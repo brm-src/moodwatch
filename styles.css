@@ -194,7 +194,7 @@ header.top {
 .section {
   max-width: 720px;
   margin: 0 auto;
-  padding: var(--s-5) var(--s-3) var(--s-4);
+  padding: var(--s-3) var(--s-3) var(--s-4);
 }
 
 /* fig label (left margin tag) */
@@ -229,8 +229,8 @@ header.top {
 .q-title {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(2rem, 6vw + 0.5rem, 3.4rem);
-  line-height: 1.02;
+  font-size: clamp(1.6rem, 4.5vw + 0.5rem, 3rem);
+  line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--ink);
   margin-bottom: var(--s-3);
@@ -303,16 +303,16 @@ header.top {
 .doors .door:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .doors .door svg {
   width: 100%;
-  aspect-ratio: 4/5;
+  aspect-ratio: 1/1;
   display: block;
 }
 .doors .door .label {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: var(--t-body);
+  font-size: 0.92rem;
   color: var(--ink);
-  padding: var(--s-2);
-  line-height: 1.3;
+  padding: 10px var(--s-2);
+  line-height: 1.25;
   border-top: 1px solid var(--rule);
 }
 
