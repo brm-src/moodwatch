@@ -102,6 +102,151 @@
         { value: "bitter", labelKey: "q_ending_bitter" },
       ],
     },
+    color: {
+      key: "color", kind: "real", titleKey: "q_color_t",
+      options: [
+        { value: "blood",  labelKey: "q_color_blood"  },
+        { value: "neon",   labelKey: "q_color_neon"   },
+        { value: "gold",   labelKey: "q_color_gold"   },
+        { value: "ocean",  labelKey: "q_color_ocean"  },
+        { value: "ash",    labelKey: "q_color_ash"    },
+        { value: "earth",  labelKey: "q_color_earth"  },
+      ],
+    },
+    light: {
+      key: "light", kind: "real", titleKey: "q_light_t",
+      options: [
+        { value: "golden",      labelKey: "q_light_golden"      },
+        { value: "fluorescent", labelKey: "q_light_fluorescent" },
+        { value: "candle",      labelKey: "q_light_candle"      },
+        { value: "neon",        labelKey: "q_light_neon"        },
+        { value: "moon",        labelKey: "q_light_moon"        },
+      ],
+    },
+    texture: {
+      key: "texture", kind: "real", titleKey: "q_texture_t",
+      options: [
+        { value: "silk",     labelKey: "q_texture_silk"     },
+        { value: "sandpaper",labelKey: "q_texture_sandpaper"},
+        { value: "wet",      labelKey: "q_texture_wet"      },
+        { value: "wood",     labelKey: "q_texture_wood"     },
+        { value: "glass",    labelKey: "q_texture_glass"    },
+      ],
+    },
+    decade: {
+      key: "decade", kind: "real", titleKey: "q_decade_t",
+      options: [
+        { value: "old",  labelKey: "q_decade_old"  },
+        { value: "70s",  labelKey: "q_decade_70s"  },
+        { value: "90s",  labelKey: "q_decade_90s"  },
+        { value: "00s",  labelKey: "q_decade_00s"  },
+        { value: "now",  labelKey: "q_decade_now"  },
+        { value: "any",  labelKey: "q_decade_any"  },
+      ],
+    },
+    place: {
+      key: "place", kind: "real", titleKey: "q_place_t",
+      options: [
+        { value: "town",      labelKey: "q_place_town"      },
+        { value: "metropolis",labelKey: "q_place_metropolis"},
+        { value: "forest",    labelKey: "q_place_forest"    },
+        { value: "abandoned", labelKey: "q_place_abandoned" },
+        { value: "nowhere",   labelKey: "q_place_nowhere"   },
+        { value: "interior",  labelKey: "q_place_interior"  },
+      ],
+    },
+    memory: {
+      key: "memory", kind: "real", titleKey: "q_memory_t",
+      options: [
+        { value: "childhood", labelKey: "q_memory_childhood" },
+        { value: "heartbreak",labelKey: "q_memory_heartbreak"},
+        { value: "triumph",   labelKey: "q_memory_triumph"   },
+        { value: "regret",    labelKey: "q_memory_regret"    },
+        { value: "wonder",    labelKey: "q_memory_wonder"    },
+      ],
+    },
+    want: {
+      key: "want", kind: "real", titleKey: "q_want_t",
+      options: [
+        { value: "moved",      labelKey: "q_want_moved"      },
+        { value: "entertained",labelKey: "q_want_entertained"},
+        { value: "challenged", labelKey: "q_want_challenged" },
+        { value: "soothed",    labelKey: "q_want_soothed"    },
+        { value: "haunted",    labelKey: "q_want_haunted"    },
+      ],
+    },
+    avoid: {
+      key: "avoid", kind: "real", titleKey: "q_avoid_t",
+      options: [
+        { value: "violence",  labelKey: "q_avoid_violence"  },
+        { value: "romance",   labelKey: "q_avoid_romance"   },
+        { value: "cliche",    labelKey: "q_avoid_cliche"    },
+        { value: "slow",      labelKey: "q_avoid_slow"      },
+        { value: "weird",     labelKey: "q_avoid_weird"     },
+        { value: "nothing",   labelKey: "q_avoid_nothing"   },
+      ],
+    },
+    animal: {
+      key: "animal", kind: "real", titleKey: "q_animal_t",
+      options: [
+        { value: "cat",  labelKey: "q_animal_cat"  },
+        { value: "wolf", labelKey: "q_animal_wolf" },
+        { value: "fish", labelKey: "q_animal_fish" },
+        { value: "bird", labelKey: "q_animal_bird" },
+        { value: "fox",  labelKey: "q_animal_fox"  },
+      ],
+    },
+    lately: {
+      key: "lately", kind: "real", titleKey: "q_lately_t",
+      options: [
+        { value: "restless", labelKey: "q_lately_restless" },
+        { value: "numb",     labelKey: "q_lately_numb"     },
+        { value: "electric", labelKey: "q_lately_electric" },
+        { value: "lonely",   labelKey: "q_lately_lonely"   },
+        { value: "hopeful",  labelKey: "q_lately_hopeful"  },
+        { value: "stuck",    labelKey: "q_lately_stuck"    },
+      ],
+    },
+    risk_taste: {
+      key: "risk_taste", kind: "real", titleKey: "q_risktaste_t",
+      options: [
+        { value: "classic",   labelKey: "q_risktaste_classic"   },
+        { value: "gem",       labelKey: "q_risktaste_gem"       },
+        { value: "weird",     labelKey: "q_risktaste_weird"     },
+        { value: "cult",      labelKey: "q_risktaste_cult"      },
+        { value: "hate_maybe",labelKey: "q_risktaste_hate"      },
+      ],
+    },
+    smell: {
+      key: "smell", kind: "real", titleKey: "q_smell_t",
+      options: [
+        { value: "coffee",    labelKey: "q_smell_coffee"    },
+        { value: "petrichor", labelKey: "q_smell_petrichor" },
+        { value: "smoke",     labelKey: "q_smell_smoke"     },
+        { value: "sea",       labelKey: "q_smell_sea"       },
+        { value: "old_paper", labelKey: "q_smell_old_paper" },
+      ],
+    },
+    window: {
+      key: "window", kind: "real", titleKey: "q_window_t",
+      options: [
+        { value: "rain",    labelKey: "q_window_rain"    },
+        { value: "city",    labelKey: "q_window_city"    },
+        { value: "forest",  labelKey: "q_window_forest"  },
+        { value: "parking", labelKey: "q_window_parking" },
+        { value: "sea",     labelKey: "q_window_sea"     },
+        { value: "wall",    labelKey: "q_window_wall"    },
+      ],
+    },
+    temperature: {
+      key: "temperature", kind: "real", titleKey: "q_temp_t",
+      options: [
+        { value: "burning", labelKey: "q_temp_burning" },
+        { value: "warm",    labelKey: "q_temp_warm"    },
+        { value: "cool",    labelKey: "q_temp_cool"    },
+        { value: "freezing",labelKey: "q_temp_freezing"},
+      ],
+    },
     phrase: {
       key: "phrase", kind: "phrase",
       titleKey: "q_phrase_t",
@@ -117,9 +262,13 @@
   };
 
   // Categories that can rotate (excluding ink which is mandatory)
-  const ROTATING = ["state","door","scene","intent","depth","weather","sound","company","pace","ending","phrase"];
+  const ROTATING = [
+    "state","door","scene","intent","depth","weather","sound","company","pace","ending",
+    "color","light","texture","decade","place","memory","want","avoid","animal","lately",
+    "risk_taste","smell","window","temperature","phrase",
+  ];
 
-  // Build a fresh quiz: 6 random categories + ink last
+  // Build a fresh quiz: 6 random categories + ink last (7 total)
   function buildSession() {
     const shuffled = [...ROTATING].sort(() => Math.random() - 0.5).slice(0, 6);
     return [...shuffled.map(k => BANK[k]), BANK.ink];
@@ -231,6 +380,34 @@
     if (a.pace === "fast")  m.energy = "engage";
     if (a.ending === "twist")  m.risk = "discover";
     if (a.ending === "bitter") m.tone = m.tone || "dark";
+    // new axes
+    if (a.color === "blood" || a.color === "ash") m.tone = m.tone || "dark";
+    if (a.color === "gold"  || a.color === "earth") m.tone = m.tone || "light";
+    if (a.color === "neon")  { m.tone = "dark"; m.energy = "engage"; }
+    if (a.light === "fluorescent" || a.light === "neon") m.tone = m.tone || "dark";
+    if (a.light === "candle" || a.light === "golden") m.tone = m.tone || "light";
+    if (a.texture === "sandpaper" || a.texture === "wet") m.tone = m.tone || "dark";
+    if (a.texture === "silk" || a.texture === "wood") m.tone = m.tone || "light";
+    if (a.place === "abandoned" || a.place === "nowhere") m.tone = m.tone || "dark";
+    if (a.place === "interior") m.company = m.company || "alone";
+    if (a.memory === "heartbreak" || a.memory === "regret") m.tone = m.tone || "dark";
+    if (a.memory === "wonder" || a.memory === "childhood") m.tone = m.tone || "light";
+    if (a.want === "moved" || a.want === "haunted") m.energy = "engage";
+    if (a.want === "soothed" || a.want === "entertained") m.energy = "unwind";
+    if (a.want === "challenged") { m.energy = "engage"; m.risk = "discover"; }
+    if (a.avoid) m.avoid = a.avoid;
+    if (a.lately === "numb" || a.lately === "stuck") m.risk = "discover";
+    if (a.lately === "lonely") m.company = "alone";
+    if (a.risk_taste === "classic")  m.risk = "safe";
+    if (a.risk_taste === "gem" || a.risk_taste === "weird" || a.risk_taste === "cult") m.risk = "discover";
+    if (a.risk_taste === "hate_maybe") { m.risk = "discover"; m.tone = m.tone || "dark"; }
+    if (a.window === "rain" || a.window === "parking" || a.window === "wall") m.tone = m.tone || "dark";
+    if (a.window === "sea" || a.window === "forest") m.tone = m.tone || "light";
+    if (a.temperature === "burning" || a.temperature === "freezing") m.energy = "engage";
+    if (a.temperature === "warm") m.energy = m.energy || "unwind";
+    if (a.decade) m.decade = a.decade;
+    if (a.animal) m.animal = a.animal;
+    if (a.smell) m.smell = a.smell;
     if (a.ink) {
       try {
         const blot = JSON.parse(a.ink);
