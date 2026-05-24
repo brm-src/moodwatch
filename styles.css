@@ -96,15 +96,16 @@ header.top {
 .hero {
   position: relative;
   min-height: 100dvh;
-  background:
-    linear-gradient(180deg, rgba(20,22,15,0.4) 0%, rgba(20,22,15,0.65) 60%, rgba(20,22,15,0.85) 100%),
-    url("./assets/hero-caligari.jpg") center / cover no-repeat;
   background-color: var(--charcoal);
   color: var(--paper);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: var(--s-5) var(--s-3) var(--s-3);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transition: background-image .4s ease;
 }
 .hero .hero-fig {
   font-family: var(--font-body);

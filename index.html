@@ -7,21 +7,20 @@
 <title>moodwatch — a film for tonight</title>
 <meta name="description" content="A small ritual to find a film for tonight. Free, no signup. Optional Letterboxd watchlist.">
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2314160f'/><text x='32' y='44' font-size='40' text-anchor='middle' fill='%23c43b2a' font-family='serif' font-style='italic'>m</text></svg>">
-<link rel="preload" as="image" href="./assets/hero-caligari.jpg">
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
 <main>
-  <!-- ─── intro hero (Caligari full-bleed) ─── -->
-  <section class="step active hero" data-step="intro">
+  <!-- ─── intro hero (random PD silent-film still) ─── -->
+  <section class="step active hero" data-step="intro" id="hero">
     <div>
       <header class="top" style="background:transparent;padding:0;margin-bottom:var(--s-4);">
         <span class="brand">mood<em>watch</em></span>
-        <span class="kicker" data-i18n="kicker">Cinema · Mood · Tonight</span>
+        <span class="kicker" data-i18n="kicker">Cinema · Mood · Pick</span>
       </header>
-      <div class="hero-fig" data-i18n="intro_fig">FIG. A — Caligari, 1920</div>
-      <h1 data-i18n="intro_title">A film <em>for tonight.</em></h1>
+      <div class="hero-fig" id="hero-fig" data-i18n="intro_fig">FIG. A</div>
+      <h1 data-i18n="intro_title">A film, <em>chosen by mood.</em></h1>
     </div>
     <div class="hero-card-dark hero-card" style="background:transparent;color:var(--paper);align-self:flex-start;max-width:480px;padding:0;">
       <p style="color:var(--paper-3);font-family:var(--font-display);font-style:italic;font-size:var(--t-lead);line-height:1.4;margin-bottom:var(--s-3);"
@@ -112,7 +111,7 @@
       <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDb</a> ·
       <a href="https://www.justwatch.com" target="_blank" rel="noopener">JustWatch</a>
     </small>
-    <span class="credit-still">Hero · Das Cabinet des Dr. Caligari (1920) · Public domain</span>
+    <span class="credit-still" id="hero-credit">Hero · Public domain</span>
   </div>
 </footer>
 

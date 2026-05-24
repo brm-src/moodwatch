@@ -2,7 +2,7 @@
 const STRINGS = {
   en: {
     // chrome
-    kicker: "Cinema · Mood · Tonight",
+    kicker: "Cinema · Mood · Pick",
     back: "Back",
     skip: "Skip",
     next: "Next",
@@ -13,8 +13,8 @@ const STRINGS = {
     footer_made: "Built with",
 
     // intro
-    intro_fig: "FIG. A — Caligari, 1920",
-    intro_title: "A film <em>for tonight.</em>",
+    intro_fig: "FIG. A",
+    intro_title: "A film, <em>chosen by mood.</em>",
     intro_lead: "Pick how I'll choose. The questions are the same.",
     path_lb: "Use my Letterboxd watchlist",
     path_global: "Just recommend something",
@@ -26,8 +26,8 @@ const STRINGS = {
     user_ph: "your_username",
 
     // results
-    picks_label: "Tonight",
-    picks_title: "For your <em>night.</em>",
+    picks_label: "Picks",
+    picks_title: "For your <em>mood.</em>",
     pick_n: "Pick {n}",
     no_picks: "Nothing landed. Try a different mood.",
     where_to_watch: "Where to watch",
@@ -35,7 +35,7 @@ const STRINGS = {
 
     // loading / error
     loading_label: "Searching",
-    loading: "Looking through the night.",
+    loading: "Reading the room.",
     loading_lb: "Reading your watchlist.",
     oops_label: "Trouble",
     oops: "Something <em>broke.</em>",
@@ -53,16 +53,16 @@ const STRINGS = {
     q_door_fantasy:   "A bright door floating in the sky.",
     q_door_intimacy:  "An apartment door with warm light underneath.",
 
-    // Q2 — state (gender-neutral)
-    q_state_t: "How are you <em>tonight?</em>",
-    q_state_drained:  "Drained. Long day.",
+    // Q2 — state (gender-neutral, time-neutral)
+    q_state_t: "How are <em>you?</em>",
+    q_state_drained:  "Drained. Long stretch.",
     q_state_restless: "Restless. Need something.",
     q_state_pensive:  "Heavy. Sitting with things.",
     q_state_good:     "Fine. Open to anything.",
 
     // Q3 — scene
     q_scene_t: "Which scene <em>pulls?</em>",
-    q_scene_road:      "A car driving at night with no destination.",
+    q_scene_road:      "A car driving with no destination.",
     q_scene_city:      "A vast city where nobody knows anyone.",
     q_scene_house:     "A quiet house hiding something strange.",
     q_scene_dialogue:  "Two people talking until everything changes.",
@@ -87,13 +87,13 @@ const STRINGS = {
     q_depth_warm:       "Some emotion, no destruction.",
     q_depth_thoughtful: "Leave me thinking.",
     q_depth_uneasy:     "Elegant discomfort.",
-    q_depth_ruined:     "Ruin my night, but ruin it well.",
+    q_depth_ruined:     "Wreck me, but wreck me well.",
 
     // Q7 — phrase
-    q_phrase_t: "Tonight I want something that <em>feels like…</em>",
+    q_phrase_t: "I want something that <em>feels like…</em>",
     q_phrase_ph: "(write a few words)",
     q_phrase_c1: "a strange dream",
-    q_phrase_c2: "a rainy night",
+    q_phrase_c2: "a rainy afternoon",
     q_phrase_c3: "an emotional gut-punch",
     q_phrase_c4: "beautiful but sad",
     q_phrase_c5: "low effort, high reward",
@@ -101,7 +101,7 @@ const STRINGS = {
   },
 
   es: {
-    kicker: "Cine · Mood · Esta noche",
+    kicker: "Cine · Mood · Pick",
     back: "Atrás",
     skip: "Saltar",
     next: "Siguiente",
@@ -111,8 +111,8 @@ const STRINGS = {
     support: "Apoya moodwatch",
     footer_made: "Hecho con",
 
-    intro_fig: "FIG. A — Caligari, 1920",
-    intro_title: "Una película <em>para esta noche.</em>",
+    intro_fig: "FIG. A",
+    intro_title: "Una película, <em>según tu mood.</em>",
     intro_lead: "Elige cómo busco. Las preguntas son las mismas.",
     path_lb: "Usar mi watchlist de Letterboxd",
     path_global: "Solo recomiéndame algo",
@@ -122,15 +122,15 @@ const STRINGS = {
     lb_continue: "Continuar",
     user_ph: "tu_usuario",
 
-    picks_label: "Esta noche",
-    picks_title: "Para tu <em>noche.</em>",
+    picks_label: "Picks",
+    picks_title: "Para tu <em>mood.</em>",
     pick_n: "Pick {n}",
     no_picks: "Nada cuajó. Prueba otro mood.",
     where_to_watch: "Dónde verla",
     on_tmdb: "Detalles",
 
     loading_label: "Buscando",
-    loading: "Mirando entre la noche.",
+    loading: "Leyendo el ambiente.",
     loading_lb: "Leyendo tu watchlist.",
     oops_label: "Problema",
     oops: "Algo se <em>rompió.</em>",
@@ -146,14 +146,14 @@ const STRINGS = {
     q_door_fantasy:   "Una puerta brillante flotando en el cielo.",
     q_door_intimacy:  "La puerta de un departamento con luz cálida debajo.",
 
-    q_state_t: "¿Cómo estás <em>esta noche?</em>",
-    q_state_drained:  "Sin batería. Día largo.",
+    q_state_t: "¿Cómo <em>estás?</em>",
+    q_state_drained:  "Sin batería. Tirada larga.",
     q_state_restless: "Inquietud. Necesito algo.",
     q_state_pensive:  "Pesado. Rumiando.",
     q_state_good:     "Bien. Abierto a lo que sea.",
 
     q_scene_t: "¿Qué escena te <em>tira?</em>",
-    q_scene_road:      "Un auto manejando de noche sin destino.",
+    q_scene_road:      "Un auto manejando sin destino.",
     q_scene_city:      "Una ciudad enorme donde nadie se conoce.",
     q_scene_house:     "Una casa tranquila con algo raro escondido.",
     q_scene_dialogue:  "Dos personas hablando hasta que todo cambia.",
@@ -175,12 +175,12 @@ const STRINGS = {
     q_depth_warm:       "Emoción, sin destrucción.",
     q_depth_thoughtful: "Quedar pensando.",
     q_depth_uneasy:     "Incomodidad elegante.",
-    q_depth_ruined:     "Arruina mi noche, pero bien.",
+    q_depth_ruined:     "Destrúyeme, pero hazlo bien.",
 
     q_phrase_t: "Quiero algo que se <em>sienta como…</em>",
     q_phrase_ph: "(escribe unas palabras)",
     q_phrase_c1: "un sueño raro",
-    q_phrase_c2: "una noche de lluvia",
+    q_phrase_c2: "una tarde de lluvia",
     q_phrase_c3: "un golpe emocional",
     q_phrase_c4: "bonito pero triste",
     q_phrase_c5: "no me hace pensar mucho",

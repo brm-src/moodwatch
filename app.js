@@ -480,9 +480,35 @@
   }
   function showError(msg) { $("#err-msg").textContent = msg; show("error"); }
 
+  // ---------- random hero from manifest ----------
+  async function loadRandomHero() {
+    try {
+      const r = await fetch("./assets/heroes/manifest.json", { cache: "no-cache" });
+      if (!r.ok) return;
+      const list = await r.json();
+      if (!Array.isArray(list) || !list.length) return;
+      const pick = list[Math.floor(Math.random() * list.length)];
+      const hero = document.getElementById("hero");
+      const fig = document.getElementById("hero-fig");
+      const credit = document.getElementById("hero-credit");
+      if (hero) {
+        // Preload image, then swap background to avoid flash
+        const img = new Image();
+        img.onload = () => {
+          hero.style.backgroundImage =
+            `linear-gradient(180deg, rgba(20,22,15,0.4) 0%, rgba(20,22,15,0.65) 60%, rgba(20,22,15,0.85) 100%), url("${pick.file}")`;
+        };
+        img.src = pick.file;
+      }
+      if (fig) fig.textContent = `FIG. — ${pick.caption}`;
+      if (credit) credit.textContent = `Hero · ${pick.caption} · Public domain`;
+    } catch (e) { /* fall through to CSS default */ }
+  }
+
   // ---------- wire ----------
   document.addEventListener("DOMContentLoaded", () => {
     show("intro");
+    loadRandomHero();
     $("#q-back").addEventListener("click", backQ);
     $("#q-skip").addEventListener("click", skipQ);
 
