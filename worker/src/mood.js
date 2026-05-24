@@ -98,13 +98,20 @@ function voteFilters(mood) {
   if (mood.popularity === "high") out["vote_count.gte"] = 1000;
   if (mood.popularity === "low")  out["vote_count.gte"] = 100; // cap below
   if (mood.popularity === "low")  out["vote_count.lte"] = 1500;
-  // depth → quality floor
+  // depth → quality floor (also shapes vote_count: thoughtful → less mainstream)
   if (mood.depth === "thoughtful" || mood.depth === "uneasy" || mood.depth === "ruined") {
     out["vote_average.gte"] = 6.8;
-    out["vote_count.gte"] = Math.max(out["vote_count.gte"] || 0, 250);
+    // override base 800 floor: pull in smaller films (250-1500 votes)
+    out["vote_count.gte"] = 250;
+    out["vote_count.lte"] = 1500;
   }
   if (mood.depth === "fun") {
     out["vote_average.gte"] = 6.0;
+  }
+  // temperature: cold = slow/contemplative (drop popularity floor)
+  if (mood.temperature === "freezing" || mood.temperature === "cool") {
+    out["vote_count.gte"] = Math.min(out["vote_count.gte"] || 9999, 200);
+    out["vote_count.lte"] = Math.min(out["vote_count.lte"] || 9999, 1200);
   }
   // director_vibe
   if (mood.quality === "high") {
@@ -135,18 +142,18 @@ export async function discoverByMood(env, mood, language) {
     ...voteFilters(mood),
   };
 
-  // Three pages for variety, sorted by popularity desc to inject diversity
+  // Three pages for variety, fetched in parallel for speed
   const pages = [1, 2, 3];
-  const results = [];
-  for (const p of pages) {
+  const pageResults = await Promise.all(pages.map(async p => {
     try {
       const data = await tmdbDiscover(env, { ...params, page: p }, language);
-      if (data.results) results.push(...data.results);
+      return data.results || [];
     } catch (e) {
       console.log("discover page fail:", p, e?.message);
+      return [];
     }
-    if (results.length >= 60) break;
-  }
+  }));
+  const results = pageResults.flat();
 
   // De-dupe by id
   const seen = new Set();

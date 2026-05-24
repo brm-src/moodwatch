@@ -84,13 +84,19 @@ async function recommend(req, env, ctx) {
       (f.vote_average || 0) * 1.5 +
       Math.min((f.popularity || 0) / 30, 4) +
       (cur ? 6 : 0) -
-      // small-gem bias if user asked for obscure
       (mood.popularity === "low" ? Math.min((f.popularity || 0) / 50, 2) : 0);
     return { ...f, _score: score, _curated: cur || null };
-  }).sort((a, b) => b._score - a._score).slice(0, 8);
+  }).sort((a, b) => b._score - a._score);
 
-  // 4. Enrich top picks with director + providers + runtime (parallel)
-  const top = ranked.slice(0, 4);
+  // Pick 4 random from top 12 so repeated visits don't show the same picks
+  const TOP_N = Math.min(12, ranked.length);
+  const topPool = ranked.slice(0, TOP_N);
+  // Fisher-Yates partial shuffle
+  for (let i = topPool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [topPool[i], topPool[j]] = [topPool[j], topPool[i]];
+  }
+  const top = topPool.slice(0, 4);
   const enriched = await Promise.all(top.map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       tmdbProviders(env, f.id, country),

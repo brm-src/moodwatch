@@ -13,7 +13,7 @@ const STRINGS = {
 
     intro_fig: "",
     intro_title: "A film, <em>chosen by mood.</em>",
-    intro_lead: "Pick how I'll choose. Questions vary each visit.",
+    intro_lead: "Pick how I'll choose.",
     path_lb: "Use my Letterboxd watchlist",
     path_global: "Just recommend something",
 
@@ -353,7 +353,7 @@ const STRINGS = {
 
     intro_fig: "",
     intro_title: "Una película, <em>según tu mood.</em>",
-    intro_lead: "Elige cómo busco. Las preguntas cambian cada visita.",
+    intro_lead: "Elige cómo busco.",
     path_lb: "Usar mi watchlist de Letterboxd",
     path_global: "Solo recomiéndame algo",
 

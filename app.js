@@ -933,7 +933,7 @@
   }
   async function recommend({ withUser }) {
     show("loading");
-    $("#load-msg").textContent = withUser ? window.t("loading_lb") : window.t("loading");
+    $("#load-msg").textContent = withUser && state.user ? window.t("loading_lb") : window.t("loading");
     const country = guessCountry();
     const lang = window.LANG;
     const mood = ritualToMood(state.answers);
