@@ -163,13 +163,12 @@
     intro:   $('[data-step="intro"]'),
     lbAsk:   $('[data-step="lb-ask"]'),
     quiz:    $('[data-step="quiz"]'),
-    vibe:    $('[data-step="vibe"]'),
     loading: $('[data-step="loading"]'),
     results: $('[data-step="results"]'),
     error:   $('[data-step="error"]'),
   };
   const stepKeyByName = {
-    "intro": "intro", "lb-ask": "lbAsk", "quiz": "quiz", "vibe": "vibe",
+    "intro": "intro", "lb-ask": "lbAsk", "quiz": "quiz",
     "loading": "loading", "results": "results", "error": "error",
   };
   function show(name) {
@@ -373,7 +372,7 @@
 
   function nextQ() {
     if (state.qIdx < QUIZ.length - 1) { state.qIdx++; renderQuestion(); }
-    else renderVibe();
+    else recommend({ withUser: state.path === "lb" });
   }
   function backQ() { if (state.qIdx > 0) { state.qIdx--; renderQuestion(); } }
   function skipQ() { delete state.answers[QUIZ[state.qIdx].key]; nextQ(); }
@@ -420,6 +419,11 @@
   }
 
   function renderResults(data) {
+    // vibe summary as subtitle
+    const words = vibeWords(state.answers, window.LANG);
+    const desc = $("#vibe-desc");
+    if (desc) desc.textContent = words.length ? words.join(" · ") : window.t("vibe_neutral") || "";
+
     const cards = $("#cards");
     cards.innerHTML = "";
     if (!data.films || !data.films.length) {
@@ -510,17 +514,14 @@
     });
     $("#lb-back").addEventListener("click", () => { state.path = null; show("intro"); });
 
-    // vibe -> straight to recommend (no second LB prompt)
-    $("#vibe-continue").addEventListener("click", () => {
-      recommend({ withUser: state.path === "lb" });
-    });
-
     // restart / retry
     $("#restart").addEventListener("click", () => {
       state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null;
       const inp = $("#user"); if (inp) { inp.value = ""; inp.style.borderBottomColor = ""; }
       show("intro");
     });
-    $("#retry").addEventListener("click", () => show("vibe"));
+    $("#retry").addEventListener("click", () => {
+      recommend({ withUser: state.path === "lb" });
+    });
   });
 })();

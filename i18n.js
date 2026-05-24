@@ -2,7 +2,7 @@
 const STRINGS = {
   en: {
     // chrome
-    kicker: "A ritual, not a form",
+    kicker: "Cinema · Mood · Tonight",
     back: "Back",
     skip: "Skip",
     next: "Next",
@@ -12,40 +12,39 @@ const STRINGS = {
     support: "Support moodwatch",
     footer_made: "Built with",
 
-    // step labels
-    intro_label: "Begin",
-    intro_title: "A film for <em>tonight.</em>",
-    intro_lead: "Pick how I'll choose. The ritual is the same either way.",
-    path_lb: "Personalize with my Letterboxd watchlist",
+    // intro
+    intro_fig: "FIG. A — Caligari, 1920",
+    intro_title: "A film <em>for tonight.</em>",
+    intro_lead: "Pick how I'll choose. The questions are the same.",
+    path_lb: "Use my Letterboxd watchlist",
     path_global: "Just recommend something",
+
+    // lb
     lb_label: "Letterboxd",
     lb_ask_title: "Your <em>username.</em>",
-    lb_ask_lead: "I read your public watchlist. Nothing is stored.",
     lb_continue: "Continue",
-    vibe_label: "Your vibe",
-    vibe_lead: "Now, the film.",
-    vibe_pick: "Pick the film",
-    vibe_neutral: "Open to anything",
     user_ph: "your_username",
-    picks_label: "Tonight",
-    pick_n: "Pick {n}",
-    no_picks: "Nothing landed. Try a different vibe.",
-    oops_label: "Trouble",
-    oops: "Something <em>broke.</em>",
-    loading: "Reading the room…",
-    loading_lb: "Reading your watchlist… give me a moment.",
 
     // results
+    picks_label: "Tonight",
+    picks_title: "For your <em>night.</em>",
+    pick_n: "Pick {n}",
+    no_picks: "Nothing landed. Try a different mood.",
     where_to_watch: "Where to watch",
     on_tmdb: "Details",
 
-    // errors
+    // loading / error
+    loading_label: "Searching",
+    loading: "Looking through the night.",
+    loading_lb: "Reading your watchlist.",
+    oops_label: "Trouble",
+    oops: "Something <em>broke.</em>",
     err_invalid_user: "That username doesn't look right.",
     err_empty_watchlist: "Watchlist is empty or private.",
-    err_generic: "Server error. Try again in a bit.",
+    err_generic: "Server hiccup. Try again in a moment.",
 
     // q numbering
-    q_num: "{n} / {tot}",
+    q_num: "Q.{n} of {tot}",
 
     // Q1 — door
     q_door_t: "Choose a <em>door.</em>",
@@ -54,13 +53,12 @@ const STRINGS = {
     q_door_fantasy:   "A bright door floating in the sky.",
     q_door_intimacy:  "An apartment door with warm light underneath.",
 
-    // Q2 — state
+    // Q2 — state (gender-neutral)
     q_state_t: "How are you <em>tonight?</em>",
-    q_state_lead: "No filter. Just the truth.",
-    q_state_drained:  "Drained. Day was a lot.",
+    q_state_drained:  "Drained. Long day.",
     q_state_restless: "Restless. Need something.",
-    q_state_pensive:  "Pensive. Sitting with things.",
-    q_state_good:     "Good. Open to anything.",
+    q_state_pensive:  "Heavy. Sitting with things.",
+    q_state_good:     "Fine. Open to anything.",
 
     // Q3 — scene
     q_scene_t: "Which scene <em>pulls?</em>",
@@ -76,26 +74,24 @@ const STRINGS = {
     q_ink_dark:  "the deep one",
     q_ink_light: "the open one",
 
-    // Q5 — intent
-    q_intent_t: "And from the film, <em>what?</em>",
-    q_intent_lead: "Be specific. The vaguer you are, the more generic the pick.",
-    q_intent_escape:  "I want to escape.",
-    q_intent_feel:    "I want to feel something.",
-    q_intent_think:   "I want something to chew on.",
-    q_intent_company: "I want company. Warmth.",
+    // Q5 — intent (neutral)
+    q_intent_t: "What do you want <em>from the film?</em>",
+    q_intent_escape:  "To escape.",
+    q_intent_feel:    "To feel something.",
+    q_intent_think:   "Something to chew on.",
+    q_intent_company: "Warmth. Company.",
 
     // Q6 — depth
     q_depth_t: "How <em>deep?</em>",
-    q_depth_lead: "Where do you want to land at the end.",
-    q_depth_fun:        "I just want to have a good time.",
-    q_depth_warm:       "Some emotion, but no destruction.",
-    q_depth_thoughtful: "I want to be left thinking.",
+    q_depth_fun:        "Just a good time.",
+    q_depth_warm:       "Some emotion, no destruction.",
+    q_depth_thoughtful: "Leave me thinking.",
     q_depth_uneasy:     "Elegant discomfort.",
     q_depth_ruined:     "Ruin my night, but ruin it well.",
 
     // Q7 — phrase
     q_phrase_t: "Tonight I want something that <em>feels like…</em>",
-    q_phrase_ph: "(write it in a few words)",
+    q_phrase_ph: "(write a few words)",
     q_phrase_c1: "a strange dream",
     q_phrase_c2: "a rainy night",
     q_phrase_c3: "an emotional gut-punch",
@@ -105,7 +101,7 @@ const STRINGS = {
   },
 
   es: {
-    kicker: "Un ritual, no un formulario",
+    kicker: "Cine · Mood · Esta noche",
     back: "Atrás",
     skip: "Saltar",
     next: "Siguiente",
@@ -115,49 +111,46 @@ const STRINGS = {
     support: "Apoya moodwatch",
     footer_made: "Hecho con",
 
-    intro_label: "Comenzar",
-    intro_title: "Una película para <em>esta noche.</em>",
-    intro_lead: "Elige cómo te recomiendo. El ritual es el mismo en ambos casos.",
-    path_lb: "Personalizar con mi watchlist de Letterboxd",
+    intro_fig: "FIG. A — Caligari, 1920",
+    intro_title: "Una película <em>para esta noche.</em>",
+    intro_lead: "Elige cómo busco. Las preguntas son las mismas.",
+    path_lb: "Usar mi watchlist de Letterboxd",
     path_global: "Solo recomiéndame algo",
+
     lb_label: "Letterboxd",
     lb_ask_title: "Tu <em>usuario.</em>",
-    lb_ask_lead: "Leo tu watchlist pública. No se guarda nada.",
     lb_continue: "Continuar",
-    vibe_label: "Tu vibra",
-    vibe_lead: "Ahora, la película.",
-    vibe_pick: "Elegir la película",
-    vibe_neutral: "Abierta a cualquier cosa",
     user_ph: "tu_usuario",
-    picks_label: "Esta noche",
-    pick_n: "Pick {n}",
-    no_picks: "Nada cuajó. Prueba otra vibra.",
-    oops_label: "Problema",
-    oops: "Algo se <em>rompió.</em>",
-    loading: "Leyendo el ambiente…",
-    loading_lb: "Leyendo tu watchlist… dame un momento.",
 
+    picks_label: "Esta noche",
+    picks_title: "Para tu <em>noche.</em>",
+    pick_n: "Pick {n}",
+    no_picks: "Nada cuajó. Prueba otro mood.",
     where_to_watch: "Dónde verla",
     on_tmdb: "Detalles",
 
+    loading_label: "Buscando",
+    loading: "Mirando entre la noche.",
+    loading_lb: "Leyendo tu watchlist.",
+    oops_label: "Problema",
+    oops: "Algo se <em>rompió.</em>",
     err_invalid_user: "Ese usuario no se ve bien.",
     err_empty_watchlist: "Tu watchlist está vacía o es privada.",
-    err_generic: "Error del servidor. Prueba de nuevo en un momento.",
+    err_generic: "Hipo del servidor. Prueba de nuevo en un momento.",
 
-    q_num: "{n} / {tot}",
+    q_num: "Q.{n} de {tot}",
 
     q_door_t: "Elige una <em>puerta.</em>",
     q_door_intensity: "Una puerta roja al fondo de un pasillo oscuro.",
     q_door_mystery:   "Una puerta vieja en una casa abandonada.",
     q_door_fantasy:   "Una puerta brillante flotando en el cielo.",
-    q_door_intimacy:  "La puerta de un departamento con luz cálida abajo.",
+    q_door_intimacy:  "La puerta de un departamento con luz cálida debajo.",
 
     q_state_t: "¿Cómo estás <em>esta noche?</em>",
-    q_state_lead: "Sin filtro. La verdad nomás.",
-    q_state_drained:  "Vaciada. El día pesó.",
-    q_state_restless: "Inquieta. Necesito algo.",
-    q_state_pensive:  "Pensativa. Rumiando cosas.",
-    q_state_good:     "Bien. Abierta a lo que sea.",
+    q_state_drained:  "Sin batería. Día largo.",
+    q_state_restless: "Inquietud. Necesito algo.",
+    q_state_pensive:  "Pesado. Rumiando.",
+    q_state_good:     "Bien. Abierto a lo que sea.",
 
     q_scene_t: "¿Qué escena te <em>tira?</em>",
     q_scene_road:      "Un auto manejando de noche sin destino.",
@@ -171,28 +164,26 @@ const STRINGS = {
     q_ink_dark:  "la profunda",
     q_ink_light: "la abierta",
 
-    q_intent_t: "Y de la película, <em>¿qué quieres?</em>",
-    q_intent_lead: "Sé específica. Mientras más vaga, más genérica la recomendación.",
-    q_intent_escape:  "Quiero escapar.",
-    q_intent_feel:    "Quiero sentir algo.",
-    q_intent_think:   "Quiero algo para masticar.",
-    q_intent_company: "Quiero compañía. Calor.",
+    q_intent_t: "¿Qué quieres <em>de la película?</em>",
+    q_intent_escape:  "Escapar.",
+    q_intent_feel:    "Sentir algo.",
+    q_intent_think:   "Algo para masticar.",
+    q_intent_company: "Compañía. Calor.",
 
     q_depth_t: "¿Qué tan <em>profundo?</em>",
-    q_depth_lead: "Dónde quieres aterrizar al final.",
-    q_depth_fun:        "Solo quiero pasarla bien.",
-    q_depth_warm:       "Algo con emoción, pero sin destrucción.",
-    q_depth_thoughtful: "Quiero quedar pensando.",
+    q_depth_fun:        "Solo pasarla bien.",
+    q_depth_warm:       "Emoción, sin destrucción.",
+    q_depth_thoughtful: "Quedar pensando.",
     q_depth_uneasy:     "Incomodidad elegante.",
-    q_depth_ruined:     "Arruíname la noche, pero bien.",
+    q_depth_ruined:     "Arruina mi noche, pero bien.",
 
-    q_phrase_t: "Esta noche quiero algo que se <em>sienta como…</em>",
-    q_phrase_ph: "(escríbelo en pocas palabras)",
+    q_phrase_t: "Quiero algo que se <em>sienta como…</em>",
+    q_phrase_ph: "(escribe unas palabras)",
     q_phrase_c1: "un sueño raro",
     q_phrase_c2: "una noche de lluvia",
     q_phrase_c3: "un golpe emocional",
     q_phrase_c4: "bonito pero triste",
-    q_phrase_c5: "algo que no me haga pensar mucho",
+    q_phrase_c5: "no me hace pensar mucho",
     q_phrase_c6: "vibra de fin del mundo",
   },
 };
