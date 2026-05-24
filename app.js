@@ -157,18 +157,24 @@
   }
 
   // ---------- state ----------
-  const state = { qIdx: 0, answers: {}, user: "" };
+  const state = { qIdx: 0, answers: {}, user: "", path: null /* "lb" | "global" */ };
 
   const steps = {
+    intro:   $('[data-step="intro"]'),
+    lbAsk:   $('[data-step="lb-ask"]'),
     quiz:    $('[data-step="quiz"]'),
     vibe:    $('[data-step="vibe"]'),
-    lb:      $('[data-step="lb"]'),
     loading: $('[data-step="loading"]'),
     results: $('[data-step="results"]'),
     error:   $('[data-step="error"]'),
   };
+  const stepKeyByName = {
+    "intro": "intro", "lb-ask": "lbAsk", "quiz": "quiz", "vibe": "vibe",
+    "loading": "loading", "results": "results", "error": "error",
+  };
   function show(name) {
-    Object.entries(steps).forEach(([k, el]) => el && el.classList.toggle("active", k === name));
+    const want = stepKeyByName[name] || name;
+    Object.entries(steps).forEach(([k, el]) => el && el.classList.toggle("active", k === want));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -472,28 +478,49 @@
 
   // ---------- wire ----------
   document.addEventListener("DOMContentLoaded", () => {
-    show("quiz");
-    renderQuestion();
+    show("intro");
     $("#q-back").addEventListener("click", backQ);
     $("#q-skip").addEventListener("click", skipQ);
 
-    $("#use-lb").addEventListener("click", () => {
+    // intro paths
+    $("#path-global").addEventListener("click", () => {
+      state.path = "global";
+      state.qIdx = 0;
+      renderQuestion();
+      show("quiz");
+    });
+    $("#path-lb").addEventListener("click", () => {
+      state.path = "lb";
+      show("lb-ask");
+      setTimeout(() => $("#user")?.focus(), 100);
+    });
+
+    // lb-ask
+    $("#lb-confirm").addEventListener("click", () => {
       const u = ($("#user").value || "").trim().replace(/^@/, "").toLowerCase();
       if (!/^[a-z0-9_-]{1,30}$/.test(u)) {
         $("#user").focus();
-        $("#user").style.borderColor = "var(--accent)";
+        $("#user").style.borderBottomColor = "var(--accent)";
         return;
       }
       state.user = u;
-      recommend({ withUser: true });
+      state.qIdx = 0;
+      renderQuestion();
+      show("quiz");
     });
-    $("#skip-lb").addEventListener("click", () => recommend({ withUser: false }));
-    $("#vibe-continue").addEventListener("click", () => show("lb"));
+    $("#lb-back").addEventListener("click", () => { state.path = null; show("intro"); });
+
+    // vibe -> straight to recommend (no second LB prompt)
+    $("#vibe-continue").addEventListener("click", () => {
+      recommend({ withUser: state.path === "lb" });
+    });
+
+    // restart / retry
     $("#restart").addEventListener("click", () => {
-      state.qIdx = 0; state.answers = {}; state.user = "";
-      const inp = $("#user"); if (inp) inp.value = "";
-      renderQuestion(); show("quiz");
+      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null;
+      const inp = $("#user"); if (inp) { inp.value = ""; inp.style.borderBottomColor = ""; }
+      show("intro");
     });
-    $("#retry").addEventListener("click", () => show(state.user ? "lb" : "quiz"));
+    $("#retry").addEventListener("click", () => show("vibe"));
   });
 })();

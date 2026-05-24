@@ -16,8 +16,47 @@
     <span class="kicker" data-i18n="kicker">A ritual, not a form</span>
   </header>
 
+  <!-- ─── intro: choose path ─── -->
+  <section class="step active" data-step="intro">
+    <div class="q-num"><span data-i18n="intro_label">Begin</span><span class="bar"></span></div>
+    <h2 class="q-title" data-i18n="intro_title">A film for <em>tonight.</em></h2>
+    <p class="lead" data-i18n="intro_lead">Pick how I'll choose. The ritual is the same either way.</p>
+    <div class="lb-actions" style="margin-top: var(--s-3);">
+      <button class="primary" id="path-lb">
+        <span data-i18n="path_lb">Personalize with my Letterboxd watchlist</span>
+        <span class="arrow">→</span>
+      </button>
+      <button id="path-global">
+        <span data-i18n="path_global">Just recommend something</span>
+        <span class="arrow">→</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── ask Letterboxd @ ─── -->
+  <section class="step" data-step="lb-ask">
+    <div class="q-num"><span data-i18n="lb_label">Letterboxd</span><span class="bar"></span></div>
+    <h2 class="q-title" data-i18n="lb_ask_title">Your <em>username.</em></h2>
+    <p class="lead" data-i18n="lb_ask_lead">I read your public watchlist. Nothing is stored.</p>
+    <div class="user-row">
+      <span class="at">@</span>
+      <input id="user" type="text" inputmode="latin" autocapitalize="off"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             data-i18n-attr="placeholder:user_ph">
+    </div>
+    <div class="lb-actions">
+      <button class="primary" id="lb-confirm">
+        <span data-i18n="lb_continue">Continue</span>
+        <span class="arrow">→</span>
+      </button>
+      <button id="lb-back">
+        <span data-i18n="back">Back</span>
+      </button>
+    </div>
+  </section>
+
   <!-- ─── quiz ─── -->
-  <section class="step active" data-step="quiz">
+  <section class="step" data-step="quiz">
     <div class="dots" id="dots"></div>
     <div class="q-num" id="q-num">
       <span></span><span class="bar"></span>
@@ -35,30 +74,7 @@
     <div class="q-num"><span data-i18n="vibe_label">Your vibe</span><span class="bar"></span></div>
     <h2 class="q-title" id="vibe-text"></h2>
     <p class="lead" data-i18n="vibe_lead">Now, the film.</p>
-    <button class="restart" id="vibe-continue" data-i18n="continue">Continue</button>
-  </section>
-
-  <!-- ─── optional Letterboxd ─── -->
-  <section class="step" data-step="lb">
-    <div class="q-num"><span data-i18n="lb_label">Optional</span><span class="bar"></span></div>
-    <h2 class="q-title" data-i18n="lb_title">Personalize <em>with your watchlist?</em></h2>
-    <p class="lead" data-i18n="lb_lead">If you have Letterboxd, I'll pick from films you already wanted to see.</p>
-    <div class="user-row">
-      <span class="at">@</span>
-      <input id="user" type="text" inputmode="latin" autocapitalize="off"
-             autocomplete="off" autocorrect="off" spellcheck="false"
-             data-i18n-attr="placeholder:user_ph">
-    </div>
-    <div class="lb-actions">
-      <button class="primary" id="use-lb">
-        <span data-i18n="use_lb">Use my watchlist</span>
-        <span class="arrow">→</span>
-      </button>
-      <button id="skip-lb">
-        <span data-i18n="skip_lb">Just recommend something</span>
-        <span class="arrow">→</span>
-      </button>
-    </div>
+    <button class="restart" id="vibe-continue" data-i18n="vibe_pick">Pick the film</button>
   </section>
 
   <!-- ─── loading ─── -->
