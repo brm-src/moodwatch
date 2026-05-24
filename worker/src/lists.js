@@ -1,162 +1,87 @@
-// Curated Letterboxd lists mapped to mood signatures.
-// When a user's mood matches a list's signature, that list's films get pulled
-// into the candidate pool with a priority boost.
-//
-// Each entry:
-//   { url, name, signature: {axis: value | [values]}, priority }
-//
-// Signature matching: a list matches if AT LEAST ONE axis matches the user's mood.
-// More matches = higher boost.
+// Moodwatch editorial lists.
+// These replace live Letterboxd scraping: LB list pages are unstable/blocked from Workers
+// (403/404), so we use verified TMDb IDs as durable "list seeds" and tag hits with
+// `from_list`. The spirit is Letterboxd-style curation; the runtime source is TMDb.
 
 export const LISTS = [
   {
-    slug: "lb-slow-cinema",
-    url: "https://letterboxd.com/dave/list/official-top-250-narrative-feature-films/",
-    name: "Slow cinema",
+    slug: "slow-cinema-contemplative",
+    name: "Slow / contemplative cinema",
     signature: { depth: ["thoughtful", "ruined"], temperature: ["cool", "freezing"], pace: ["slow"] },
+    ids: [1398, 593, 81401, 414453, 30020, 655, 797, 18148, 780, 147, 329865, 531428, 428449, 585378],
   },
   {
-    slug: "lb-noir",
-    url: "https://letterboxd.com/jugu/list/noir-classics/",
-    name: "Noir classics",
-    signature: { tone: "dark", energy: "engage", first_act: "thriller_horror" },
+    slug: "neo-noir-thriller",
+    name: "Noir / moral thriller",
+    signature: { tone: "dark", energy: "engage", first_act: ["thriller_horror", "action_adventure"] },
+    ids: [949, 1949, 807, 473033, 146233, 242582, 273481, 1422, 395834, 6977, 769, 49797, 11423],
   },
   {
-    slug: "lb-folk-horror",
-    url: "https://letterboxd.com/lucy_in_the_sky/list/folk-horror/",
-    name: "Folk horror",
+    slug: "folk-atmospheric-horror",
+    name: "Folk / atmospheric horror",
     signature: { trust: "horror", tone: "dark", first_act: "thriller_horror" },
+    ids: [310131, 493922, 530385, 503919, 694, 805, 36095, 27374, 575776, 9539, 9552, 293670, 21484],
   },
   {
-    slug: "lb-cult",
-    url: "https://letterboxd.com/jugu/list/cult-films/",
-    name: "Cult oddities",
+    slug: "cult-weird-discover",
+    name: "Cult / weird discoveries",
     signature: { trust: "weird", risk: "discover" },
+    ids: [513434, 220289, 431, 985, 8327, 662, 21484, 25623, 97370, 492, 8051, 115, 11830],
   },
   {
-    slug: "lb-romance-modern",
-    url: "https://letterboxd.com/madsmoreau/list/modern-romance/",
-    name: "Modern romance",
+    slug: "modern-romance-adult",
+    name: "Modern adult romance",
     signature: { tone: "light", first_act: "drama_romance", temperature: "warm" },
+    ids: [531428, 76, 80, 666277, 1011985, 38, 152601, 155341, 284, 843, 1018],
   },
   {
-    slug: "lb-anime-adult",
-    url: "https://letterboxd.com/yotsuba_chan/list/100-essential-anime-films/",
-    name: "Adult animation",
+    slug: "adult-animation-anime",
+    name: "Adult animation / anime",
     signature: { trust: "animation" },
+    ids: [10494, 9323, 128, 129, 149, 378064, 10315, 324857, 569094, 12477, 662],
   },
   {
-    slug: "lb-80s-action",
-    url: "https://letterboxd.com/cinemonster/list/80s-action-essentials/",
-    name: "80s action",
-    signature: { decade: "70s", first_act: "action_adventure" },
+    slug: "80s-action-retro",
+    name: "80s action / retro charge",
+    signature: { decade: ["80s", "70s"], first_act: "action_adventure" },
+    ids: [1103, 106, 562, 5548, 218, 679, 6978, 603, 85, 76341, 137113, 353081],
   },
   {
-    slug: "lb-feel-good",
-    url: "https://letterboxd.com/cynthrax/list/the-feel-good-list/",
-    name: "Feel-good",
-    signature: { tone: "light", energy: "unwind", want: "calm" },
+    slug: "warm-companion",
+    name: "Warm companion films",
+    signature: { tone: "light", energy: "unwind", want: ["calm", "comfort"] },
+    ids: [976893, 370755, 11830, 331482, 840430, 505192, 194, 155341, 615173, 773, 120467, 121986],
   },
   {
-    slug: "lb-coming-of-age",
-    url: "https://letterboxd.com/twoeyestoseebeauty/list/coming-of-age/",
-    name: "Coming of age",
-    signature: { memory: ["childhood_summer", "heartbreak"], depth: "thoughtful" },
+    slug: "documentary-truth",
+    name: "Documentary / reality cuts",
+    signature: { first_act: "discover", trust: "documentary" },
+    ids: [721589, 123678, 128216, 501, 42044, 14275, 30017, 26317],
   },
   {
-    slug: "lb-female-directed",
-    url: "https://letterboxd.com/sallyjanecriterion/list/films-directed-by-women/",
-    name: "Directed by women",
-    signature: {}, // matches all moods at low priority
+    slug: "classics-still-alive",
+    name: "Classics that still bite",
+    signature: { decade: ["old", "70s"], depth: "thoughtful" },
+    ids: [9552, 207, 655, 797, 346, 18148, 62, 780, 147, 238, 240, 348, 28],
   },
 ];
 
-const UA = "moodwatch-bot/0.1 (+https://brm-src.github.io/moodwatch/)";
-
-async function fetchListPage(url) {
-  const r = await fetch(url, {
-    headers: { "User-Agent": UA, "Accept-Language": "en;q=0.9" },
-    cf: { cacheTtl: 86400 * 3, cacheEverything: true },
-  });
-  if (!r.ok) throw new Error(`LB list ${url} → ${r.status}`);
-  return r.text();
+function matchesValue(want, got) {
+  if (got == null) return false;
+  if (Array.isArray(want)) return want.includes(got);
+  return want === got;
 }
 
-function extractFilmSlugs(html) {
-  const slugs = new Set();
-  const re = /data-film-slug="([a-z0-9][a-z0-9-]+)"/gi;
-  let m;
-  while ((m = re.exec(html))) slugs.add(m[1]);
-  if (slugs.size === 0) {
-    // Fallback: parse film links
-    const re2 = /\/film\/([a-z0-9][a-z0-9-]+)\/?/gi;
-    let m2;
-    while ((m2 = re2.exec(html))) slugs.add(m2[1]);
-  }
-  return [...slugs].filter(s => s.length > 1 && !["a","is","of","the","this","new","top"].includes(s));
-}
-
-function nextPageUrl(html, baseUrl) {
-  // Look for "next" pagination
-  const m = html.match(/href="([^"]*\/page\/(\d+)\/[^"]*)"\s*[^>]*class="[^"]*next/i);
-  if (m) {
-    const u = m[1];
-    return u.startsWith("http") ? u : `https://letterboxd.com${u}`;
-  }
-  return null;
-}
-
-export async function fetchListSlugs(env, list, maxPages = 3) {
-  // KV cache (per-list, 3-day TTL since lists change rarely)
-  const cacheKey = `list:${list.slug}`;
-  if (env.CACHE) {
-    const cached = await env.CACHE.get(cacheKey, "json");
-    if (cached && Array.isArray(cached.slugs) && cached.ts > Date.now() - 86400 * 3 * 1000) {
-      return cached.slugs;
-    }
-  }
-
-  const allSlugs = new Set();
-  let url = list.url;
-  for (let i = 0; i < maxPages && url; i++) {
-    let html;
-    try { html = await fetchListPage(url); } catch { break; }
-    extractFilmSlugs(html).forEach(s => allSlugs.add(s));
-    url = nextPageUrl(html, url);
-  }
-
-  const slugs = [...allSlugs];
-  if (env.CACHE) {
-    await env.CACHE.put(cacheKey, JSON.stringify({ ts: Date.now(), slugs }), {
-      expirationTtl: 86400 * 7,
-    });
-  }
-  return slugs;
-}
-
-// Match a mood object against list signatures. Returns lists sorted by match score.
 export function matchLists(mood) {
   const matches = [];
   for (const list of LISTS) {
-    const sig = list.signature;
-    const sigKeys = Object.keys(sig);
-    if (sigKeys.length === 0) {
-      matches.push({ list, score: 0.5 }); // catch-all, low priority
-      continue;
-    }
+    const sig = list.signature || {};
     let score = 0;
-    for (const k of sigKeys) {
-      const want = sig[k];
-      const got = mood[k];
-      if (got == null) continue;
-      if (Array.isArray(want)) {
-        if (want.includes(got)) score++;
-      } else {
-        if (want === got) score++;
-      }
+    for (const [k, want] of Object.entries(sig)) {
+      if (matchesValue(want, mood[k])) score++;
     }
     if (score > 0) matches.push({ list, score });
   }
   matches.sort((a, b) => b.score - a.score);
-  return matches.slice(0, 3); // top 3 lists
+  return matches.slice(0, 3);
 }

@@ -1013,7 +1013,7 @@
       <h3>${escapeHtml(f.title || "")} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
       <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
-      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span><p class="note">${escapeHtml(f.curated_note)}</p>` : ""}
+      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span><p class="note">${escapeHtml(f.curated_note)}</p>` : (f.overview ? `<p class="overview">${escapeHtml(f.overview)}</p>` : "")}
       ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}`;
     const actions = document.createElement("div");
     actions.className = "actions";

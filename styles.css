@@ -115,21 +115,35 @@ header.top {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at top left, rgba(20,22,15,0.85) 0%, rgba(20,22,15,0.35) 50%, transparent 75%),
-    linear-gradient(180deg, rgba(20,22,15,0.55) 0%, rgba(20,22,15,0.15) 35%, rgba(20,22,15,0.45) 70%, rgba(20,22,15,0.95) 100%);
+    linear-gradient(90deg, rgba(20,22,15,0.92) 0%, rgba(20,22,15,0.82) 34%, rgba(20,22,15,0.38) 62%, rgba(20,22,15,0.22) 100%),
+    linear-gradient(180deg, rgba(20,22,15,0.72) 0%, rgba(20,22,15,0.25) 42%, rgba(20,22,15,0.95) 100%);
   pointer-events: none;
 }
 .hero > * { position: relative; z-index: 1; }
 .hero h1 {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: var(--t-h1);
-  line-height: 0.98;
-  letter-spacing: -0.025em;
-  max-width: 14ch;
+  font-size: clamp(52px, 10vw, 122px);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  max-width: 12ch;
   font-variation-settings: "opsz" 72;
   text-wrap: balance;
-  text-shadow: 0 2px 22px rgba(0,0,0,0.85), 0 0 1px rgba(0,0,0,0.6);
+  text-shadow: 0 3px 28px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.9);
+  margin: 0 0 var(--s-5);
+}
+.card .overview {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin-top: var(--s-2);
+  max-height: 5.6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
 }
 .hero .hero-fig {
   font-family: var(--font-body);
@@ -145,17 +159,6 @@ header.top {
   text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 .hero .hero-fig:empty { display: none; }
-.hero h1 {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: var(--t-h1);
-  line-height: 0.98;
-  letter-spacing: -0.025em;
-  max-width: 14ch;
-  font-variation-settings: "opsz" 72;
-  text-wrap: balance;
-  text-shadow: 0 2px 14px rgba(0,0,0,0.45);
-}
 .hero h1 em {
   font-style: italic;
   font-weight: 400;

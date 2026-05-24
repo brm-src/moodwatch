@@ -3,11 +3,11 @@
 
 export const CURATED = [
   // ── OSCURO · REFLEXIVO ───────────────────────────────────────────
-  { id: 837082,  note: "Charlotte Wells filma el duelo desde el fondo de una pileta. Te parte sin que lo notes." },
-  { id: 1011985, note: "Celine Song convierte lo que pudo ser en la película más adulta sobre el amor no elegido." },
+  { id: 965150,  note: "Charlotte Wells filma el duelo desde el fondo de una pileta. Te parte sin que lo notes." },
+  { id: 666277,  note: "Celine Song convierte lo que pudo ser en la película más adulta sobre el amor no elegido." },
   { id: 152601,  note: "Jonze construyó el retrato de soledad más honesto de los 2010s. Phoenix nunca estuvo mejor." },
-  { id: 804150,  note: "Scorsese a máxima potencia: codicia, crimen, y la América que borra lo que no quiere ver." },
-  { id: 777245,  note: "El Spielberg más personal. El cine que te salva y destruye tu familia al mismo tiempo." },
+  { id: 466420,  note: "Scorsese a máxima potencia: codicia, crimen, y la América que borra lo que no quiere ver." },
+  { id: 804095,  note: "El Spielberg más personal. El cine que te salva y destruye tu familia al mismo tiempo." },
   { id: 496243,  note: "Sátira social que termina cortando profundo." },
   { id: 491584,  note: "Misterio lento, vacío emocional y rabia contenida." },
   { id: 1018,    note: "Hollywood convertido en sueño roto." },
@@ -18,7 +18,7 @@ export const CURATED = [
 
   // ── OSCURO · TENSO ───────────────────────────────────────────────
   { id: 146233,  note: "Villeneuve en estado puro: thriller moral donde ninguna respuesta llega limpia." },
-  { id: 58244,   note: "Kim Jee-woon llevó el thriller de venganza al límite. Obra maestra incómoda." },
+  { id: 49797,   note: "Kim Jee-woon llevó el thriller de venganza al límite. Obra maestra incómoda." },
   { id: 1422,    note: "Scorsese hizo el mejor thriller americano de los 2000s. Traición, ritmo, adrenalina pura." },
   { id: 949,     note: "Mann inventó la estética del thriller moderno. De Niro y Pacino en el pináculo del género." },
   { id: 395834,  note: "Western tardío que nadie esperaba. Frío, preciso, brutal." },
@@ -31,7 +31,7 @@ export const CURATED = [
 
   // ── OSCURO · DEVASTADOR ──────────────────────────────────────────
   { id: 807,     note: "Fincher preguntó qué hay en la caja. Nadie quiere saber la respuesta." },
-  { id: 23269,   note: "Laugier en el extremo absoluto. Más allá del torture porn: hay tesis filosófica adentro." },
+  { id: 9539,    note: "Laugier en el extremo absoluto. Más allá del torture porn: hay tesis filosófica adentro." },
   { id: 334541,  note: "Dolor humano sin consuelo fácil." },
   { id: 641,     note: "Adicción filmada como caída libre." },
   { id: 25237,   note: "La guerra como trauma absoluto." },
@@ -42,9 +42,9 @@ export const CURATED = [
 
   // ── LUZ · ACOMPAÑAMIENTO ─────────────────────────────────────────
   { id: 840430,  note: "Vieja escuela en el mejor sentido: personajes, invierno de Nueva Inglaterra y mucha humanidad." },
-  { id: 516486,  note: "Buddy comedy que también es algo. Wilde debutó como directora y anotó directo." },
-  { id: 155341,  note: "Curtis hace trampas con el tiempo y uno lo acepta. Warm sin ser empalagosa." },
-  { id: 615173,  note: "Toma el loop de Groundhog Day y le agrega nihilismo cómico. Sorprendentemente bien ejecutada." },
+  { id: 505600,  note: "Buddy comedy que también es algo. Wilde debutó como directora y anotó directo." },
+  { id: 122906,  note: "Curtis hace trampas con el tiempo y uno lo acepta. Warm sin ser empalagosa." },
+  { id: 587792,  note: "Toma el loop de Groundhog Day y le agrega nihilismo cómico. Sorprendentemente bien ejecutada." },
   { id: 976893,  note: "Calma, rutina y belleza mínima." },
   { id: 370755,  note: "La vida cotidiana como poema tranquilo." },
   { id: 11830,   note: "Comida, humor y ternura japonesa." },
@@ -65,15 +65,12 @@ export const CURATED = [
 
   // ── FRÍO · CONTEMPLATIVO ─────────────────────────────────────────
   { id: 329865,  note: "Arrival reencuadra la sci-fi como tragedia lingüística. Villeneuve más preciso." },
-  { id: 553604,  note: "Eggers encerró a dos hombres en un faro y filmó la locura como mito griego." },
-  { id: 254508,  note: "Lanthimos construyó una distopía del afecto. Extraña, fría y con más verdad de lo que parece." },
+  { id: 503919,  note: "Eggers encerró a dos hombres en un faro y filmó la locura como mito griego." },
+  { id: 254320,  note: "Lanthimos construyó una distopía del afecto. Extraña, fría y con más verdad de lo que parece." },
   { id: 374720,  note: "Nolan filmó Dunkerque como sensación física. Relato bélico sin héroes individuales." },
   { id: 593,     note: "Recuerdos, duelo y espacio interior." },
   { id: 81401,   note: "Silencio, viento y agotamiento existencial." },
   { id: 414453,  note: "Arquitectura, pausa y melancolía." },
-  { id: 872,     note: "Rutina doméstica convertida en tensión." },
-  { id: 490003,  note: "Cuatro horas de tristeza suspendida." },
-  { id: 426,     note: "Hipnosis fría y apocalipsis silencioso." },
   { id: 30020,   note: "Minimalismo moral y contemplación pura." },
 
   // ── CÁLIDO · ROMÁNTICO ───────────────────────────────────────────
@@ -85,7 +82,7 @@ export const CURATED = [
   { id: 284,     note: "Romance clásico con tristeza adulta." },
 
   // ── RARO · DISCOVER ──────────────────────────────────────────────
-  { id: 524911,  note: "Una película de zombies dentro de otra. Ueda es un genio caótico." },
+  { id: 513434,  note: "Una película de zombies dentro de otra. Ueda es un genio caótico." },
   { id: 220289,  note: "$50k en una noche. Física cuántica como paranoia doméstica perfecta." },
   { id: 431,     note: "Kafkiana, matemática y aterradora. Precursora del cine de escape room." },
   { id: 985,     note: "Pesadilla industrial sin explicación segura." },
@@ -107,12 +104,11 @@ export const CURATED = [
 
   // ── TERROR ATMOSFÉRICO ───────────────────────────────────────────
   { id: 493922,  note: "Ari Aster redefinió el horror familiar. Te deja sin herramientas para procesar lo que viste." },
-  { id: 310137,  note: "Eggers construyó el miedo de adentro hacia afuera. Folk horror en estado puro." },
-  { id: 310131,  note: "Folk horror austero y enfermizo." },
+  { id: 310131,  note: "Eggers construyó el miedo de adentro hacia afuera. Folk horror en estado puro." },
   { id: 530385,  note: "Horror diurno en flores amarillas. Lo más perturbador es que el culto tiene lógica interna." },
-  { id: 376292,  note: "Folklore coreano, exorcismo y paranoia. Absolutamente impredecible." },
-  { id: 67345,   note: "La película de terror más melancólica que existe. Documental falso. Duelo como horror." },
-  { id: 625215,  note: "Powell filmó la fe como posesión. Horror que nace de la devoción." },
+  { id: 293670,  note: "Folklore coreano, exorcismo y paranoia. Absolutamente impredecible." },
+  { id: 27374,   note: "La película de terror más melancólica que existe. Documental falso. Duelo como horror." },
+  { id: 575776,  note: "Powell filmó la fe como posesión. Horror que nace de la devoción." },
   { id: 503919,  note: "Locura marítima en blanco y negro." },
   { id: 694,     note: "Aislamiento, arquitectura y terror psicológico." },
   { id: 805,     note: "Paranoia doméstica con elegancia diabólica." },
@@ -139,7 +135,7 @@ export const CURATED = [
   { id: 10315,   note: "Wes Anderson en stop motion perfecto." },
 
   // ── DOCUMENTAL ───────────────────────────────────────────────────
-  { id: 721589,  note: "Un hombre aprende de un pulpo durante un año. Suena tonto. Te cambia algo por dentro." },
+  { id: 682110,  note: "Un hombre aprende de un pulpo durante un año. Suena tonto. Te cambia algo por dentro." },
   { id: 123678,  note: "La realidad más perturbadora que la ficción." },
   { id: 128216,  note: "Memoria familiar y verdad inestable." },
   { id: 501,     note: "Herzog mirando obsesión y naturaleza." },
@@ -149,7 +145,7 @@ export const CURATED = [
   { id: 26317,   note: "Cine mirando al cine desde el origen." },
 
   // ── JOYA INVISIBLE ───────────────────────────────────────────────
-  { id: 2011,    note: "Dolor humano filmado sin protección." },
+
   { id: 565743,  note: "Sci-fi retro pequeña y elegante." },
   { id: 453278,  note: "Drama íntimo, físico y silencioso." },
   { id: 428449,  note: "Duelo, tiempo y minimalismo fantasma." },

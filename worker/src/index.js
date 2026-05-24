@@ -4,9 +4,9 @@
 
 import { discoverByMood } from "./mood.js";
 import { tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase, tmdbDiscover } from "./tmdb.js";
-import { fetchWatchlistTmdbIds, slugsToTmdbIds } from "./letterboxd.js";
+import { fetchWatchlistTmdbIds } from "./letterboxd.js";
 import { CURATED, curatedFor } from "./curated.js";
-import { LISTS, fetchListSlugs, matchLists } from "./lists.js";
+import { matchLists } from "./lists.js";
 
 function corsHeaders(origin, env) {
   const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim());
@@ -35,7 +35,7 @@ function decodeMood(b64) {
 }
 
 function justwatchUrl(film, country) {
-  if (film.providers_link) return film.providers_link;
+  // Always use JustWatch search — TMDb's providers_link 404s often
   const c = (country || "us").toLowerCase();
   const q = encodeURIComponent(film.title || "");
   return `https://www.justwatch.com/${c}/search?q=${q}`;
@@ -59,41 +59,40 @@ async function recommend(req, env, ctx) {
   // 1. Get candidate pool from TMDb /discover (multi-page if discoverable)
   const candidates = await discoverByMood(env, mood, lang);
 
-  // 1b. Pull films from matching curated Letterboxd lists, fetch their TMDb data,
-  // merge into pool. List films get marked _list = listName for soft boost.
-  // Wrap whole block in timeout — if LB scrape is slow we proceed without it.
+  // 1b. Merge mood-matched editorial list seeds into the candidate pool.
+  // This replaces live Letterboxd scraping: LB blocks Workers and list URLs rot.
+  // List hits get tagged with `from_list` and a soft score boost.
   const matched = matchLists(mood);
   const listIds = new Map();
-  if (matched.length > 0) {
-    const TIMEOUT_MS = 6000;
-    const work = (async () => {
-      const allListSlugs = await Promise.all(
-        matched.slice(0, 2).map(m => fetchListSlugs(env, m.list, 1).catch(() => []))
-      );
-      for (let i = 0; i < allListSlugs.length; i++) {
-        const slugs = allListSlugs[i].slice(0, 25); // small cap, KV-cached anyway
-        const ids = await slugsToTmdbIds(env, slugs);
-        for (const id of ids) {
-          if (!listIds.has(id)) listIds.set(id, matched[i].list.name);
-        }
-      }
-    })();
-    try {
-      await Promise.race([
-        work,
-        new Promise((_, rej) => setTimeout(() => rej(new Error("list-timeout")), TIMEOUT_MS)),
-      ]);
-    } catch (e) {
-      console.log("lists skipped:", e?.message);
+  for (const m of matched) {
+    for (const id of (m.list.ids || [])) {
+      if (!listIds.has(id)) listIds.set(id, m.list.name);
     }
   }
 
-  // Don't fetch extra TMDb details for list-only ids — too expensive in worker.
-  // Just tag candidates that are in matching lists.
-  const allCandidates = candidates.map(c => ({
-    ...c,
-    _list: listIds.get(c.id) || null,
-  }));
+  const candidateIds = new Set(candidates.map(c => c.id));
+  const missingListIds = [...listIds.keys()].filter(id => !candidateIds.has(id));
+  const extraFromLists = (await Promise.all(missingListIds.slice(0, 36).map(id =>
+    tmdbDetails(env, id, lang).then(d => ({
+      id: d.id,
+      title: d.title,
+      release_date: d.release_date,
+      vote_average: d.vote_average,
+      vote_count: d.vote_count,
+      popularity: d.popularity,
+      genre_ids: (d.genres || []).map(g => g.id),
+      genres: (d.genres || []).map(g => g.name?.toLowerCase()),
+      poster_path: d.poster_path,
+      overview: d.overview,
+      runtime: d.runtime,
+      _list: listIds.get(id) || null,
+    })).catch(() => null)
+  ))).filter(Boolean);
+
+  const allCandidates = [
+    ...candidates.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
+    ...extraFromLists,
+  ];
 
   // 2. If LB user provided, intersect with their watchlist TMDb IDs
   let pool = allCandidates;
@@ -170,6 +169,7 @@ async function recommend(req, env, ctx) {
       runtime: details.runtime || null,
       genres: f.genres || [],
       poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
+      overview: f.overview || null,
       justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: f._curated?.note || null,
@@ -246,6 +246,7 @@ async function surprise(req, env, ctx) {
       runtime: details.runtime || null,
       genres: (f.genre_ids || []).slice(0, 2),
       poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
+      overview: f.overview || null,
       justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: cur?.note || null,
@@ -254,6 +255,25 @@ async function surprise(req, env, ctx) {
   }));
 
   return { films: enriched, mode: "surprise" };
+}
+
+async function verifyCurated(req, env) {
+  const url = new URL(req.url);
+  const max = Math.min(parseInt(url.searchParams.get("max") || "40", 10), 50);
+  const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+  const out = [];
+  const seen = new Set();
+  for (const c of CURATED.slice(offset, offset + max)) {
+    if (seen.has(c.id)) continue;
+    seen.add(c.id);
+    try {
+      const d = await tmdbDetails(env, c.id, "en-US");
+      out.push({ id: c.id, title: d.title, year: (d.release_date || "").slice(0, 4), note: c.note });
+    } catch (e) {
+      out.push({ id: c.id, error: String(e?.message || e), note: c.note });
+    }
+  }
+  return { offset, count: out.length, total: CURATED.length, items: out };
 }
 
 export default {
@@ -289,6 +309,15 @@ export default {
       } catch (e) {
         console.log("surprise err:", e?.stack || e);
         return json({ error: "generic", message: String(e?.message || e) }, { status: 500 }, cors);
+      }
+    }
+
+    if (url.pathname === "/verify-curated") {
+      try {
+        const out = await verifyCurated(req, env);
+        return json(out, {}, cors);
+      } catch (e) {
+        return json({ error: "verify", message: String(e?.message || e) }, { status: 500 }, cors);
       }
     }
 
