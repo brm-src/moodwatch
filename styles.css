@@ -223,6 +223,25 @@ header.top {
 .hero-card-dark .pill:hover { background: var(--paper); color: var(--ink); }
 .hero-card-dark .pill.primary { background: var(--paper); color: var(--ink); }
 .hero-card-dark .pill.primary:hover { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.quick-surprise {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--s-2);
+}
+.quick-surprise button {
+  background: rgba(20,22,15,0.35);
+  color: var(--paper-3);
+  border: 1px solid rgba(240,234,223,0.45);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: var(--t-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.quick-surprise button:hover { background: var(--paper); color: var(--ink); }
 
 /* ─── content sections (cream bg) ─── */
 .section {
@@ -490,6 +509,33 @@ header.top {
 
 /* ─── results ─── */
 #cards { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-3); }
+.why-panel {
+  border: 1px solid var(--rule);
+  background: rgba(216,207,188,0.22);
+  padding: var(--s-2);
+  margin: 0 0 var(--s-3);
+}
+.why-title {
+  font-family: var(--font-body);
+  font-size: var(--t-mono);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.why-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.why-chips span {
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-family: var(--font-body);
+  font-size: var(--t-mono);
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.why-panel p { margin-top: 8px; color: var(--ink-soft); font-family: var(--font-display); font-style: italic; }
 .card {
   display: grid;
   grid-template-columns: 124px 1fr;
@@ -550,6 +596,13 @@ header.top {
   border-left: 2px solid var(--accent);
   padding-left: var(--s-2);
   margin-top: var(--s-1);
+}
+.card .reason {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+  margin-top: 4px;
 }
 .card .actions { display: flex; gap: var(--s-2); margin-top: var(--s-2); flex-wrap: wrap; }
 .card a.action {

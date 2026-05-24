@@ -41,6 +41,57 @@ function justwatchUrl(film, country) {
   return `https://www.justwatch.com/${c}/search?q=${q}`;
 }
 
+function moodSummary(mood, lang = "en") {
+  const es = String(lang || "").startsWith("es");
+  const labels = {
+    tone: { dark: ["dark", "oscuro"], light: ["light", "luminoso"] },
+    energy: { engage: ["engaged", "con tensión"], unwind: ["unwinding", "para bajar revoluciones"] },
+    risk: { safe: ["safe", "seguro"], discover: ["discovery", "descubrimiento"] },
+    depth: { thoughtful: ["thoughtful", "reflexivo"], uneasy: ["uneasy", "incómodo"], ruined: ["devastating", "devastador"], fun: ["fun", "liviano"], warm: ["warm", "cálido"] },
+    runtime: { short: ["under 90 min", "menos de 90 min"], medium: ["90–120 min", "90–120 min"], long: ["long", "larga"], epic: ["epic", "épica"] },
+    popularity: { low: ["less obvious", "menos obvio"], high: ["recognizable", "reconocible"], mid: ["balanced", "equilibrado"] },
+    first_act: { thriller_horror: ["thriller/horror", "thriller/terror"], drama_romance: ["drama/romance", "drama/romance"], action_adventure: ["action/adventure", "acción/aventura"], fantasy_scifi: ["fantasy/sci-fi", "fantasía/sci-fi"] },
+    trust: { horror: ["horror", "terror"], thriller: ["thriller", "thriller"], comedy: ["comedy", "comedia"], animation: ["animation", "animación"], weird: ["weird", "raro"], drama: ["drama", "drama"] },
+  };
+  const chips = [];
+  for (const [axis, vals] of Object.entries(labels)) {
+    const v = mood?.[axis];
+    if (v && vals[v]) chips.push(vals[v][es ? 1 : 0]);
+  }
+  const headline = chips.length
+    ? (es ? `Tu mood: ${chips.slice(0, 5).join(" · ")}.` : `Your mood: ${chips.slice(0, 5).join(" · ")}.`)
+    : (es ? "Sin mood fijo: fui por calidad y sorpresa." : "No fixed mood: I went for quality and surprise.");
+  return { headline, chips: chips.slice(0, 8) };
+}
+
+function pickReason(film, mood, lang = "en") {
+  const es = String(lang || "").startsWith("es");
+  const bits = [];
+  if (film._curated) bits.push(es ? "tiene nota editorial" : "has an editor note");
+  if (film._list) bits.push(es ? `calza con ${film._list}` : `matches ${film._list}`);
+  if (mood?.runtime && film.runtime) bits.push(es ? `${film.runtime} min dentro del tiempo` : `${film.runtime} min fits the runtime`);
+  if (mood?.trust === "horror") bits.push(es ? "viene del eje terror/atmósfera" : "comes from the horror/atmosphere axis");
+  if (mood?.risk === "discover") bits.push(es ? "privilegié descubrimiento sobre obviedad" : "leans discovery over obvious picks");
+  if (mood?.popularity === "low") bits.push(es ? "evité solo blockbusters" : "avoids only-blockbuster picks");
+  if (!bits.length) bits.push(es ? "salió por mezcla de rating, mood y variedad" : "picked by rating, mood fit and variety");
+  return (es ? "Por qué: " : "Why: ") + bits.slice(0, 3).join("; ") + ".";
+}
+
+function surpriseMoodForProfile(profile) {
+  const p = (profile || "quality").toLowerCase();
+  const presets = {
+    weird: { trust: "weird", risk: "discover", popularity: "low" },
+    short: { runtime: "short", risk: "safe" },
+    beautiful: { tone: "light", energy: "unwind", want: "soothed", quality: "high" },
+    hurt: { memory: "heartbreak", want: "haunted", depth: "ruined" },
+    pace: { energy: "engage", first_act: "action_adventure", popularity: "mid" },
+    horror: { trust: "horror", tone: "dark", first_act: "thriller_horror" },
+    classic: { decade: "old", quality: "high" },
+    quality: { quality: "high" },
+  };
+  return presets[p] || presets.quality;
+}
+
 async function recommend(req, env, ctx) {
   const url = new URL(req.url);
   const country = (url.searchParams.get("country") || "US").toUpperCase();
@@ -174,16 +225,19 @@ async function recommend(req, env, ctx) {
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
+      reason: pickReason({ ...f, runtime: details.runtime || f.runtime }, mood, lang),
     };
   }));
 
-  return { films: enriched, lb_used: lbUsed };
+  return { films: enriched, lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matched.map(m => m.list.name) };
 }
 
 async function surprise(req, env, ctx) {
   const url = new URL(req.url);
   const country = (url.searchParams.get("country") || "US").toUpperCase();
   const lang    = (url.searchParams.get("lang") || "en").startsWith("es") ? "es-ES" : "en-US";
+  const profile = (url.searchParams.get("profile") || "quality").toLowerCase();
+  const surpriseMood = surpriseMoodForProfile(profile);
   const exclude = (url.searchParams.get("exclude") || "")
     .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
   const excludeSet = new Set(exclude);
@@ -202,12 +256,18 @@ async function surprise(req, env, ctx) {
   }
 
   const baseParams = {
-    "vote_count.gte": 800,
-    "vote_average.gte": 6.8,
+    "vote_count.gte": profile === "weird" ? 80 : 800,
+    "vote_average.gte": profile === "pace" ? 6.3 : 6.8,
     "with_runtime.gte": 75,
     "primary_release_date.lte": today,
     include_adult: "false",
   };
+  if (profile === "short") baseParams["with_runtime.lte"] = 95;
+  if (profile === "weird") baseParams["vote_count.lte"] = 1500;
+  if (profile === "classic") baseParams["primary_release_date.lte"] = "1979-12-31";
+  if (profile === "horror") baseParams.with_genres = "27|53|9648";
+  if (profile === "pace") baseParams.with_genres = "28|12|53";
+  if (profile === "hurt") baseParams["vote_count.gte"] = 120;
 
   const fetches = pages.map(p =>
     tmdbDiscover(env, { ...baseParams, ...p }, lang).catch(() => ({ results: [] }))
@@ -215,21 +275,59 @@ async function surprise(req, env, ctx) {
   const all = await Promise.all(fetches);
   let pool = all.flatMap(r => r.results || []);
 
-  // De-dupe + drop excluded
+  const matched = matchLists(surpriseMood);
+  const listIds = new Map();
+  for (const m of matched) {
+    for (const id of (m.list.ids || [])) if (!listIds.has(id)) listIds.set(id, m.list.name);
+  }
+  const extraFromLists = (await Promise.all([...listIds.keys()].slice(0, 18).map(id =>
+    tmdbDetails(env, id, lang).then(d => ({
+      id: d.id,
+      title: d.title,
+      release_date: d.release_date,
+      vote_average: d.vote_average,
+      vote_count: d.vote_count,
+      popularity: d.popularity,
+      genre_ids: (d.genres || []).map(g => g.id),
+      genres: (d.genres || []).map(g => g.name?.toLowerCase()),
+      poster_path: d.poster_path,
+      overview: d.overview,
+      runtime: d.runtime,
+      _list: listIds.get(id) || null,
+    })).catch(() => null)
+  ))).filter(f => {
+    if (!f) return false;
+    if (f.release_date && f.release_date > today) return false;
+    if (f.runtime && f.runtime < 75) return false;
+    if (profile === "short" && f.runtime && f.runtime > 95) return false;
+    return true;
+  });
+  pool = [
+    ...pool.map(f => ({ ...f, _list: listIds.get(f.id) || null })),
+    ...extraFromLists,
+  ];
+
+  // De-dupe + drop excluded/profile leaks
   const seen = new Set();
   pool = pool.filter(f => {
     if (excludeSet.has(f.id)) return false;
     if (seen.has(f.id)) return false;
+    if (profile === "short" && f.runtime && f.runtime > 95) return false;
     seen.add(f.id);
     return true;
   });
 
-  // Shuffle + pick 4
-  for (let i = pool.length - 1; i > 0; i--) {
+  const listed = pool.filter(f => f._list);
+  const unlisted = pool.filter(f => !f._list);
+  for (let i = listed.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+    [listed[i], listed[j]] = [listed[j], listed[i]];
   }
-  const top = pool.slice(0, 4);
+  for (let i = unlisted.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [unlisted[i], unlisted[j]] = [unlisted[j], unlisted[i]];
+  }
+  const top = [...listed.slice(0, 3), ...unlisted.slice(0, 4)].slice(0, 4);
 
   const enriched = await Promise.all(top.map(async (f) => {
     const [providers, credits, details] = await Promise.all([
@@ -244,17 +342,18 @@ async function surprise(req, env, ctx) {
       year: (f.release_date || "").slice(0, 4),
       director: credits.director || null,
       runtime: details.runtime || null,
-      genres: (f.genre_ids || []).slice(0, 2),
+      genres: f.genres || (details.genres || []).map(g => g.name),
       poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
       overview: f.overview || null,
       justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: cur?.note || null,
-      from_list: null,
+      from_list: f._list || null,
+      reason: pickReason({ ...f, _curated: cur || null, runtime: details.runtime || f.runtime || null }, surpriseMood, lang),
     };
   }));
 
-  return { films: enriched, mode: "surprise" };
+  return { films: enriched, mode: "surprise", profile, why: moodSummary(surpriseMood, lang), matched_lists: matched.map(m => m.list.name) };
 }
 
 async function verifyCurated(req, env) {

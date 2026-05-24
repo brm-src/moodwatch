@@ -38,6 +38,13 @@
           <span data-i18n="path_surprise">Surprise me</span>
           <span class="arrow">→</span>
         </button>
+        <div class="quick-surprise" aria-label="Quick surprise filters">
+          <button type="button" data-profile="weird" data-i18n="quick_weird">Algo raro</button>
+          <button type="button" data-profile="short" data-i18n="quick_short">Algo corto</button>
+          <button type="button" data-profile="beautiful" data-i18n="quick_beautiful">Algo hermoso</button>
+          <button type="button" data-profile="hurt" data-i18n="quick_hurt">Algo que duela</button>
+          <button type="button" data-profile="pace" data-i18n="quick_pace">Algo con ritmo</button>
+        </div>
       </div>
     </div>
   </section>
@@ -90,6 +97,7 @@
     <div class="fig"><span data-i18n="picks_label">Picks</span><span class="bar"></span></div>
     <h2 class="q-title" id="vibe-title" data-i18n="picks_title">For your <em>mood.</em></h2>
     <p style="font-family:var(--font-display);font-style:italic;color:var(--ink-soft);font-size:var(--t-lead);margin-bottom:var(--s-3);" id="vibe-desc"></p>
+    <div id="why-panel" class="why-panel" hidden></div>
     <div id="cards"></div>
     <div class="results-actions">
       <button class="pill" id="reroll" data-i18n="reroll">Show 4 more</button>

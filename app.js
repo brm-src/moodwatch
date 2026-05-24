@@ -729,7 +729,7 @@
   // ────────────────────────────────────────────────────────────
   // STATE & STEP MGMT
   // ────────────────────────────────────────────────────────────
-  const state = { qIdx: 0, answers: {}, user: "", path: null };
+  const state = { qIdx: 0, answers: {}, user: "", path: null, surpriseProfile: "quality" };
 
   const steps = {
     intro:   $('[data-step="intro"]'),
@@ -931,12 +931,14 @@
     const m = (navigator.language || "").match(/-([A-Z]{2})/i);
     return m ? m[1].toUpperCase() : "US";
   }
-  async function surpriseFlow({ exclude } = {}) {
+  async function surpriseFlow({ exclude, profile } = {}) {
     show("loading");
     $("#load-msg").textContent = window.t("loading");
     const country = guessCountry();
     const lang = window.LANG;
     const params = new URLSearchParams({ country, lang });
+    const activeProfile = profile || state.surpriseProfile || "quality";
+    params.set("profile", activeProfile);
     if (exclude && exclude.length) params.set("exclude", exclude.join(","));
     params.set("seed", String(Math.floor(Math.random() * 1e9)));
     try {
@@ -984,7 +986,8 @@
   function renderResults(data) {
     const words = vibeWords(state.answers, window.LANG);
     const desc = $("#vibe-desc");
-    if (desc) desc.textContent = words.length ? words.join(" · ") : "";
+    if (desc) desc.textContent = data?.why?.headline || (words.length ? words.join(" · ") : "");
+    renderWhy(data);
     const cards = $("#cards");
     cards.innerHTML = "";
     if (!data.films || !data.films.length) {
@@ -997,6 +1000,20 @@
     }
     show("results");
   }
+  function renderWhy(data) {
+    const panel = $("#why-panel");
+    if (!panel) return;
+    const chips = data?.why?.chips || [];
+    const lists = data?.matched_lists || [];
+    if (!chips.length && !lists.length) { panel.hidden = true; panel.innerHTML = ""; return; }
+    panel.hidden = false;
+    panel.innerHTML = `
+      <div class="why-title">${window.t("why_title")}</div>
+      ${chips.length ? `<div class="why-chips">${chips.map(c => `<span>${escapeHtml(c)}</span>`).join("")}</div>` : ""}
+      ${lists.length ? `<p>${window.t("why_lists")} ${lists.map(escapeHtml).join(" · ")}</p>` : ""}
+    `;
+  }
+
   function filmCard(f, rank) {
     const c = document.createElement("article");
     c.className = "card";
@@ -1014,7 +1031,8 @@
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
       <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
       ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span><p class="note">${escapeHtml(f.curated_note)}</p>` : (f.overview ? `<p class="overview">${escapeHtml(f.overview)}</p>` : "")}
-      ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}`;
+      ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}
+      ${f.reason ? `<p class="reason">${escapeHtml(f.reason)}</p>` : ""}`;
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
@@ -1088,6 +1106,7 @@
       state.answers = {};
       state.shownIds = [];
       state.lastWithUser = false;
+      state.surpriseProfile = "quality";
       await surpriseFlow();
     });
     $("#path-lb").addEventListener("click", () => {
@@ -1112,15 +1131,26 @@
     });
     $("#lb-back").addEventListener("click", () => { state.path = null; show("intro"); });
 
+    $$(".quick-surprise button[data-profile]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        state.path = "surprise";
+        state.answers = {};
+        state.shownIds = [];
+        state.lastWithUser = false;
+        state.surpriseProfile = btn.dataset.profile || "quality";
+        await surpriseFlow({ profile: state.surpriseProfile });
+      });
+    });
+
     $("#restart").addEventListener("click", () => {
-      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null;
+      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality";
       state.shownIds = [];
       const inp = $("#user"); if (inp) { inp.value = ""; }
       show("intro");
     });
     $("#reroll").addEventListener("click", () => {
       if (state.path === "surprise") {
-        surpriseFlow({ exclude: state.shownIds || [] });
+        surpriseFlow({ exclude: state.shownIds || [], profile: state.surpriseProfile });
       } else {
         recommend({ withUser: state.lastWithUser, exclude: state.shownIds || [] });
       }
