@@ -1,0 +1,310 @@
+// Netlify function: GET /api/recommend
+//
+// Modes:
+//   1) Global: ?country=CL&mood=BASE64JSON
+//      -> TMDb /discover with mood-derived filters, returns top 6
+//   2) Letterboxd: ?user=USER&country=CL&mood=BASE64JSON
+//      -> scrape watchlist, enrich, score, return top 6
+
+const UA = "Mozilla/5.0 (compatible; MoodwatchBot/0.1)";
+const LB = "https://letterboxd.com";
+const TMDB = "https://api.themoviedb.org/3";
+
+import { CURATED } from "./curated.mjs";
+
+// In-memory caches (warm for the lifetime of the function instance)
+const slugCache = new Map();
+const detailsCache = new Map();
+
+async function fetchText(url) {
+  const r = await fetch(url, { headers: { "User-Agent": UA } });
+  if (!r.ok) throw new Error(`${r.status} ${url}`);
+  return r.text();
+}
+async function fetchJson(url) {
+  const r = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!r.ok) throw new Error(`${r.status} ${url}`);
+  return r.json();
+}
+
+// ---------- Letterboxd ----------
+function extractSlugs(html) {
+  const re = /data-target-link="\/film\/([^"/]+)\/"/g;
+  const out = []; let m;
+  while ((m = re.exec(html))) out.push(m[1]);
+  return [...new Set(out)];
+}
+function pageCount(html) {
+  const re = /\/watchlist\/page\/(\d+)\//g; let max = 1, m;
+  while ((m = re.exec(html))) max = Math.max(max, parseInt(m[1], 10));
+  return max;
+}
+async function fetchWatchlistSlugs(user, maxPages = 3) {
+  const first = await fetchText(`${LB}/${user}/watchlist/`);
+  const total = Math.min(pageCount(first), maxPages);
+  let slugs = extractSlugs(first);
+  for (let p = 2; p <= total; p++) {
+    const html = await fetchText(`${LB}/${user}/watchlist/page/${p}/`);
+    slugs = slugs.concat(extractSlugs(html));
+  }
+  return [...new Set(slugs)];
+}
+async function resolveSlug(slug) {
+  if (slugCache.has(slug)) return slugCache.get(slug);
+  const html = await fetchText(`${LB}/film/${slug}/`);
+  const tmdb = html.match(/themoviedb\.org\/movie\/(\d+)/);
+  if (!tmdb) return null;
+  const data = { slug, tmdb_id: parseInt(tmdb[1], 10) };
+  slugCache.set(slug, data);
+  return data;
+}
+
+// ---------- TMDb ----------
+async function tmdbDetails(id, country, lang, apiKey) {
+  const k = `${id}:${country}:${lang}`;
+  if (detailsCache.has(k)) return detailsCache.get(k);
+  const [d, wp] = await Promise.all([
+    fetchJson(`${TMDB}/movie/${id}?api_key=${apiKey}&language=${lang}&append_to_response=keywords`),
+    fetchJson(`${TMDB}/movie/${id}/watch/providers?api_key=${apiKey}`),
+  ]);
+  const provs = (wp.results && wp.results[country]) || {};
+  const out = {
+    id,
+    title: d.title || d.original_title,
+    original_title: d.original_title,
+    year: d.release_date ? parseInt(d.release_date.slice(0, 4), 10) : null,
+    overview: d.overview,
+    runtime: d.runtime,
+    genres: (d.genres || []).map(g => g.name),
+    keywords: ((d.keywords && d.keywords.keywords) || []).map(k => k.name),
+    popularity: d.popularity,
+    vote_avg: d.vote_average,
+    vote_count: d.vote_count,
+    poster: d.poster_path ? `https://image.tmdb.org/t/p/w500${d.poster_path}` : null,
+    providers_link: provs.link || null,
+  };
+  detailsCache.set(k, out);
+  return out;
+}
+
+// Mood -> /discover filters (global mode)
+const GENRE_IDS = {
+  Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80,
+  Documentary: 99, Drama: 18, Family: 10751, Fantasy: 14, History: 36,
+  Horror: 27, Music: 10402, Mystery: 9648, Romance: 10749, ScienceFiction: 878,
+  Thriller: 53, War: 10752, Western: 37,
+};
+function moodToDiscover(mood, country, lang) {
+  const p = new URLSearchParams();
+  p.set("language", lang);
+  p.set("watch_region", country);
+  p.set("region", country);
+  p.set("include_adult", "false");
+  p.set("vote_count.gte", "200"); // baseline quality
+
+  // time -> runtime
+  if (mood.time === "short") p.set("with_runtime.lte", "95");
+  else if (mood.time === "medium") { p.set("with_runtime.gte", "90"); p.set("with_runtime.lte", "130"); }
+  else if (mood.time === "long") p.set("with_runtime.gte", "120");
+
+  const include = new Set(); const exclude = new Set();
+  // tone
+  if (mood.tone === "dark") {
+    [GENRE_IDS.Thriller, GENRE_IDS.Mystery, GENRE_IDS.Crime, GENRE_IDS.Drama].forEach(g => include.add(g));
+    [GENRE_IDS.Family, GENRE_IDS.Animation].forEach(g => exclude.add(g));
+  } else if (mood.tone === "light") {
+    [GENRE_IDS.Comedy, GENRE_IDS.Romance, GENRE_IDS.Family, GENRE_IDS.Adventure].forEach(g => include.add(g));
+    [GENRE_IDS.Horror, GENRE_IDS.War].forEach(g => exclude.add(g));
+  }
+  // energy
+  if (mood.energy === "engage") {
+    [GENRE_IDS.Drama, GENRE_IDS.Documentary, GENRE_IDS.Mystery].forEach(g => include.add(g));
+  } else if (mood.energy === "unwind") {
+    [GENRE_IDS.Comedy, GENRE_IDS.Animation, GENRE_IDS.Action].forEach(g => include.add(g));
+  }
+  // company
+  if (mood.company === "shared") {
+    [GENRE_IDS.Comedy, GENRE_IDS.Adventure, GENRE_IDS.Action].forEach(g => include.add(g));
+  } else if (mood.company === "alone") {
+    [GENRE_IDS.Drama, GENRE_IDS.Mystery].forEach(g => include.add(g));
+  }
+  // risk
+  if (mood.risk === "safe") {
+    p.set("vote_count.gte", "5000");
+    p.set("sort_by", "popularity.desc");
+  } else if (mood.risk === "discover") {
+    p.set("vote_count.gte", "200");
+    p.set("vote_count.lte", "8000");
+    p.set("vote_average.gte", "7.0");
+    p.set("sort_by", "vote_average.desc");
+  } else {
+    p.set("sort_by", "popularity.desc");
+  }
+
+  if (include.size) p.set("with_genres", [...include].join("|"));
+  if (exclude.size) p.set("without_genres", [...exclude].join(","));
+  return p;
+}
+
+// Mood scoring (Letterboxd mode)
+const ENGAGE = new Set(["Drama","Documentary","History","Mystery","War"]);
+const UNWIND = new Set(["Comedy","Animation","Family","Adventure","Action"]);
+const DARK_G = new Set(["Horror","Thriller","Crime","War","Mystery"]);
+const LIGHT_G = new Set(["Comedy","Family","Animation","Romance","Adventure"]);
+const SHARED = new Set(["Comedy","Action","Adventure","Animation","Family"]);
+const ALONE  = new Set(["Drama","Mystery","Documentary","Romance"]);
+function overlap(arr, set) {
+  if (!arr || !arr.length) return 0;
+  let h = 0; for (const x of arr) if (set.has(x)) h++;
+  return h / arr.length;
+}
+function scoreFilm(f, mood) {
+  const reasons = []; let total = 0;
+  if (f.runtime && mood.time) {
+    const ok = (mood.time === "short" && f.runtime <= 95)
+            || (mood.time === "medium" && f.runtime > 95 && f.runtime <= 130)
+            || (mood.time === "long" && f.runtime > 130);
+    if (ok) { total += 1; reasons.push("runtime"); } else total += 0.3;
+  }
+  if (mood.energy) {
+    const s = overlap(f.genres, mood.energy === "engage" ? ENGAGE : UNWIND);
+    if (s > 0) { total += s * 1.5; reasons.push("energy"); }
+  }
+  if (mood.tone) {
+    const s = overlap(f.genres, mood.tone === "dark" ? DARK_G : LIGHT_G);
+    if (s > 0) { total += s * 1.5; reasons.push("tone"); }
+  }
+  if (mood.risk) {
+    const known = (f.popularity || 0) > 20 || (f.vote_count || 0) > 5000;
+    const ok = (mood.risk === "safe" && known) || (mood.risk === "discover" && !known);
+    if (ok) { total += 0.8; reasons.push(mood.risk === "safe" ? "known" : "off-radar"); }
+  }
+  if (mood.company) {
+    const s = overlap(f.genres, mood.company === "shared" ? SHARED : ALONE);
+    if (s > 0) total += s * 0.7;
+  }
+  if ((f.vote_avg || 0) >= 7.5) { total += 0.3; reasons.push("rated"); }
+  return { score: Math.round(total * 100) / 100, reasons };
+}
+
+function justwatchUrl(film, country) {
+  if (film.providers_link) return film.providers_link;
+  const q = encodeURIComponent(film.title || film.original_title || "");
+  return `https://www.justwatch.com/${country.toLowerCase()}/buscar?q=${q}`;
+}
+
+// Curated bonus: count matching mood tags. Each match adds 1.2 to score
+// and earns the "curated" reason badge. Returns {bonus, note} or null.
+function curatedFor(tmdbId, mood, lang) {
+  const c = CURATED.find(x => x.tmdb_id === tmdbId);
+  if (!c) return null;
+  let matches = 0;
+  for (const k of Object.keys(c.tags || {})) {
+    if (mood[k] && mood[k] === c.tags[k]) matches++;
+  }
+  if (matches === 0) return null;
+  return {
+    bonus: matches * 1.2,
+    note: lang === "es" ? c.note_es : c.note_en,
+  };
+}
+
+function shape(f, country, lang, mood) {
+  const cur = curatedFor(f.id || f.tmdb_id, mood || {}, lang);
+  let score = f.score || 0;
+  let reasons = f.reasons || [];
+  let curated_note = null;
+  if (cur) {
+    score += cur.bonus;
+    reasons = ["curated", ...reasons];
+    curated_note = cur.note;
+  }
+  return {
+    id: f.id || f.tmdb_id,
+    title: f.title,
+    year: f.year,
+    overview: f.overview,
+    runtime: f.runtime,
+    genres: f.genres,
+    poster: f.poster,
+    score: Math.round(score * 100) / 100,
+    reasons,
+    curated_note,
+    tmdb: `https://www.themoviedb.org/movie/${f.id || f.tmdb_id}`,
+    justwatch: justwatchUrl(f, country),
+  };
+}
+
+export default async (req) => {
+  const url = new URL(req.url);
+  const user = (url.searchParams.get("user") || "").trim().replace(/^@/, "").toLowerCase();
+  const country = (url.searchParams.get("country") || "US").toUpperCase().slice(0, 2);
+  const lang = (url.searchParams.get("lang") || "en").slice(0, 2);
+  const moodB64 = url.searchParams.get("mood") || "e30=";
+
+  const apiKey = process.env.TMDB_API_KEY;
+  if (!apiKey) return new Response(JSON.stringify({ error: "server_misconfig" }), { status: 500 });
+
+  let mood = {};
+  try { mood = JSON.parse(Buffer.from(moodB64, "base64").toString("utf8")); } catch {}
+
+  try {
+    if (user) {
+      if (!/^[a-z0-9_-]{1,30}$/.test(user))
+        return new Response(JSON.stringify({ error: "invalid_user" }), { status: 400 });
+
+      const slugs = (await fetchWatchlistSlugs(user, 3)).slice(0, 60);
+      if (!slugs.length)
+        return new Response(JSON.stringify({ error: "empty_watchlist" }), { status: 404 });
+
+      // Resolve slugs in parallel batches
+      const resolved = [];
+      for (let i = 0; i < slugs.length; i += 8) {
+        const batch = await Promise.allSettled(slugs.slice(i, i + 8).map(resolveSlug));
+        for (const r of batch) if (r.status === "fulfilled" && r.value) resolved.push(r.value);
+      }
+      // Enrich
+      const enriched = [];
+      for (let i = 0; i < resolved.length; i += 8) {
+        const batch = await Promise.allSettled(
+          resolved.slice(i, i + 8).map(it => tmdbDetails(it.tmdb_id, country, lang, apiKey))
+        );
+        for (const r of batch) if (r.status === "fulfilled") enriched.push(r.value);
+      }
+      const ranked = enriched
+        .map(f => ({ ...f, ...scoreFilm(f, mood) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 6)
+        .map(f => shape(f, country, lang, mood));
+      return new Response(JSON.stringify({ mode: "letterboxd", films: ranked, total: enriched.length }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
+      });
+    }
+
+    // Global mode: TMDb /discover, then enrich top candidates with providers
+    const params = moodToDiscover(mood, country, lang);
+    params.set("api_key", apiKey);
+    params.set("page", "1");
+    const disc = await fetchJson(`${TMDB}/discover/movie?${params}`);
+    const candidates = (disc.results || []).slice(0, 18);
+    // Enrich top candidates with providers + full details (parallel)
+    const enriched = [];
+    for (let i = 0; i < candidates.length; i += 8) {
+      const batch = await Promise.allSettled(
+        candidates.slice(i, i + 8).map(c => tmdbDetails(c.id, country, lang, apiKey))
+      );
+      for (const r of batch) if (r.status === "fulfilled") enriched.push(r.value);
+    }
+    // Score + sort
+    const ranked = enriched
+      .map(f => ({ ...f, ...scoreFilm(f, mood) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(f => shape(f, country, lang, mood));
+    return new Response(JSON.stringify({ mode: "global", films: ranked, total: enriched.length }), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: String(e.message || e) }), { status: 500 });
+  }
+};

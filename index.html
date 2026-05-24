@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0e10">
+<title>moodwatch</title>
+<meta name="description" content="A mood-based pick. Free, no signup. Optionally personalize with your Letterboxd watchlist.">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='52'>🎞️</text></svg>">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main id="app">
+  <header>
+    <h1>moodwatch</h1>
+    <p data-i18n="tagline">A mood-based pick. Free, no signup.</p>
+  </header>
+
+  <!-- Step: quiz -->
+  <section class="step" data-step="quiz">
+    <div class="progress"><span id="prog"></span></div>
+    <h2 id="q-title"></h2>
+    <div id="q-options" class="options"></div>
+    <div class="quiz-nav">
+      <button class="ghost" id="q-back" data-i18n="back">Back</button>
+      <button class="ghost" id="q-skip" data-i18n="skip">Skip</button>
+    </div>
+  </section>
+
+  <!-- Step: optional Letterboxd personalization -->
+  <section class="step hidden" data-step="lb">
+    <h2 data-i18n="user_label">Letterboxd username (optional)</h2>
+    <div class="user-row">
+      <span class="prefix">@</span>
+      <input id="user" name="user" inputmode="latin" autocapitalize="off"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             data-i18n-attr="placeholder:user_ph">
+    </div>
+    <div class="lb-actions">
+      <button class="primary" id="use-lb" data-i18n="use_lb">Personalize with my watchlist</button>
+      <button class="ghost"  id="skip-lb" data-i18n="skip_lb">Just recommend me something</button>
+    </div>
+  </section>
+
+  <!-- Step: loading -->
+  <section class="step hidden" data-step="loading">
+    <div class="loader"></div>
+    <p id="load-msg" data-i18n="loading">Reading the vibes…</p>
+  </section>
+
+  <!-- Step: results -->
+  <section class="step hidden" data-step="results">
+    <h2 data-i18n="picks">Tonight's picks</h2>
+    <div id="cards"></div>
+    <button class="ghost" id="restart" data-i18n="restart">Start over</button>
+  </section>
+
+  <!-- Step: error -->
+  <section class="step hidden" data-step="error">
+    <h2 data-i18n="oops">Something broke</h2>
+    <p id="err-msg"></p>
+    <button class="primary" id="retry" data-i18n="retry">Try again</button>
+  </section>
+</main>
+
+<footer>
+  <a class="kofi" href="https://ko-fi.com/brmcl" target="_blank" rel="noopener">
+    ☕ <span data-i18n="support">Support moodwatch</span>
+  </a>
+  <small>
+    <span data-i18n="footer_made">Made with</span> ♥ ·
+    <a href="https://letterboxd.com" target="_blank" rel="noopener">Letterboxd</a> ·
+    <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDb</a> ·
+    <a href="https://www.justwatch.com" target="_blank" rel="noopener">JustWatch</a>
+  </small>
+</footer>
+
+<script src="./i18n.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

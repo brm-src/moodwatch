@@ -1,0 +1,24 @@
+# Editor cruft
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+venv/
+
+# Caches from spike
+cache.json
+enrich_cache.json
+
+# Secrets
+.env
+.env.*
+
+# Node / Netlify (legacy from initial scaffold)
+node_modules/
+.netlify/
