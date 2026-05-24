@@ -35,14 +35,41 @@ function decodeMood(b64) {
 }
 
 function justwatchUrl(film, country) {
-  // Always use JustWatch search — TMDb's providers_link 404s often
+  // Always use JustWatch search — TMDb's providers_link and locale paths 404 often.
   const c = (country || "us").toLowerCase();
-  // Use title + year for better matching; strip special chars
-  const title = (film.title || "").replace(/[^\w\s-]/g, "").trim();
+  // Spanish-locale JustWatch uses /buscar, not /search. CL was the reported 404.
+  const spanishSearch = new Set(["cl", "es", "mx", "ar", "co", "pe", "uy", "ec"]);
+  const searchPath = spanishSearch.has(c) ? "buscar" : "search";
+  // Use title + year for better matching; strip special chars but preserve unicode letters.
+  const title = (film.title || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .trim();
   const year = film.release_date ? new Date(film.release_date).getFullYear() : "";
   const query = year ? `${title} ${year}` : title;
   const q = encodeURIComponent(query);
-  return `https://www.justwatch.com/${c}/search?q=${q}`;
+  return `https://www.justwatch.com/${c}/${searchPath}?content_type=movie&q=${q}`;
+}
+
+function fitScore(film, mood = {}) {
+  const genres = new Set([...(film.genres || []), ...(film.genre_ids || [])].map(x => String(x).toLowerCase()));
+  let s = 0;
+  const has = (...xs) => xs.some(x => genres.has(String(x).toLowerCase()));
+  if (mood.tone === "dark" && has("27", "53", "9648", "80", "horror", "thriller", "mystery", "crime")) s += 2;
+  if (mood.tone === "light" && has("35", "10749", "12", "16", "14", "comedy", "romance", "adventure", "animation", "fantasy")) s += 2;
+  if (mood.energy === "engage" && has("28", "53", "9648", "12", "action", "thriller", "mystery", "adventure")) s += 1.5;
+  if (mood.energy === "unwind" && has("35", "10749", "18", "16", "comedy", "romance", "drama", "animation")) s += 1;
+  if (mood.first_act === "thriller_horror" && has("27", "53", "9648", "horror", "thriller", "mystery")) s += 2;
+  if ((mood.trust === "horror" || mood.first_act === "thriller_horror") && !has("27", "53", "9648", "horror", "thriller", "mystery")) s -= 4;
+  if ((mood.trust === "horror" || mood.tone === "dark") && has("10751", "16", "family", "animation")) s -= 2.5;
+  if (mood.first_act === "drama_romance" && has("18", "10749", "drama", "romance")) s += 2;
+  if (mood.first_act === "action_adventure" && has("28", "12", "action", "adventure")) s += 2;
+  if (mood.first_act === "fantasy_scifi" && has("14", "878", "fantasy", "scifi", "science fiction")) s += 2;
+  if (mood.runtime === "short" && film.runtime && film.runtime <= 95) s += 1.5;
+  if (mood.runtime === "medium" && film.runtime && film.runtime >= 90 && film.runtime <= 125) s += 1;
+  if (mood.popularity === "low") s += Math.max(0, 1.4 - Math.min((film.popularity || 0) / 70, 1.4));
+  return s;
 }
 
 function moodSummary(mood, lang = "en") {
@@ -125,13 +152,36 @@ async function recommend(req, env, ctx) {
     }
   }
 
+  const today = new Date().toISOString().slice(0, 10);
   const candidateIds = new Set(candidates.map(c => c.id));
   const missingListIds = [...listIds.keys()].filter(id => !candidateIds.has(id));
   for (let i = missingListIds.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [missingListIds[i], missingListIds[j]] = [missingListIds[j], missingListIds[i]];
   }
-  const extraFromLists = missingListIds.slice(0, 12).map(id => ({ id, _list: listIds.get(id) || null, _listOnly: true }));
+  const extraFromLists = (await Promise.all(missingListIds.slice(0, 6).map(id =>
+    tmdbDetails(env, id, lang).then(d => ({
+      id: d.id,
+      title: d.title,
+      release_date: d.release_date,
+      vote_average: d.vote_average,
+      vote_count: d.vote_count,
+      popularity: d.popularity,
+      genre_ids: (d.genres || []).map(g => g.id),
+      genres: (d.genres || []).map(g => g.name?.toLowerCase()),
+      poster_path: d.poster_path,
+      overview: d.overview,
+      runtime: d.runtime,
+      _list: listIds.get(id) || null,
+      _listOnly: true,
+    })).catch(() => null)
+  ))).filter(f => {
+    if (!f) return false;
+    if (f.release_date && f.release_date > today) return false;
+    if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
+    if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+    return true;
+  });
 
   const allCandidates = [
     ...candidates.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
@@ -158,7 +208,6 @@ async function recommend(req, env, ctx) {
   }
 
   // Drop excluded ids (re-roll case) and future releases
-  const today = new Date().toISOString().slice(0, 10);
   pool = pool.filter(f => !excludeSet.has(f.id) && (!f.release_date || f.release_date <= today));
 
   // 3. Score with curated + list boost
@@ -167,10 +216,12 @@ async function recommend(req, env, ctx) {
     const listName = f._list;
     const score =
       (f.vote_average || (f._listOnly ? 7 : 0)) * 1.5 +
-      Math.min((f.popularity || 0) / 30, 4) +
+      Math.min((f.popularity || 0) / 35, 3.2) +
+      fitScore(f, mood) +
       (cur ? 6 : 0) +
-      (listName ? 4 : 0) -
-      (mood.popularity === "low" ? Math.min((f.popularity || 0) / 50, 2) : 0);
+      (listName ? 3 : 0) -
+      (mood.popularity === "low" ? Math.min((f.popularity || 0) / 42, 3) : 0) +
+      (Math.random() * 0.9);
     return { ...f, _score: score, _curated: cur || null, _list: listName };
   }).sort((a, b) => b._score - a._score);
 
@@ -194,10 +245,10 @@ async function recommend(req, env, ctx) {
       if (!top.some(x => x.id === item.id)) top.push(item);
     }
   };
-  pushUnique(shuffleInPlace([...curatedHits]), 1);
-  pushUnique(shuffleInPlace(listHits.slice(0, 24)), matched.length ? 4 : 1);
-  pushUnique(shuffleInPlace(otherHits.slice(0, 30)), 4);
-  const enriched = await Promise.all(top.slice(0, 4).map(async (f) => {
+  pushUnique(curatedHits.slice(0, 3), 2);
+  pushUnique(listHits.slice(0, 24), matched.length ? 6 : 3);
+  pushUnique(otherHits.slice(0, 40), 8);
+  const enrichedPool = await Promise.all(top.slice(0, 8).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       tmdbProviders(env, f.id, country),
       tmdbCredits(env, f.id),
@@ -219,6 +270,13 @@ async function recommend(req, env, ctx) {
       reason: pickReason({ ...f, runtime: details.runtime || f.runtime }, mood, lang),
     };
   }));
+
+  const enriched = enrichedPool.filter(f => {
+    if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
+    if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+    if (mood.runtime === "long" && f.runtime && f.runtime < 110) return false;
+    return true;
+  }).slice(0, 4);
 
   return { films: enriched, lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matched.map(m => m.list.name) };
 }
@@ -313,16 +371,18 @@ async function surprise(req, env, ctx) {
     return true;
   });
 
+  pool = pool.map(f => ({
+    ...f,
+    _score:
+      (f.vote_average || 0) * 1.4 +
+      Math.min((f.popularity || 0) / 45, 2.5) +
+      fitScore(f, surpriseMood) +
+      (f._list ? 3 : 0) +
+      (curatedFor(f.id) ? 4 : 0) +
+      (Math.random() * 1.2),
+  })).sort((a, b) => b._score - a._score);
   const listed = pool.filter(f => f._list);
   const unlisted = pool.filter(f => !f._list);
-  for (let i = listed.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [listed[i], listed[j]] = [listed[j], listed[i]];
-  }
-  for (let i = unlisted.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [unlisted[i], unlisted[j]] = [unlisted[j], unlisted[i]];
-  }
   const top = listed.length >= 4 ? listed.slice(0, 4) : [...listed, ...unlisted].slice(0, 4);
 
   const enriched = await Promise.all(top.map(async (f) => {

@@ -146,20 +146,6 @@ header.top {
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
 }
-.hero .hero-fig {
-  font-family: var(--font-body);
-  font-size: var(--t-mono);
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0;
-  min-height: 1em;
-  order: 3;
-  align-self: flex-start;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-}
-.hero .hero-fig:empty { display: none; }
 .hero h1 em {
   font-style: italic;
   font-weight: 400;
@@ -555,7 +541,12 @@ header.top {
   background: var(--paper-2);
   display: block;
 }
-.card .meta { display: flex; flex-direction: column; gap: var(--s-1); }
+.card .meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
 .card-rank {
   font-family: var(--font-body);
   font-size: var(--t-mono);
@@ -572,6 +563,9 @@ header.top {
   letter-spacing: -0.015em;
   color: var(--ink);
   font-variation-settings: "opsz" 36;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
 }
 .card h3 .yr {
   font-style: italic;
@@ -583,6 +577,7 @@ header.top {
   font-style: italic;
   font-size: var(--t-body);
   color: var(--ink-soft);
+  overflow-wrap: anywhere;
 }
 .card .specs {
   font-family: var(--font-body);
@@ -591,6 +586,7 @@ header.top {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   margin-top: var(--s-1);
+  overflow-wrap: anywhere;
 }
 .card .note {
   font-family: var(--font-display);
@@ -696,19 +692,6 @@ footer.bottom small {
 }
 footer.bottom small a { color: var(--paper-3); text-decoration: none; }
 footer.bottom small a:hover { color: var(--accent); }
-.credit-still {
-  font-family: var(--font-body);
-  font-size: 10px;
-  color: #6e6f5e;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  display: none;
-}
-/* Only show credit-still on desktop and NOT during hero */
-@media (min-width: 768px) {
-  .credit-still { display: block; }
-}
-body.on-hero .credit-still { display: none !important; }
 
 .editor-badge {
   display: inline-block;
@@ -775,6 +758,6 @@ body.on-hero .credit-still { display: none !important; }
 
 @media (max-width: 380px) {
   .section { padding: var(--s-4) var(--s-3) var(--s-3); }
-  .card { grid-template-columns: 96px 1fr; gap: var(--s-2); }
+  .card { grid-template-columns: 88px minmax(0, 1fr); gap: var(--s-2); }
   .card h3 { font-size: 1.25rem; }
 }

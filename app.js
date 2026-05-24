@@ -445,10 +445,22 @@
     "phrase",
   ];
 
-  // Build a fresh quiz: 6 random categories + ink last (7 total)
+  function takeRandom(keys, n) {
+    return [...keys].sort(() => Math.random() - 0.5).slice(0, n);
+  }
+
+  // Build a fresh quiz with a spine. Before this it was pure random, so
+  // sessions could ask six atmospheric questions and miss basic constraints
+  // like runtime/language/taste. Keep the ritual feel, but always collect the
+  // axes that materially improve recommendations.
   function buildSession() {
-    const shuffled = [...ROTATING].sort(() => Math.random() - 0.5).slice(0, 6);
-    return [...shuffled.map(k => BANK[k]), BANK.ink];
+    const spine = ["state", "intent"];
+    const format = takeRandom(["runtime", "language_pref"], 1);
+    const taste = takeRandom(["depth", "risk_taste", "director_vibe", "first_act", "trust", "avoid", "rewatch_taste"], 2);
+    const texture = takeRandom(["weather", "light", "texture", "place", "sound", "temperature", "memory", "want", "pace", "opening"], 1);
+    const wild = takeRandom(["scene", "door", "decade", "smell", "window", "object", "body", "phrase"], 1);
+    const keys = [...new Set([...spine, ...taste, ...texture, ...format, ...wild])].slice(0, 6);
+    return [...keys.map(k => BANK[k]), BANK.ink];
   }
 
   let QUIZ = buildSession();
@@ -1069,8 +1081,6 @@
       if (!Array.isArray(list) || !list.length) return;
       const pick = list[Math.floor(Math.random() * list.length)];
       const hero = document.getElementById("hero");
-      const fig = document.getElementById("hero-fig");
-      const credit = document.getElementById("hero-credit");
       if (hero) {
         const img = new Image();
         img.onload = () => {
@@ -1079,8 +1089,6 @@
         };
         img.src = pick.file;
       }
-      if (fig)    fig.textContent    = pick.caption;
-      if (credit) credit.textContent = `Hero · ${pick.caption} · Public domain`;
     } catch {}
   }
 
