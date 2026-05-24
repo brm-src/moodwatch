@@ -65,7 +65,8 @@ function genreSet(mood) {
 
 function runtimeRange(mood) {
   const m = mood.runtime;
-  if (m === "short")  return { "with_runtime.lte": 90 };
+  // user-asked runtime overrides default min of 75
+  if (m === "short")  return { "with_runtime.gte": 75, "with_runtime.lte": 90 };
   if (m === "medium") return { "with_runtime.gte": 90, "with_runtime.lte": 120 };
   if (m === "long")   return { "with_runtime.gte": 120, "with_runtime.lte": 180 };
   if (m === "epic")   return { "with_runtime.gte": 150 };
@@ -118,10 +119,13 @@ function voteFilters(mood) {
 }
 
 export async function discoverByMood(env, mood, language) {
+  const today = new Date().toISOString().slice(0, 10);
   const params = {
     sort_by: "vote_average.desc",
     "vote_count.gte": 800,        // raised from 200 to filter out fresh-release noise
     "vote_average.gte": 6.5,      // baseline quality
+    "with_runtime.gte": 75,       // drop shorts / TV specials
+    "primary_release_date.lte": today, // already-released only
     include_adult: "false",
     page: 1,
     ...genreSet(mood),
