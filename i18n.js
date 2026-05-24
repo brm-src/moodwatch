@@ -1,85 +1,189 @@
-// i18n: detect browser language, expose t() and apply data-i18n attrs.
+// moodwatch — i18n. Auto-detects EN/ES from navigator.language.
 const STRINGS = {
   en: {
-    tagline: "A mood-based pick. Free, no signup.",
-    user_label: "Letterboxd username (optional)",
-    user_ph: "your_username",
-    use_lb: "Personalize with my watchlist",
-    skip_lb: "Just recommend me something",
-    next: "Next",
+    // chrome
+    kicker: "A ritual, not a form",
     back: "Back",
     skip: "Skip",
-    loading: "Reading the vibes…",
-    loading_lb: "Reading your watchlist… this may take a few seconds.",
-    picks: "Tonight's picks",
-    no_picks: "Couldn't find a good match. Try different moods.",
+    next: "Next",
+    continue: "Continue",
     restart: "Start over",
-    oops: "Something broke",
     retry: "Try again",
-    err_invalid_user: "That username doesn't look right.",
-    err_empty: "Watchlist is empty or private.",
-    err_generic: "Server error. Try again in a bit.",
-    where_to_watch: "Where to watch",
-    on_tmdb: "On TMDb",
     support: "Support moodwatch",
-    footer_made: "Made with",
-    // quiz
-    q_time_t: "How much time do you have?",
-    q_time_short: "Under 95 min",
-    q_time_medium: "95–130 min",
-    q_time_long: "130 min+",
-    q_energy_t: "What kind of headspace?",
-    q_energy_engage: "I want to engage",
-    q_energy_unwind: "I want to unwind",
-    q_tone_t: "Tone?",
-    q_tone_dark: "Dark / heavy",
-    q_tone_light: "Light / warm",
-    q_company_t: "Watching with…?",
-    q_company_alone: "Alone",
-    q_company_shared: "With someone",
-    q_risk_t: "Known territory or new?",
-    q_risk_safe: "Something safe",
-    q_risk_discover: "Surprise me",
+    footer_made: "Built with",
+
+    // step labels
+    vibe_label: "Your vibe",
+    vibe_lead: "Now, the film.",
+    vibe_neutral: "Open to anything",
+    lb_label: "Optional",
+    lb_title: "Personalize <em>with your watchlist?</em>",
+    lb_lead: "If you have Letterboxd, I'll pick from films you already wanted to see.",
+    use_lb: "Use my watchlist",
+    skip_lb: "Just recommend something",
+    user_ph: "your_username",
+    picks_label: "Tonight",
+    pick_n: "Pick {n}",
+    no_picks: "Nothing landed. Try a different vibe.",
+    oops_label: "Trouble",
+    oops: "Something <em>broke.</em>",
+    loading: "Reading the room…",
+    loading_lb: "Reading your watchlist… give me a moment.",
+
+    // results
+    where_to_watch: "Where to watch",
+    on_tmdb: "Details",
+
+    // errors
+    err_invalid_user: "That username doesn't look right.",
+    err_empty_watchlist: "Watchlist is empty or private.",
+    err_generic: "Server error. Try again in a bit.",
+
+    // q numbering
+    q_num: "{n} / {tot}",
+
+    // Q1 — door
+    q_door_t: "Choose a <em>door.</em>",
+    q_door_intensity: "A red door at the end of a dark hallway.",
+    q_door_mystery:   "An old door in an abandoned house.",
+    q_door_fantasy:   "A bright door floating in the sky.",
+    q_door_intimacy:  "An apartment door with warm light underneath.",
+
+    // Q2 — state
+    q_state_t: "How are you <em>tonight?</em>",
+    q_state_lead: "No filter. Just the truth.",
+    q_state_drained:  "Drained. Day was a lot.",
+    q_state_restless: "Restless. Need something.",
+    q_state_pensive:  "Pensive. Sitting with things.",
+    q_state_good:     "Good. Open to anything.",
+
+    // Q3 — scene
+    q_scene_t: "Which scene <em>pulls?</em>",
+    q_scene_road:      "A car driving at night with no destination.",
+    q_scene_city:      "A vast city where nobody knows anyone.",
+    q_scene_house:     "A quiet house hiding something strange.",
+    q_scene_dialogue:  "Two people talking until everything changes.",
+    q_scene_survival:  "A group trying to survive something.",
+    q_scene_discovery: "Someone finding out a truth they didn't want.",
+
+    // Q4 — ink
+    q_ink_t: "Pick the <em>ink.</em>",
+    q_ink_dark:  "the deep one",
+    q_ink_light: "the open one",
+
+    // Q5 — intent
+    q_intent_t: "And from the film, <em>what?</em>",
+    q_intent_lead: "Be specific. The vaguer you are, the more generic the pick.",
+    q_intent_escape:  "I want to escape.",
+    q_intent_feel:    "I want to feel something.",
+    q_intent_think:   "I want something to chew on.",
+    q_intent_company: "I want company. Warmth.",
+
+    // Q6 — depth
+    q_depth_t: "How <em>deep?</em>",
+    q_depth_lead: "Where do you want to land at the end.",
+    q_depth_fun:        "I just want to have a good time.",
+    q_depth_warm:       "Some emotion, but no destruction.",
+    q_depth_thoughtful: "I want to be left thinking.",
+    q_depth_uneasy:     "Elegant discomfort.",
+    q_depth_ruined:     "Ruin my night, but ruin it well.",
+
+    // Q7 — phrase
+    q_phrase_t: "Tonight I want something that <em>feels like…</em>",
+    q_phrase_ph: "(write it in a few words)",
+    q_phrase_c1: "a strange dream",
+    q_phrase_c2: "a rainy night",
+    q_phrase_c3: "an emotional gut-punch",
+    q_phrase_c4: "beautiful but sad",
+    q_phrase_c5: "low effort, high reward",
+    q_phrase_c6: "end-of-the-world vibes",
   },
+
   es: {
-    tagline: "Una recomendación según tu mood. Gratis, sin registro.",
-    user_label: "Usuario de Letterboxd (opcional)",
-    user_ph: "tu_usuario",
-    use_lb: "Personaliza con mi watchlist",
-    skip_lb: "Solo recomiéndame algo",
-    next: "Siguiente",
+    kicker: "Un ritual, no un formulario",
     back: "Atrás",
     skip: "Saltar",
-    loading: "Leyendo la onda…",
-    loading_lb: "Leyendo tu watchlist… puede tomar unos segundos.",
-    picks: "Tus picks",
-    no_picks: "No encontré un buen match. Prueba otras combinaciones.",
-    restart: "Empezar de nuevo",
-    oops: "Algo se rompió",
+    next: "Siguiente",
+    continue: "Continuar",
+    restart: "Volver a empezar",
     retry: "Reintentar",
-    err_invalid_user: "Ese usuario no se ve bien.",
-    err_empty: "La watchlist está vacía o es privada.",
-    err_generic: "Error del servidor. Prueba de nuevo en un momento.",
-    where_to_watch: "Dónde verla",
-    on_tmdb: "Ver en TMDb",
     support: "Apoya moodwatch",
     footer_made: "Hecho con",
-    q_time_t: "¿Cuánto tiempo tienes?",
-    q_time_short: "Menos de 95 min",
-    q_time_medium: "95–130 min",
-    q_time_long: "Más de 130 min",
-    q_energy_t: "¿Qué cabeza tienes?",
-    q_energy_engage: "Quiero engancharme",
-    q_energy_unwind: "Quiero desconectar",
-    q_tone_t: "¿Qué tono?",
-    q_tone_dark: "Oscuro / pesado",
-    q_tone_light: "Liviano / cálido",
-    q_company_t: "¿Vas a verla…?",
-    q_company_alone: "Solo/a",
-    q_company_shared: "Acompañado/a",
-    q_risk_t: "¿Algo conocido o nuevo?",
-    q_risk_safe: "Algo seguro",
-    q_risk_discover: "Sorpréndeme",
+
+    vibe_label: "Tu vibra",
+    vibe_lead: "Ahora, la película.",
+    vibe_neutral: "Abierta a cualquier cosa",
+    lb_label: "Opcional",
+    lb_title: "¿Personalizo <em>con tu watchlist?</em>",
+    lb_lead: "Si tienes Letterboxd, elijo entre películas que ya querías ver.",
+    use_lb: "Usar mi watchlist",
+    skip_lb: "Solo recomiéndame algo",
+    user_ph: "tu_usuario",
+    picks_label: "Esta noche",
+    pick_n: "Pick {n}",
+    no_picks: "Nada cuajó. Prueba otra vibra.",
+    oops_label: "Problema",
+    oops: "Algo se <em>rompió.</em>",
+    loading: "Leyendo el ambiente…",
+    loading_lb: "Leyendo tu watchlist… dame un momento.",
+
+    where_to_watch: "Dónde verla",
+    on_tmdb: "Detalles",
+
+    err_invalid_user: "Ese usuario no se ve bien.",
+    err_empty_watchlist: "Tu watchlist está vacía o es privada.",
+    err_generic: "Error del servidor. Prueba de nuevo en un momento.",
+
+    q_num: "{n} / {tot}",
+
+    q_door_t: "Elige una <em>puerta.</em>",
+    q_door_intensity: "Una puerta roja al fondo de un pasillo oscuro.",
+    q_door_mystery:   "Una puerta vieja en una casa abandonada.",
+    q_door_fantasy:   "Una puerta brillante flotando en el cielo.",
+    q_door_intimacy:  "La puerta de un departamento con luz cálida abajo.",
+
+    q_state_t: "¿Cómo estás <em>esta noche?</em>",
+    q_state_lead: "Sin filtro. La verdad nomás.",
+    q_state_drained:  "Vaciada. El día pesó.",
+    q_state_restless: "Inquieta. Necesito algo.",
+    q_state_pensive:  "Pensativa. Rumiando cosas.",
+    q_state_good:     "Bien. Abierta a lo que sea.",
+
+    q_scene_t: "¿Qué escena te <em>tira?</em>",
+    q_scene_road:      "Un auto manejando de noche sin destino.",
+    q_scene_city:      "Una ciudad enorme donde nadie se conoce.",
+    q_scene_house:     "Una casa tranquila con algo raro escondido.",
+    q_scene_dialogue:  "Dos personas hablando hasta que todo cambia.",
+    q_scene_survival:  "Un grupo tratando de sobrevivir a algo.",
+    q_scene_discovery: "Alguien descubriendo una verdad que no quería saber.",
+
+    q_ink_t: "Elige la <em>tinta.</em>",
+    q_ink_dark:  "la profunda",
+    q_ink_light: "la abierta",
+
+    q_intent_t: "Y de la película, <em>¿qué quieres?</em>",
+    q_intent_lead: "Sé específica. Mientras más vaga, más genérica la recomendación.",
+    q_intent_escape:  "Quiero escapar.",
+    q_intent_feel:    "Quiero sentir algo.",
+    q_intent_think:   "Quiero algo para masticar.",
+    q_intent_company: "Quiero compañía. Calor.",
+
+    q_depth_t: "¿Qué tan <em>profundo?</em>",
+    q_depth_lead: "Dónde quieres aterrizar al final.",
+    q_depth_fun:        "Solo quiero pasarla bien.",
+    q_depth_warm:       "Algo con emoción, pero sin destrucción.",
+    q_depth_thoughtful: "Quiero quedar pensando.",
+    q_depth_uneasy:     "Incomodidad elegante.",
+    q_depth_ruined:     "Arruíname la noche, pero bien.",
+
+    q_phrase_t: "Esta noche quiero algo que se <em>sienta como…</em>",
+    q_phrase_ph: "(escríbelo en pocas palabras)",
+    q_phrase_c1: "un sueño raro",
+    q_phrase_c2: "una noche de lluvia",
+    q_phrase_c3: "un golpe emocional",
+    q_phrase_c4: "bonito pero triste",
+    q_phrase_c5: "algo que no me haga pensar mucho",
+    q_phrase_c6: "vibra de fin del mundo",
   },
 };
 
@@ -90,14 +194,13 @@ function detectLang() {
 const LANG = detectLang();
 const T = STRINGS[LANG];
 window.LANG = LANG;
-window.t = (key) => T[key] ?? STRINGS.en[key] ?? key;
-
+window.t = (key) => (T[key] !== undefined ? T[key] : (STRINGS.en[key] !== undefined ? STRINGS.en[key] : key));
 document.documentElement.lang = LANG;
 
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const k = el.getAttribute("data-i18n");
-    el.textContent = window.t(k);
+    el.innerHTML = window.t(k);
   });
   document.querySelectorAll("[data-i18n-attr]").forEach(el => {
     const spec = el.getAttribute("data-i18n-attr");
