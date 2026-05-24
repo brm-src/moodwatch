@@ -123,22 +123,11 @@ async function recommend(req, env, ctx) {
 
   const candidateIds = new Set(candidates.map(c => c.id));
   const missingListIds = [...listIds.keys()].filter(id => !candidateIds.has(id));
-  const extraFromLists = (await Promise.all(missingListIds.slice(0, 36).map(id =>
-    tmdbDetails(env, id, lang).then(d => ({
-      id: d.id,
-      title: d.title,
-      release_date: d.release_date,
-      vote_average: d.vote_average,
-      vote_count: d.vote_count,
-      popularity: d.popularity,
-      genre_ids: (d.genres || []).map(g => g.id),
-      genres: (d.genres || []).map(g => g.name?.toLowerCase()),
-      poster_path: d.poster_path,
-      overview: d.overview,
-      runtime: d.runtime,
-      _list: listIds.get(id) || null,
-    })).catch(() => null)
-  ))).filter(Boolean);
+  for (let i = missingListIds.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [missingListIds[i], missingListIds[j]] = [missingListIds[j], missingListIds[i]];
+  }
+  const extraFromLists = missingListIds.slice(0, 12).map(id => ({ id, _list: listIds.get(id) || null, _listOnly: true }));
 
   const allCandidates = [
     ...candidates.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
@@ -172,41 +161,38 @@ async function recommend(req, env, ctx) {
     const cur = curatedFor(f.id);
     const listName = f._list;
     const score =
-      (f.vote_average || 0) * 1.5 +
+      (f.vote_average || (f._listOnly ? 7 : 0)) * 1.5 +
       Math.min((f.popularity || 0) / 30, 4) +
       (cur ? 6 : 0) +
-      (listName ? 2.5 : 0) -
+      (listName ? 4 : 0) -
       (mood.popularity === "low" ? Math.min((f.popularity || 0) / 50, 2) : 0);
     return { ...f, _score: score, _curated: cur || null, _list: listName };
   }).sort((a, b) => b._score - a._score);
 
-  // Always pull every curated item that survived filters into the front of the pool
-  const curatedHits = ranked.filter(f => f._curated);
-  const otherHits   = ranked.filter(f => !f._curated);
+  // Prefer editorial list hits when a mood clearly matches a list; TMDb discover fills gaps.
+  const curatedHits = ranked.filter(f => f._curated && (!matched.length || f._list));
+  const listHits = ranked.filter(f => f._list && !f._curated);
+  const otherHits = ranked.filter(f => !f._curated && !f._list);
 
-  // Pick 4: 1 curated (if any) + 3 random from top 30 of the rest.
-  // If no curated, 4 random from top 30.
-  const TOP_N = Math.min(30, otherHits.length);
-  const top30 = otherHits.slice(0, TOP_N);
-  for (let i = top30.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [top30[i], top30[j]] = [top30[j], top30[i]];
-  }
-
-  let top = [];
-  if (curatedHits.length > 0) {
-    // randomize curated order too
-    const curShuffled = [...curatedHits];
-    for (let i = curShuffled.length - 1; i > 0; i--) {
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [curShuffled[i], curShuffled[j]] = [curShuffled[j], curShuffled[i]];
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    top.push(curShuffled[0]);
-    top.push(...top30.slice(0, 3));
-  } else {
-    top = top30.slice(0, 4);
+    return arr;
   }
-  const enriched = await Promise.all(top.map(async (f) => {
+
+  const top = [];
+  const pushUnique = (items, max) => {
+    for (const item of items) {
+      if (top.length >= max) break;
+      if (!top.some(x => x.id === item.id)) top.push(item);
+    }
+  };
+  pushUnique(shuffleInPlace([...curatedHits]), 1);
+  pushUnique(shuffleInPlace(listHits.slice(0, 24)), matched.length ? 3 : 1);
+  pushUnique(shuffleInPlace(otherHits.slice(0, 30)), 4);
+  const enriched = await Promise.all(top.slice(0, 4).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       tmdbProviders(env, f.id, country),
       tmdbCredits(env, f.id),
@@ -214,14 +200,14 @@ async function recommend(req, env, ctx) {
     ]);
     return {
       id: f.id,
-      title: f.title,
-      year: (f.release_date || "").slice(0, 4),
+      title: f.title || details.title,
+      year: (f.release_date || details.release_date || "").slice(0, 4),
       director: credits.director || null,
       runtime: details.runtime || null,
-      genres: f.genres || [],
-      poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
-      overview: f.overview || null,
-      justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
+      genres: f.genres || (details.genres || []).map(g => g.name?.toLowerCase()),
+      poster: (f.poster_path || details.poster_path) ? `${tmdbImageBase()}w342${f.poster_path || details.poster_path}` : null,
+      overview: f.overview || details.overview || null,
+      justwatch: justwatchUrl({ title: f.title || details.title, providers_link: providers.link }, country),
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
@@ -280,7 +266,12 @@ async function surprise(req, env, ctx) {
   for (const m of matched) {
     for (const id of (m.list.ids || [])) if (!listIds.has(id)) listIds.set(id, m.list.name);
   }
-  const extraFromLists = (await Promise.all([...listIds.keys()].slice(0, 18).map(id =>
+  const shuffledListIds = [...listIds.keys()];
+  for (let i = shuffledListIds.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledListIds[i], shuffledListIds[j]] = [shuffledListIds[j], shuffledListIds[i]];
+  }
+  const extraFromLists = (await Promise.all(shuffledListIds.slice(0, 8).map(id =>
     tmdbDetails(env, id, lang).then(d => ({
       id: d.id,
       title: d.title,
@@ -355,24 +346,24 @@ async function surprise(req, env, ctx) {
 
   return { films: enriched, mode: "surprise", profile, why: moodSummary(surpriseMood, lang), matched_lists: matched.map(m => m.list.name) };
 }
-
 async function verifyCurated(req, env) {
   const url = new URL(req.url);
   const max = Math.min(parseInt(url.searchParams.get("max") || "40", 10), 50);
   const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
   const out = [];
   const seen = new Set();
-  for (const c of CURATED.slice(offset, offset + max)) {
+  const slice = CURATED.slice(offset, offset + max);
+  for (const c of slice) {
     if (seen.has(c.id)) continue;
     seen.add(c.id);
     try {
       const d = await tmdbDetails(env, c.id, "en-US");
-      out.push({ id: c.id, title: d.title, year: (d.release_date || "").slice(0, 4), note: c.note });
+      out.push({ id: c.id, title: d.title, original_title: d.original_title, year: (d.release_date || "").slice(0, 4), note: c.note });
     } catch (e) {
-      out.push({ id: c.id, error: String(e?.message || e), note: c.note });
+      out.push({ id: c.id, error: String(e?.message || e) });
     }
   }
-  return { offset, count: out.length, total: CURATED.length, items: out };
+  return { offset, max, count: out.length, total: CURATED.length, items: out };
 }
 
 export default {

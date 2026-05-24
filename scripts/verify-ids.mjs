@@ -43,4 +43,14 @@ for (const list of LISTS) {
   assert(list.slug && list.name && list.signature && Array.isArray(list.ids), `malformed list ${list.slug || list.name}`);
   assert(list.ids.length >= 8, `list ${list.slug} too thin`);
 }
+const priorityMinimums = {
+  'latam-pulse': 55,
+  'terror-sin-jumpscares': 50,
+  'rainy-night-cinema': 45,
+  'sunday-anxiety': 45,
+};
+for (const [slug, min] of Object.entries(priorityMinimums)) {
+  const list = LISTS.find(l => l.slug === slug);
+  assert(list && list.ids.length >= min, `priority list ${slug} needs >=${min}, got ${list?.ids?.length || 0}`);
+}
 console.log(`id validation ok: ${new Set(all).size} unique ids, ${LISTS.length} lists, ${Object.keys(CURATED_GROUPS).length} curated buckets`);
