@@ -324,6 +324,103 @@
         { value: "warm_anim",    labelKey: "q_trust_animation" },
       ],
     },
+    time_of_day: {
+      key: "time_of_day", kind: "real", titleKey: "q_tod_t",
+      options: [
+        { value: "dawn",      labelKey: "q_tod_dawn"      },
+        { value: "morning",   labelKey: "q_tod_morning"   },
+        { value: "noon",      labelKey: "q_tod_noon"      },
+        { value: "afternoon", labelKey: "q_tod_afternoon" },
+        { value: "dusk",      labelKey: "q_tod_dusk"      },
+        { value: "night",     labelKey: "q_tod_night"     },
+        { value: "small_hours", labelKey: "q_tod_small_hours" },
+      ],
+    },
+    garment: {
+      key: "garment", kind: "real", titleKey: "q_garment_t",
+      options: [
+        { value: "trench",     labelKey: "q_garment_trench"     },
+        { value: "sweater",    labelKey: "q_garment_sweater"    },
+        { value: "leather",    labelKey: "q_garment_leather"    },
+        { value: "white_shirt",labelKey: "q_garment_white_shirt"},
+        { value: "robe",       labelKey: "q_garment_robe"       },
+        { value: "naked",      labelKey: "q_garment_naked"      },
+      ],
+    },
+    food: {
+      key: "food", kind: "real", titleKey: "q_food_t",
+      options: [
+        { value: "ramen",   labelKey: "q_food_ramen"   },
+        { value: "wine",    labelKey: "q_food_wine"    },
+        { value: "fries",   labelKey: "q_food_fries"   },
+        { value: "fruit",   labelKey: "q_food_fruit"   },
+        { value: "bread",   labelKey: "q_food_bread"   },
+        { value: "nothing", labelKey: "q_food_nothing" },
+      ],
+    },
+    drink: {
+      key: "drink", kind: "real", titleKey: "q_drink_t",
+      options: [
+        { value: "coffee",  labelKey: "q_drink_coffee"  },
+        { value: "wine",    labelKey: "q_drink_wine"    },
+        { value: "whisky",  labelKey: "q_drink_whisky"  },
+        { value: "water",   labelKey: "q_drink_water"   },
+        { value: "tea",     labelKey: "q_drink_tea"     },
+        { value: "beer",    labelKey: "q_drink_beer"    },
+      ],
+    },
+    instrument: {
+      key: "instrument", kind: "real", titleKey: "q_instrument_t",
+      options: [
+        { value: "piano",   labelKey: "q_instrument_piano"   },
+        { value: "guitar",  labelKey: "q_instrument_guitar"  },
+        { value: "synth",   labelKey: "q_instrument_synth"   },
+        { value: "strings", labelKey: "q_instrument_strings" },
+        { value: "drums",   labelKey: "q_instrument_drums"   },
+        { value: "voice",   labelKey: "q_instrument_voice"   },
+      ],
+    },
+    transport: {
+      key: "transport", kind: "real", titleKey: "q_transport_t",
+      options: [
+        { value: "walking", labelKey: "q_transport_walking" },
+        { value: "car",     labelKey: "q_transport_car"     },
+        { value: "train",   labelKey: "q_transport_train"   },
+        { value: "boat",    labelKey: "q_transport_boat"    },
+        { value: "bike",    labelKey: "q_transport_bike"    },
+        { value: "running", labelKey: "q_transport_running" },
+      ],
+    },
+    season: {
+      key: "season", kind: "real", titleKey: "q_season_t",
+      options: [
+        { value: "spring", labelKey: "q_season_spring" },
+        { value: "summer", labelKey: "q_season_summer" },
+        { value: "autumn", labelKey: "q_season_autumn" },
+        { value: "winter", labelKey: "q_season_winter" },
+      ],
+    },
+    object: {
+      key: "object", kind: "real", titleKey: "q_object_t",
+      options: [
+        { value: "photo",    labelKey: "q_object_photo"    },
+        { value: "key",      labelKey: "q_object_key"      },
+        { value: "letter",   labelKey: "q_object_letter"   },
+        { value: "mirror",   labelKey: "q_object_mirror"   },
+        { value: "knife",    labelKey: "q_object_knife"    },
+        { value: "clock",    labelKey: "q_object_clock"    },
+      ],
+    },
+    body: {
+      key: "body", kind: "real", titleKey: "q_body_t",
+      options: [
+        { value: "tense",   labelKey: "q_body_tense"   },
+        { value: "tired",   labelKey: "q_body_tired"   },
+        { value: "wired",   labelKey: "q_body_wired"   },
+        { value: "soft",    labelKey: "q_body_soft"    },
+        { value: "buzzed",  labelKey: "q_body_buzzed"  },
+      ],
+    },
     phrase: {
       key: "phrase", kind: "phrase",
       titleKey: "q_phrase_t",
@@ -344,6 +441,7 @@
     "color","light","texture","decade","place","memory","want","avoid","animal","lately",
     "risk_taste","smell","window","temperature",
     "runtime","language_pref","opening","rewatch_taste","director_vibe","first_act","fear","trust",
+    "time_of_day","garment","food","drink","instrument","transport","season","object","body",
     "phrase",
   ];
 
@@ -356,66 +454,141 @@
   let QUIZ = buildSession();
 
   // ────────────────────────────────────────────────────────────
-  // INK BLOT GENERATOR — symmetric procedural Rorschach
+  // INK BLOT GENERATOR — organic symmetric Rorschach
+  // Each blot: blob via radial-jittered cubic bezier + satellites
+  // + fragments + spatter. Density and asymmetry vary.
   // ────────────────────────────────────────────────────────────
   function rand(min, max) { return min + Math.random() * (max - min); }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-  function makeBlot(seedMood) {
-    // generate ~7 random points on the right half, mirror to left
-    const cx = 100, h = 250;
-    const n = 6 + Math.floor(Math.random() * 4);
+  // Build an organic closed path from N radial points on the right half,
+  // smoothed with a Catmull-Rom-ish bezier, then mirrored across cx.
+  function blobPath(cx, cy, baseR, n, jitter, mirror = true) {
     const pts = [];
+    // generate points on a half-circle (top to bottom on right side)
     for (let i = 0; i < n; i++) {
       const t = i / (n - 1);
-      const x = cx + rand(2, 80);
-      const y = 30 + t * (h - 60) + rand(-25, 25);
-      const r = rand(8, 28);
-      pts.push({ x, y, r });
+      const ang = -Math.PI / 2 + t * Math.PI; // -90deg .. +90deg
+      const r = baseR * (1 + (Math.random() - 0.5) * jitter);
+      pts.push({
+        x: cx + Math.cos(ang) * r,
+        y: cy + Math.sin(ang) * r,
+      });
     }
-    // Build a soft path from circles + their mirrors
-    let circles = "";
-    for (const p of pts) {
-      circles += `<circle cx="${p.x}" cy="${p.y}" r="${p.r}"/>`;
-      circles += `<circle cx="${cx - (p.x - cx)}" cy="${p.y}" r="${p.r}"/>`;
-    }
-    // small spatter
-    const spatter = Array.from({length: 12}, () => {
-      const x = cx + rand(2, 70);
-      const y = rand(20, h - 20);
-      const r = rand(1, 4);
-      return `<circle cx="${x}" cy="${y}" r="${r}"/><circle cx="${cx - (x - cx)}" cy="${y}" r="${r}"/>`;
-    }).join("");
+    // close on the left by mirroring
+    const left = mirror
+      ? pts.slice().reverse().map(p => ({ x: cx - (p.x - cx), y: p.y }))
+      : [];
+    const all = [...pts, ...left];
 
-    const id = "blot" + Math.random().toString(36).slice(2, 7);
+    // build smooth path
+    let d = `M ${all[0].x.toFixed(1)} ${all[0].y.toFixed(1)}`;
+    for (let i = 0; i < all.length; i++) {
+      const p0 = all[(i - 1 + all.length) % all.length];
+      const p1 = all[i];
+      const p2 = all[(i + 1) % all.length];
+      const p3 = all[(i + 2) % all.length];
+      // Catmull-Rom -> bezier
+      const c1x = p1.x + (p2.x - p0.x) / 6;
+      const c1y = p1.y + (p2.y - p0.y) / 6;
+      const c2x = p2.x - (p3.x - p1.x) / 6;
+      const c2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+    return d + " Z";
+  }
+
+  function makeBlot(seedMood) {
+    const W = 240, H = 280, cx = W / 2;
+    const symmetry = Math.random() < 0.85; // most are symmetric, some not
+    const fragments = Math.random() < 0.55;
+    const spatter   = Math.random() < 0.85;
+
+    // 1–3 main blobs of different sizes/positions
+    const nBlobs = 1 + Math.floor(Math.random() * 3);
+    let blobs = "";
+    for (let b = 0; b < nBlobs; b++) {
+      const cy = rand(60, H - 60);
+      const baseR = rand(28, 70);
+      const n = 6 + Math.floor(Math.random() * 6);
+      const jitter = rand(0.25, 0.75);
+      const op = rand(0.65, 1.0).toFixed(2);
+      const offsetCx = symmetry ? cx : cx + rand(-25, 25);
+      const path = blobPath(offsetCx, cy, baseR, n, jitter, symmetry);
+      blobs += `<path d="${path}" opacity="${op}"/>`;
+    }
+
+    // Fragments: small detached blobs
+    let frags = "";
+    if (fragments) {
+      const nFrag = 2 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < nFrag; i++) {
+        const cy = rand(40, H - 40);
+        const r = rand(4, 14);
+        const xOff = rand(8, 80);
+        const op = rand(0.5, 0.9).toFixed(2);
+        const n = 5 + Math.floor(Math.random() * 4);
+        const j = rand(0.4, 0.9);
+        frags += `<path d="${blobPath(cx + xOff, cy, r, n, j, false)}" opacity="${op}"/>`;
+        if (symmetry) {
+          frags += `<path d="${blobPath(cx - xOff, cy, r, n, j, false)}" opacity="${op}"/>`;
+        }
+      }
+    }
+
+    // Spatter: tiny dots
+    let dots = "";
+    if (spatter) {
+      const nDot = 8 + Math.floor(Math.random() * 30);
+      for (let i = 0; i < nDot; i++) {
+        const xOff = rand(2, 90);
+        const y = rand(20, H - 20);
+        const r = rand(0.5, 3.5);
+        const op = rand(0.3, 0.85).toFixed(2);
+        dots += `<circle cx="${(cx + xOff).toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" opacity="${op}"/>`;
+        if (symmetry) {
+          dots += `<circle cx="${(cx - xOff).toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" opacity="${op}"/>`;
+        }
+      }
+    }
+
+    // Slight rotation for variety
+    const rot = (Math.random() - 0.5) * 6;
+    const id = "b" + Math.random().toString(36).slice(2, 8);
+    // ink tint: mostly cream, occasional warm/cool tint for variety
+    const inkColors = ["#ede7da","#ede7da","#ede7da","#e8d8b8","#dce4d8","#e6dbc4"];
+    const fill = pick(inkColors);
+
     return {
       mood: seedMood,
       svg: `
-        <svg viewBox="0 0 200 ${h}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
-            <filter id="${id}" x="-10%" y="-10%" width="120%" height="120%">
-              <feGaussianBlur stdDeviation="3"/>
-              <feColorMatrix type="matrix" values="
-                1 0 0 0 0
-                1 0 0 0 0
-                1 0 0 0 0
-                0 0 0 18 -7"/>
+            <filter id="${id}" x="-15%" y="-15%" width="130%" height="130%">
+              <feGaussianBlur stdDeviation="${rand(0.6, 1.6).toFixed(2)}"/>
+              <feTurbulence baseFrequency="${rand(0.6, 1.4).toFixed(2)}" numOctaves="2" seed="${Math.floor(Math.random() * 1000)}"/>
+              <feDisplacementMap in="SourceGraphic" scale="${rand(2, 6).toFixed(1)}"/>
             </filter>
           </defs>
-          <g fill="#ede7da" filter="url(#${id})">
-            ${circles}
-            ${spatter}
+          <g fill="${fill}" filter="url(#${id})" transform="rotate(${rot.toFixed(2)} ${cx} ${H/2})">
+            ${blobs}
+            ${frags}
+            ${dots}
           </g>
         </svg>`
     };
   }
 
-  // 4 blots per render, each with a random mood preset
+  // 4 blots per render, each with a different mood preset.
+  // Mood presets cover full grid of (tone × energy × door).
   const BLOT_MOODS = [
     { tone: "dark",  energy: "engage", door: "intensity" },
     { tone: "dark",  energy: "engage", door: "mystery"   },
-    { tone: "light", energy: "unwind", door: "intimacy"  },
-    { tone: "light", energy: "engage", door: "fantasy"   },
     { tone: "dark",  energy: "unwind", door: "mystery"   },
+    { tone: "dark",  energy: "unwind", door: "intensity" },
+    { tone: "light", energy: "engage", door: "fantasy"   },
+    { tone: "light", energy: "engage", door: "intimacy"  },
+    { tone: "light", energy: "unwind", door: "intimacy"  },
     { tone: "light", energy: "unwind", door: "fantasy"   },
   ];
   function freshBlots() {
