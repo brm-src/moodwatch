@@ -931,7 +931,7 @@
     const m = (navigator.language || "").match(/-([A-Z]{2})/i);
     return m ? m[1].toUpperCase() : "US";
   }
-  async function recommend({ withUser }) {
+  async function recommend({ withUser, exclude }) {
     show("loading");
     $("#load-msg").textContent = withUser && state.user ? window.t("loading_lb") : window.t("loading");
     const country = guessCountry();
@@ -940,6 +940,10 @@
     const moodB64 = btoa(unescape(encodeURIComponent(JSON.stringify(mood))));
     const params = new URLSearchParams({ country, lang, mood: moodB64 });
     if (withUser && state.user) params.set("user", state.user);
+    if (exclude && exclude.length) params.set("exclude", exclude.join(","));
+    // cache-bust: the edge cached recommend responses kill rotation
+    params.set("seed", String(Math.floor(Math.random() * 1e9)));
+    state.lastWithUser = !!withUser;
     try {
       const r = await fetch(`${API_BASE}/recommend?${params}`);
       const data = await r.json();
@@ -947,6 +951,8 @@
         const code = data.error || "generic";
         return showError(window.t(`err_${code}`) || window.t("err_generic"));
       }
+      // accumulate shown ids so re-roll excludes them
+      state.shownIds = (state.shownIds || []).concat((data.films || []).map(f => f.id).filter(Boolean));
       renderResults(data);
     } catch {
       showError(window.t("err_generic"));
@@ -985,7 +991,7 @@
       <h3>${escapeHtml(f.title || "")} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
       <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
-      ${f.curated_note ? `<p class="note">${escapeHtml(f.curated_note)}</p>` : ""}`;
+      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span><p class="note">${escapeHtml(f.curated_note)}</p>` : ""}`;
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
@@ -1078,9 +1084,12 @@
 
     $("#restart").addEventListener("click", () => {
       state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null;
-      const inp = $("#user"); if (inp) { inp.value = ""; inp.style.borderBottomColor = ""; }
-      QUIZ = buildSession();
+      state.shownIds = [];
+      const inp = $("#user"); if (inp) { inp.value = ""; }
       show("intro");
+    });
+    $("#reroll").addEventListener("click", () => {
+      recommend({ withUser: state.lastWithUser, exclude: state.shownIds || [] });
     });
     $("#retry").addEventListener("click", () => recommend({ withUser: state.path === "lb" }));
   });

@@ -83,11 +83,14 @@
 
   <!-- ─── results ─── -->
   <section class="step section" data-step="results">
-    <div class="fig"><span data-i18n="picks_label">Tonight</span><span class="bar"></span></div>
-    <h2 class="q-title" id="vibe-title" data-i18n="picks_title">For your <em>night.</em></h2>
+    <div class="fig"><span data-i18n="picks_label">Picks</span><span class="bar"></span></div>
+    <h2 class="q-title" id="vibe-title" data-i18n="picks_title">For your <em>mood.</em></h2>
     <p style="font-family:var(--font-display);font-style:italic;color:var(--ink-soft);font-size:var(--t-lead);margin-bottom:var(--s-3);" id="vibe-desc"></p>
     <div id="cards"></div>
-    <button class="restart" id="restart" data-i18n="restart">Start over</button>
+    <div class="results-actions">
+      <button class="pill" id="reroll" data-i18n="reroll">Show 4 more</button>
+      <button class="restart" id="restart" data-i18n="restart">Start over</button>
+    </div>
   </section>
 
   <!-- ─── error ─── -->

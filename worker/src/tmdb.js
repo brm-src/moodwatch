@@ -5,24 +5,27 @@ const IMG  = "https://image.tmdb.org/t/p/";
 
 export function tmdbImageBase() { return IMG; }
 
-async function tmdbFetch(env, path, params = {}) {
+async function tmdbFetch(env, path, params = {}, opts = {}) {
   const url = new URL(BASE + path);
   url.searchParams.set("api_key", env.TMDB_API_KEY);
   for (const [k, v] of Object.entries(params)) {
     if (v != null && v !== "") url.searchParams.set(k, v);
   }
-  // Edge cache (15 min for most, 7d for static-ish)
-  const cacheKey = url.toString();
-  const ttl = path.includes("/credits") || path.includes("/watch/providers") ? 86400 * 7 : 900;
-  const r = await fetch(url, { cf: { cacheTtl: ttl, cacheEverything: true } });
+  // Edge cache (15 min for most, 7d for static-ish, skip if opts.fresh)
+  const ttl = opts.fresh ? 0 :
+    (path.includes("/credits") || path.includes("/watch/providers") ? 86400 * 7 : 900);
+  const init = ttl > 0
+    ? { cf: { cacheTtl: ttl, cacheEverything: true } }
+    : { cache: "no-store" };
+  const r = await fetch(url, init);
   if (!r.ok) {
     throw new Error(`TMDb ${path} → ${r.status}`);
   }
   return r.json();
 }
 
-export async function tmdbDiscover(env, params, language) {
-  return tmdbFetch(env, "/discover/movie", { ...params, language });
+export async function tmdbDiscover(env, params, language, opts = {}) {
+  return tmdbFetch(env, "/discover/movie", { ...params, language }, opts);
 }
 
 export async function tmdbDetails(env, id, language) {

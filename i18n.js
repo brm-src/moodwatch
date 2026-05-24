@@ -28,6 +28,8 @@ const STRINGS = {
     no_picks: "Nothing landed. Try a different mood.",
     where_to_watch: "Where to watch",
     on_tmdb: "Details",
+    editor_pick: "Editor's pick",
+    reroll: "Show 4 more",
 
     loading_label: "Searching",
     loading: "Reading the room.",
@@ -368,6 +370,8 @@ const STRINGS = {
     no_picks: "Nada cuajó. Prueba otro mood.",
     where_to_watch: "Dónde verla",
     on_tmdb: "Detalles",
+    editor_pick: "Recomendación del editor",
+    reroll: "Mostrar otras 4",
 
     loading_label: "Buscando",
     loading: "Leyendo el ambiente.",

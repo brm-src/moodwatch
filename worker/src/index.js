@@ -46,6 +46,9 @@ async function recommend(req, env, ctx) {
   const lang    = (url.searchParams.get("lang") || "en").startsWith("es") ? "es-ES" : "en-US";
   const moodB64 = url.searchParams.get("mood") || "";
   const user    = (url.searchParams.get("user") || "").trim().toLowerCase();
+  const exclude = (url.searchParams.get("exclude") || "")
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
+  const excludeSet = new Set(exclude);
   const mood    = decodeMood(moodB64);
 
   if (!env.TMDB_API_KEY) {
@@ -54,7 +57,6 @@ async function recommend(req, env, ctx) {
 
   // 1. Get candidate pool from TMDb /discover (multi-page if discoverable)
   const candidates = await discoverByMood(env, mood, lang);
-  // candidates: [{id,title,...,vote_average,vote_count,popularity,genre_ids,release_date,poster_path}]
 
   // 2. If LB user provided, intersect with their watchlist TMDb IDs
   let pool = candidates;
@@ -70,14 +72,15 @@ async function recommend(req, env, ctx) {
       }
       const filtered = candidates.filter(f => wlIds.has(f.id));
       if (filtered.length >= 3) { pool = filtered; lbUsed = true; }
-      // else: silently fallback to global pool
     } catch (e) {
-      // scraper hiccup — fallback to global
       console.log("LB fail:", e?.message);
     }
   }
 
-  // 3. Curated boost: if a candidate is in CURATED, lift its score
+  // Drop excluded ids (re-roll case)
+  pool = pool.filter(f => !excludeSet.has(f.id));
+
+  // 3. Score with curated boost
   const ranked = pool.map(f => {
     const cur = curatedFor(f.id);
     const score =
@@ -88,15 +91,32 @@ async function recommend(req, env, ctx) {
     return { ...f, _score: score, _curated: cur || null };
   }).sort((a, b) => b._score - a._score);
 
-  // Pick 4 random from top 12 so repeated visits don't show the same picks
-  const TOP_N = Math.min(12, ranked.length);
-  const topPool = ranked.slice(0, TOP_N);
-  // Fisher-Yates partial shuffle
-  for (let i = topPool.length - 1; i > 0; i--) {
+  // Always pull every curated item that survived filters into the front of the pool
+  const curatedHits = ranked.filter(f => f._curated);
+  const otherHits   = ranked.filter(f => !f._curated);
+
+  // Pick 4: 1 curated (if any) + 3 random from top 30 of the rest.
+  // If no curated, 4 random from top 30.
+  const TOP_N = Math.min(30, otherHits.length);
+  const top30 = otherHits.slice(0, TOP_N);
+  for (let i = top30.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [topPool[i], topPool[j]] = [topPool[j], topPool[i]];
+    [top30[i], top30[j]] = [top30[j], top30[i]];
   }
-  const top = topPool.slice(0, 4);
+
+  let top = [];
+  if (curatedHits.length > 0) {
+    // randomize curated order too
+    const curShuffled = [...curatedHits];
+    for (let i = curShuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [curShuffled[i], curShuffled[j]] = [curShuffled[j], curShuffled[i]];
+    }
+    top.push(curShuffled[0]);
+    top.push(...top30.slice(0, 3));
+  } else {
+    top = top30.slice(0, 4);
+  }
   const enriched = await Promise.all(top.map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       tmdbProviders(env, f.id, country),

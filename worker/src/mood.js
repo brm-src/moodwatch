@@ -127,14 +127,12 @@ function voteFilters(mood) {
 
 export async function discoverByMood(env, mood, language) {
   const today = new Date().toISOString().slice(0, 10);
-  const params = {
-    sort_by: "vote_average.desc",
+  const baseParams = {
     "vote_count.gte": 800,        // raised from 200 to filter out fresh-release noise
     "vote_average.gte": 6.5,      // baseline quality
     "with_runtime.gte": 75,       // drop shorts / TV specials
     "primary_release_date.lte": today, // already-released only
     include_adult: "false",
-    page: 1,
     ...genreSet(mood),
     ...runtimeRange(mood),
     ...dateRange(mood),
@@ -142,18 +140,15 @@ export async function discoverByMood(env, mood, language) {
     ...voteFilters(mood),
   };
 
-  // Three pages for variety, fetched in parallel for speed
-  const pages = [1, 2, 3];
-  const pageResults = await Promise.all(pages.map(async p => {
-    try {
-      const data = await tmdbDiscover(env, { ...params, page: p }, language);
-      return data.results || [];
-    } catch (e) {
-      console.log("discover page fail:", p, e?.message);
-      return [];
-    }
-  }));
-  const results = pageResults.flat();
+  // Cast a wide net: 5 pages by vote_average + 5 by popularity, all in parallel.
+  // Different sort orders pull totally different films into the pool.
+  const fetches = [];
+  for (let p = 1; p <= 5; p++) {
+    fetches.push(tmdbDiscover(env, { ...baseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
+    fetches.push(tmdbDiscover(env, { ...baseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
+  }
+  const all = await Promise.all(fetches);
+  const results = all.flatMap(r => r.results || []);
 
   // De-dupe by id
   const seen = new Set();
