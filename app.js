@@ -1044,9 +1044,9 @@
       <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
       ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span>` : ""}
       ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}`;
-    if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 150));
-    else if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 210));
-    if (f.reason) meta.appendChild(expandableText(f.reason, "reason", 150));
+    if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 90));
+    else if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 160));
+    if (f.reason) meta.appendChild(expandableText(f.reason, "reason", 80));
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
