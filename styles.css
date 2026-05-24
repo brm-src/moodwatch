@@ -46,7 +46,10 @@ html, body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color .25s ease;
 }
+body.on-hero { background: var(--charcoal); }
+body.on-hero footer.bottom { margin-top: 0; border-top: 0; }
 html { overflow-x: clip; }
 body { overflow-x: clip; min-height: 100dvh; display: flex; flex-direction: column; }
 
@@ -115,7 +118,9 @@ header.top {
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: var(--s-3);
+  min-height: 1em;
 }
+.hero .hero-fig:empty { display: none; }
 .hero h1 {
   font-family: var(--font-display);
   font-weight: 500;
@@ -317,7 +322,7 @@ header.top {
   border-top: 1px solid var(--rule);
 }
 
-/* ─── rorschach pair (Q4) ─── */
+/* ─── rorschach pair (Q ink) — procedural blots, no labels ─── */
 .rorschach {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -329,27 +334,17 @@ header.top {
   border: 1px solid var(--rule);
   padding: 0;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
+  display: block;
   transition: border-color .15s ease, transform .15s ease;
   overflow: hidden;
+  aspect-ratio: 4/5;
 }
 .rorschach button:hover { border-color: var(--accent); transform: translateY(-2px); }
 .rorschach button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .rorschach svg {
   width: 100%;
-  aspect-ratio: 4/5;
+  height: 100%;
   display: block;
-}
-.rorschach .label {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: var(--t-body);
-  color: var(--paper);
-  padding: var(--s-2);
-  text-align: center;
-  background: var(--charcoal);
-  border-top: 1px solid var(--charcoal-2);
 }
 
 /* ─── phrase ─── */

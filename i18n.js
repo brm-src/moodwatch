@@ -1,7 +1,6 @@
 // moodwatch — i18n. Auto-detects EN/ES from navigator.language.
 const STRINGS = {
   en: {
-    // chrome
     kicker: "Cinema · Mood · Pick",
     back: "Back",
     skip: "Skip",
@@ -12,20 +11,17 @@ const STRINGS = {
     support: "Support moodwatch",
     footer_made: "Built with",
 
-    // intro
-    intro_fig: "FIG. A",
+    intro_fig: "",
     intro_title: "A film, <em>chosen by mood.</em>",
-    intro_lead: "Pick how I'll choose. The questions are the same.",
+    intro_lead: "Pick how I'll choose. Questions vary each visit.",
     path_lb: "Use my Letterboxd watchlist",
     path_global: "Just recommend something",
 
-    // lb
     lb_label: "Letterboxd",
     lb_ask_title: "Your <em>username.</em>",
     lb_continue: "Continue",
     user_ph: "your_username",
 
-    // results
     picks_label: "Picks",
     picks_title: "For your <em>mood.</em>",
     pick_n: "Pick {n}",
@@ -33,7 +29,6 @@ const STRINGS = {
     where_to_watch: "Where to watch",
     on_tmdb: "Details",
 
-    // loading / error
     loading_label: "Searching",
     loading: "Reading the room.",
     loading_lb: "Reading your watchlist.",
@@ -43,25 +38,21 @@ const STRINGS = {
     err_empty_watchlist: "Watchlist is empty or private.",
     err_generic: "Server hiccup. Try again in a moment.",
 
-    // q numbering
     q_num: "Q.{n} of {tot}",
 
-    // Q1 — door
     q_door_t: "Choose a <em>door.</em>",
     q_door_intensity: "A red door at the end of a dark hallway.",
     q_door_mystery:   "An old door in an abandoned house.",
     q_door_fantasy:   "A bright door floating in the sky.",
     q_door_intimacy:  "An apartment door with warm light underneath.",
 
-    // Q2 — state (gender-neutral, time-neutral)
-    q_state_t: "How are <em>you?</em>",
-    q_state_drained:  "Drained. Long stretch.",
+    q_state_t: "How <em>do you feel?</em>",
+    q_state_drained:  "Out of battery, it was a long day.",
     q_state_restless: "Restless. Need something.",
-    q_state_pensive:  "Heavy. Sitting with things.",
-    q_state_good:     "Fine. Open to anything.",
+    q_state_pensive:  "Heavy. Ruminating.",
+    q_state_good:     "Good. Up for whatever.",
 
-    // Q3 — scene
-    q_scene_t: "Which scene <em>pulls?</em>",
+    q_scene_t: "Which scene <em>is you right now?</em>",
     q_scene_road:      "A car driving with no destination.",
     q_scene_city:      "A vast city where nobody knows anyone.",
     q_scene_house:     "A quiet house hiding something strange.",
@@ -69,19 +60,14 @@ const STRINGS = {
     q_scene_survival:  "A group trying to survive something.",
     q_scene_discovery: "Someone finding out a truth they didn't want.",
 
-    // Q4 — ink
-    q_ink_t: "Pick the <em>ink.</em>",
-    q_ink_dark:  "the deep one",
-    q_ink_light: "the open one",
+    q_ink_t: "Choose a <em>blot.</em>",
 
-    // Q5 — intent (neutral)
     q_intent_t: "What do you want <em>from the film?</em>",
     q_intent_escape:  "To escape.",
     q_intent_feel:    "To feel something.",
     q_intent_think:   "Something to chew on.",
     q_intent_company: "Warmth. Company.",
 
-    // Q6 — depth
     q_depth_t: "How <em>deep?</em>",
     q_depth_fun:        "Just a good time.",
     q_depth_warm:       "Some emotion, no destruction.",
@@ -89,7 +75,35 @@ const STRINGS = {
     q_depth_uneasy:     "Elegant discomfort.",
     q_depth_ruined:     "Wreck me, but wreck me well.",
 
-    // Q7 — phrase
+    q_weather_t: "Pick the <em>weather.</em>",
+    q_weather_rain:   "Rain on the window.",
+    q_weather_fog:    "Fog you can't see through.",
+    q_weather_sun:    "Late afternoon sun.",
+    q_weather_storm:  "A coming storm.",
+    q_weather_winter: "Cold without snow.",
+
+    q_sound_t: "What do you <em>hear?</em>",
+    q_sound_silence: "Silence.",
+    q_sound_voices:  "Voices in the next room.",
+    q_sound_music:   "Music coming from somewhere.",
+    q_sound_noise:   "Noise. A lot of it.",
+
+    q_company_t: "And <em>who else?</em>",
+    q_company_alone:  "I'd rather watch alone.",
+    q_company_shared: "Someone next to me.",
+    q_company_stray:  "A stray cat will do.",
+
+    q_pace_t: "What <em>pace?</em>",
+    q_pace_slow:   "Slow. Let it breathe.",
+    q_pace_steady: "Steady, no rush.",
+    q_pace_fast:   "Fast. Don't let me look away.",
+
+    q_ending_t: "How should it <em>end?</em>",
+    q_ending_closed: "Closed. Tied up.",
+    q_ending_open:   "Open. Let it linger.",
+    q_ending_twist:  "Twist. Pull the rug.",
+    q_ending_bitter: "Bitter. No mercy.",
+
     q_phrase_t: "I want something that <em>feels like…</em>",
     q_phrase_ph: "(write a few words)",
     q_phrase_c1: "a strange dream",
@@ -111,9 +125,9 @@ const STRINGS = {
     support: "Apoya moodwatch",
     footer_made: "Hecho con",
 
-    intro_fig: "FIG. A",
+    intro_fig: "",
     intro_title: "Una película, <em>según tu mood.</em>",
-    intro_lead: "Elige cómo busco. Las preguntas son las mismas.",
+    intro_lead: "Elige cómo busco. Las preguntas cambian cada visita.",
     path_lb: "Usar mi watchlist de Letterboxd",
     path_global: "Solo recomiéndame algo",
 
@@ -146,13 +160,13 @@ const STRINGS = {
     q_door_fantasy:   "Una puerta brillante flotando en el cielo.",
     q_door_intimacy:  "La puerta de un departamento con luz cálida debajo.",
 
-    q_state_t: "¿Cómo <em>estás?</em>",
-    q_state_drained:  "Sin batería. Tirada larga.",
-    q_state_restless: "Inquietud. Necesito algo.",
-    q_state_pensive:  "Pesado. Rumiando.",
-    q_state_good:     "Bien. Abierto a lo que sea.",
+    q_state_t: "¿Cómo te <em>sientes?</em>",
+    q_state_drained:  "Sin batería, fue un día largo.",
+    q_state_restless: "Con inquietud. Necesito algo.",
+    q_state_pensive:  "Con pesadez, rumiando mis pensamientos.",
+    q_state_good:     "Bien. Con disposición a lo que sea.",
 
-    q_scene_t: "¿Qué escena te <em>tira?</em>",
+    q_scene_t: "¿Qué escena te <em>representa en este momento?</em>",
     q_scene_road:      "Un auto manejando sin destino.",
     q_scene_city:      "Una ciudad enorme donde nadie se conoce.",
     q_scene_house:     "Una casa tranquila con algo raro escondido.",
@@ -160,9 +174,7 @@ const STRINGS = {
     q_scene_survival:  "Un grupo tratando de sobrevivir a algo.",
     q_scene_discovery: "Alguien descubriendo una verdad que no quería saber.",
 
-    q_ink_t: "Elige la <em>tinta.</em>",
-    q_ink_dark:  "la profunda",
-    q_ink_light: "la abierta",
+    q_ink_t: "Elige una <em>mancha.</em>",
 
     q_intent_t: "¿Qué quieres <em>de la película?</em>",
     q_intent_escape:  "Escapar.",
@@ -176,6 +188,35 @@ const STRINGS = {
     q_depth_thoughtful: "Quedar pensando.",
     q_depth_uneasy:     "Incomodidad elegante.",
     q_depth_ruined:     "Destrúyeme, pero hazlo bien.",
+
+    q_weather_t: "Elige el <em>clima.</em>",
+    q_weather_rain:   "Lluvia en la ventana.",
+    q_weather_fog:    "Niebla espesa, no se ve nada.",
+    q_weather_sun:    "Sol del atardecer.",
+    q_weather_storm:  "Una tormenta acercándose.",
+    q_weather_winter: "Frío sin nieve.",
+
+    q_sound_t: "¿Qué <em>escuchas?</em>",
+    q_sound_silence: "Silencio.",
+    q_sound_voices:  "Voces en la pieza de al lado.",
+    q_sound_music:   "Música viniendo de alguna parte.",
+    q_sound_noise:   "Ruido. Mucho.",
+
+    q_company_t: "¿Y <em>con quién?</em>",
+    q_company_alone:  "Prefiero verla solo.",
+    q_company_shared: "Alguien al lado.",
+    q_company_stray:  "Un gato perdido sirve.",
+
+    q_pace_t: "¿Qué <em>ritmo?</em>",
+    q_pace_slow:   "Lento. Que respire.",
+    q_pace_steady: "Sostenido, sin apuro.",
+    q_pace_fast:   "Rápido. Que no me deje mirar a otro lado.",
+
+    q_ending_t: "¿Cómo debe <em>terminar?</em>",
+    q_ending_closed: "Cerrado. Bien atado.",
+    q_ending_open:   "Abierto. Que quede flotando.",
+    q_ending_twist:  "Con vuelta. Que me saque la silla.",
+    q_ending_bitter: "Amargo. Sin piedad.",
 
     q_phrase_t: "Quiero algo que se <em>sienta como…</em>",
     q_phrase_ph: "(escribe unas palabras)",
