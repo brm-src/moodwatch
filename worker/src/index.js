@@ -153,8 +153,9 @@ async function recommend(req, env, ctx) {
     }
   }
 
-  // Drop excluded ids (re-roll case)
-  pool = pool.filter(f => !excludeSet.has(f.id));
+  // Drop excluded ids (re-roll case) and future releases
+  const today = new Date().toISOString().slice(0, 10);
+  pool = pool.filter(f => !excludeSet.has(f.id) && (!f.release_date || f.release_date <= today));
 
   // 3. Score with curated + list boost
   const ranked = pool.map(f => {
@@ -190,7 +191,7 @@ async function recommend(req, env, ctx) {
     }
   };
   pushUnique(shuffleInPlace([...curatedHits]), 1);
-  pushUnique(shuffleInPlace(listHits.slice(0, 24)), matched.length ? 3 : 1);
+  pushUnique(shuffleInPlace(listHits.slice(0, 24)), matched.length ? 4 : 1);
   pushUnique(shuffleInPlace(otherHits.slice(0, 30)), 4);
   const enriched = await Promise.all(top.slice(0, 4).map(async (f) => {
     const [providers, credits, details] = await Promise.all([

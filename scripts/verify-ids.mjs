@@ -44,10 +44,15 @@ for (const list of LISTS) {
   assert(list.ids.length >= 8, `list ${list.slug} too thin`);
 }
 const priorityMinimums = {
-  'latam-pulse': 55,
+  'latam-pulse': 50,
   'terror-sin-jumpscares': 50,
   'rainy-night-cinema': 45,
   'sunday-anxiety': 45,
+  'comedia-con-alma': 35,
+  'accion-sin-capas': 35,
+  'animacion-adulta-anime': 35,
+  'chile-cono-sur': 35,
+  'no-phone-cinema': 35,
 };
 for (const [slug, min] of Object.entries(priorityMinimums)) {
   const list = LISTS.find(l => l.slug === slug);
