@@ -247,6 +247,83 @@
         { value: "freezing",labelKey: "q_temp_freezing"},
       ],
     },
+    runtime: {
+      key: "runtime", kind: "real", titleKey: "q_runtime_t",
+      options: [
+        { value: "short",  labelKey: "q_runtime_short"  },
+        { value: "medium", labelKey: "q_runtime_medium" },
+        { value: "long",   labelKey: "q_runtime_long"   },
+        { value: "epic",   labelKey: "q_runtime_epic"   },
+        { value: "any",    labelKey: "q_runtime_any"    },
+      ],
+    },
+    language_pref: {
+      key: "language_pref", kind: "real", titleKey: "q_lang_t",
+      options: [
+        { value: "any",      labelKey: "q_lang_any"      },
+        { value: "spanish",  labelKey: "q_lang_spanish"  },
+        { value: "english",  labelKey: "q_lang_english"  },
+        { value: "asian",    labelKey: "q_lang_asian"    },
+        { value: "european", labelKey: "q_lang_european" },
+      ],
+    },
+    opening: {
+      key: "opening", kind: "real", titleKey: "q_opening_t",
+      options: [
+        { value: "burst",     labelKey: "q_opening_burst"     },
+        { value: "quiet",     labelKey: "q_opening_quiet"     },
+        { value: "voiceover", labelKey: "q_opening_voiceover" },
+        { value: "middle",    labelKey: "q_opening_middle"    },
+        { value: "title",     labelKey: "q_opening_title"     },
+      ],
+    },
+    rewatch_taste: {
+      key: "rewatch_taste", kind: "real", titleKey: "q_rewatch_t",
+      options: [
+        { value: "popular", labelKey: "q_rewatch_popular" },
+        { value: "obscure", labelKey: "q_rewatch_obscure" },
+        { value: "either",  labelKey: "q_rewatch_either"  },
+      ],
+    },
+    director_vibe: {
+      key: "director_vibe", kind: "real", titleKey: "q_director_t",
+      options: [
+        { value: "auteur",    labelKey: "q_director_auteur"    },
+        { value: "mainstream",labelKey: "q_director_mainstream"},
+        { value: "indie",     labelKey: "q_director_indie"     },
+        { value: "any",       labelKey: "q_director_any"       },
+      ],
+    },
+    first_act: {
+      key: "first_act", kind: "real", titleKey: "q_firstact_t",
+      options: [
+        { value: "discover", labelKey: "q_firstact_discover" },
+        { value: "meet",     labelKey: "q_firstact_meet"     },
+        { value: "wrong",    labelKey: "q_firstact_wrong"    },
+        { value: "goal",     labelKey: "q_firstact_goal"     },
+      ],
+    },
+    fear: {
+      key: "fear", kind: "real", titleKey: "q_fear_t",
+      options: [
+        { value: "gore",          labelKey: "q_fear_gore"         },
+        { value: "tears",         labelKey: "q_fear_tears"        },
+        { value: "boredom",       labelKey: "q_fear_boredom"      },
+        { value: "confusion",     labelKey: "q_fear_confusion"    },
+        { value: "predictable",   labelKey: "q_fear_predictable"  },
+      ],
+    },
+    trust: {
+      key: "trust", kind: "real", titleKey: "q_trust_t",
+      options: [
+        { value: "small_drama",  labelKey: "q_trust_drama"     },
+        { value: "good_thriller",labelKey: "q_trust_thriller"  },
+        { value: "weird_film",   labelKey: "q_trust_weird"     },
+        { value: "smart_comedy", labelKey: "q_trust_comedy"    },
+        { value: "moody_horror", labelKey: "q_trust_horror"    },
+        { value: "warm_anim",    labelKey: "q_trust_animation" },
+      ],
+    },
     phrase: {
       key: "phrase", kind: "phrase",
       titleKey: "q_phrase_t",
@@ -265,7 +342,9 @@
   const ROTATING = [
     "state","door","scene","intent","depth","weather","sound","company","pace","ending",
     "color","light","texture","decade","place","memory","want","avoid","animal","lately",
-    "risk_taste","smell","window","temperature","phrase",
+    "risk_taste","smell","window","temperature",
+    "runtime","language_pref","opening","rewatch_taste","director_vibe","first_act","fear","trust",
+    "phrase",
   ];
 
   // Build a fresh quiz: 6 random categories + ink last (7 total)
@@ -408,6 +487,35 @@
     if (a.decade) m.decade = a.decade;
     if (a.animal) m.animal = a.animal;
     if (a.smell) m.smell = a.smell;
+    // backend-mapped axes (worker reads these directly)
+    if (a.runtime) m.runtime = a.runtime;
+    if (a.language_pref) m.language_pref = a.language_pref;
+    if (a.avoid && a.avoid !== "nothing") m.avoid = a.avoid;
+    if (a.opening === "burst")  { m.energy = "engage"; m.tone = m.tone || "dark"; }
+    if (a.opening === "quiet")  { m.energy = m.energy || "unwind"; }
+    if (a.opening === "voiceover") { m.tone = m.tone || "dark"; }
+    if (a.opening === "middle") { m.energy = "engage"; m.risk = "discover"; }
+    if (a.opening === "title")  { m.risk = "discover"; }
+    if (a.rewatch_taste === "popular") m.popularity = "high";
+    if (a.rewatch_taste === "obscure") { m.popularity = "low"; m.risk = "discover"; }
+    if (a.director_vibe === "auteur")     { m.quality = "high"; m.popularity = "low"; }
+    if (a.director_vibe === "mainstream") { m.popularity = "high"; }
+    if (a.director_vibe === "indie")      { m.quality = "high"; m.popularity = "mid"; }
+    if (a.first_act === "discover") m.first_act = "fantasy_scifi";
+    if (a.first_act === "meet")     m.first_act = "drama_romance";
+    if (a.first_act === "wrong")    m.first_act = "thriller_horror";
+    if (a.first_act === "goal")     m.first_act = "action_adventure";
+    if (a.fear === "gore")        m.exclude = (m.exclude || []).concat(["horror_extreme"]);
+    if (a.fear === "tears")       m.exclude = (m.exclude || []).concat(["heavy_drama"]);
+    if (a.fear === "boredom")     m.energy = "engage";
+    if (a.fear === "confusion")   m.popularity = m.popularity || "high";
+    if (a.fear === "predictable") m.risk = "discover";
+    if (a.trust === "small_drama")  m.trust = "drama";
+    if (a.trust === "good_thriller")m.trust = "thriller";
+    if (a.trust === "weird_film")   m.trust = "weird";
+    if (a.trust === "smart_comedy") m.trust = "comedy";
+    if (a.trust === "moody_horror") m.trust = "horror";
+    if (a.trust === "warm_anim")    m.trust = "animation";
     if (a.ink) {
       try {
         const blot = JSON.parse(a.ink);
