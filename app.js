@@ -1042,9 +1042,11 @@
       <h3>${escapeHtml(f.title || "")} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
       <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
-      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span><p class="note">${escapeHtml(f.curated_note)}</p>` : (f.overview ? `<p class="overview">${escapeHtml(f.overview)}</p>` : "")}
-      ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}
-      ${f.reason ? `<p class="reason">${escapeHtml(f.reason)}</p>` : ""}`;
+      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span>` : ""}
+      ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}`;
+    if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 150));
+    else if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 210));
+    if (f.reason) meta.appendChild(expandableText(f.reason, "reason", 150));
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
@@ -1065,6 +1067,30 @@
     c.appendChild(meta);
     return c;
   }
+  function expandableText(text, className, threshold) {
+    const wrap = document.createElement("div");
+    wrap.className = "expandable";
+    const p = document.createElement("p");
+    p.className = `${className} expandable-text`;
+    p.textContent = text || "";
+    wrap.appendChild(p);
+    if (String(text || "").length > threshold) {
+      p.classList.add("is-clamped");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "expand-toggle";
+      b.setAttribute("aria-expanded", "false");
+      b.textContent = window.t("read_more");
+      b.addEventListener("click", () => {
+        const expanded = p.classList.toggle("expanded");
+        b.setAttribute("aria-expanded", String(expanded));
+        b.textContent = window.t(expanded ? "read_less" : "read_more");
+      });
+      wrap.appendChild(b);
+    }
+    return wrap;
+  }
+
   function escapeHtml(s) {
     return String(s || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }

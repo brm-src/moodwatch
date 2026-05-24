@@ -139,12 +139,6 @@ header.top {
   line-height: 1.55;
   color: var(--ink-soft);
   margin-top: var(--s-2);
-  max-height: 5.6em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
 }
 .hero h1 em {
   font-style: italic;
@@ -604,6 +598,33 @@ header.top {
   color: var(--muted);
   margin-top: 4px;
 }
+.card .expandable-text.is-clamped {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+.card .expandable-text.is-clamped.expanded {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+.expand-toggle {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--t-mono);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-top: 2px;
+  padding: 0;
+  text-transform: uppercase;
+}
+.expand-toggle:hover { color: var(--ink); }
 .card .actions { display: flex; gap: var(--s-2); margin-top: var(--s-2); flex-wrap: wrap; }
 .card a.action {
   font-family: var(--font-body);
