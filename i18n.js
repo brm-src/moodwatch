@@ -30,6 +30,8 @@ const STRINGS = {
     on_tmdb: "Details",
     editor_pick: "Editor's pick",
     reroll: "Show 4 more",
+    path_surprise: "Surprise me",
+    from_list: "From the list",
 
     loading_label: "Searching",
     loading: "Reading the room.",
@@ -372,6 +374,8 @@ const STRINGS = {
     on_tmdb: "Detalles",
     editor_pick: "Recomendación del editor",
     reroll: "Mostrar otras 4",
+    path_surprise: "Sorpréndeme",
+    from_list: "De la lista",
 
     loading_label: "Buscando",
     loading: "Leyendo el ambiente.",

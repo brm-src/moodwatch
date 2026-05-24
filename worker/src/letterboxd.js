@@ -53,6 +53,18 @@ async function slugToTmdbId(env, slug) {
   return id;
 }
 
+// Resolve a batch of LB film slugs to TMDb IDs (uses KV cache).
+export async function slugsToTmdbIds(env, slugs) {
+  const ids = new Set();
+  const BATCH = 8;
+  for (let i = 0; i < slugs.length; i += BATCH) {
+    const batch = slugs.slice(i, i + BATCH);
+    const resolved = await Promise.all(batch.map(s => slugToTmdbId(env, s).catch(() => null)));
+    resolved.forEach(id => { if (id) ids.add(id); });
+  }
+  return ids;
+}
+
 export async function fetchWatchlistTmdbIds(env, user) {
   // user already validated upstream as ^[a-z0-9_-]{1,30}$
   const allSlugs = new Set();

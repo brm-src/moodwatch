@@ -3,9 +3,10 @@
 // Returns:  { films: [{title, year, director, runtime, genres, poster, justwatch, tmdb, curated_note?}] }
 
 import { discoverByMood } from "./mood.js";
-import { tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase } from "./tmdb.js";
-import { fetchWatchlistTmdbIds } from "./letterboxd.js";
+import { tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase, tmdbDiscover } from "./tmdb.js";
+import { fetchWatchlistTmdbIds, slugsToTmdbIds } from "./letterboxd.js";
 import { CURATED, curatedFor } from "./curated.js";
+import { LISTS, fetchListSlugs, matchLists } from "./lists.js";
 
 function corsHeaders(origin, env) {
   const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim());
@@ -58,8 +59,56 @@ async function recommend(req, env, ctx) {
   // 1. Get candidate pool from TMDb /discover (multi-page if discoverable)
   const candidates = await discoverByMood(env, mood, lang);
 
+  // 1b. Pull films from matching curated Letterboxd lists, fetch their TMDb data,
+  // merge into pool. List films get marked _list = listName for soft boost.
+  const matched = matchLists(mood);
+  const listIds = new Map(); // tmdb_id -> list name
+  if (matched.length > 0) {
+    try {
+      const allListSlugs = await Promise.all(matched.map(m => fetchListSlugs(env, m.list, 2).catch(() => [])));
+      for (let i = 0; i < matched.length; i++) {
+        const slugs = allListSlugs[i].slice(0, 60); // cap per list
+        const ids = await slugsToTmdbIds(env, slugs);
+        for (const id of ids) {
+          if (!listIds.has(id)) listIds.set(id, matched[i].list.name);
+        }
+      }
+    } catch (e) {
+      console.log("lists fail:", e?.message);
+    }
+  }
+
+  // Fetch TMDb minimal data for any list-only ids missing from candidates
+  const candidateIds = new Set(candidates.map(c => c.id));
+  const missingFromCandidates = [...listIds.keys()].filter(id => !candidateIds.has(id));
+  let extraFromLists = [];
+  if (missingFromCandidates.length > 0) {
+    // batch via /movie/{id} — pricey, so cap to 30
+    const cap = missingFromCandidates.slice(0, 30);
+    extraFromLists = (await Promise.all(cap.map(id =>
+      tmdbDetails(env, id, lang).then(d => d).catch(() => null)
+    ))).filter(Boolean).map(d => ({
+      id: d.id,
+      title: d.title,
+      release_date: d.release_date,
+      vote_average: d.vote_average,
+      vote_count: d.vote_count,
+      popularity: d.popularity,
+      genre_ids: (d.genres || []).map(g => g.id),
+      genres: (d.genres || []).map(g => g.name?.toLowerCase()),
+      poster_path: d.poster_path,
+      runtime: d.runtime,
+    }));
+  }
+
+  // Combined candidates with list tag
+  const allCandidates = [
+    ...candidates.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
+    ...extraFromLists.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
+  ];
+
   // 2. If LB user provided, intersect with their watchlist TMDb IDs
-  let pool = candidates;
+  let pool = allCandidates;
   let lbUsed = false;
   if (user) {
     if (!/^[a-z0-9_-]{1,30}$/.test(user)) {
@@ -70,7 +119,7 @@ async function recommend(req, env, ctx) {
       if (!wlIds || wlIds.size === 0) {
         return { error: "empty_watchlist", status: 404 };
       }
-      const filtered = candidates.filter(f => wlIds.has(f.id));
+      const filtered = allCandidates.filter(f => wlIds.has(f.id));
       if (filtered.length >= 3) { pool = filtered; lbUsed = true; }
     } catch (e) {
       console.log("LB fail:", e?.message);
@@ -80,15 +129,17 @@ async function recommend(req, env, ctx) {
   // Drop excluded ids (re-roll case)
   pool = pool.filter(f => !excludeSet.has(f.id));
 
-  // 3. Score with curated boost
+  // 3. Score with curated + list boost
   const ranked = pool.map(f => {
     const cur = curatedFor(f.id);
+    const listName = f._list;
     const score =
       (f.vote_average || 0) * 1.5 +
       Math.min((f.popularity || 0) / 30, 4) +
-      (cur ? 6 : 0) -
+      (cur ? 6 : 0) +
+      (listName ? 2.5 : 0) -
       (mood.popularity === "low" ? Math.min((f.popularity || 0) / 50, 2) : 0);
-    return { ...f, _score: score, _curated: cur || null };
+    return { ...f, _score: score, _curated: cur || null, _list: listName };
   }).sort((a, b) => b._score - a._score);
 
   // Always pull every curated item that survived filters into the front of the pool
@@ -134,10 +185,87 @@ async function recommend(req, env, ctx) {
       justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: f._curated?.note || null,
+      from_list: f._list || null,
     };
   }));
 
   return { films: enriched, lb_used: lbUsed };
+}
+
+async function surprise(req, env, ctx) {
+  const url = new URL(req.url);
+  const country = (url.searchParams.get("country") || "US").toUpperCase();
+  const lang    = (url.searchParams.get("lang") || "en").startsWith("es") ? "es-ES" : "en-US";
+  const exclude = (url.searchParams.get("exclude") || "")
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
+  const excludeSet = new Set(exclude);
+
+  if (!env.TMDB_API_KEY) return { error: "config" };
+
+  // Random page 1-20 of TMDb top-rated, with quality floor
+  const today = new Date().toISOString().slice(0, 10);
+  const sorts = ["vote_average.desc", "popularity.desc"];
+  const pages = [];
+  for (let i = 0; i < 6; i++) {
+    pages.push({
+      sort_by: sorts[Math.floor(Math.random() * sorts.length)],
+      page: 1 + Math.floor(Math.random() * 25),
+    });
+  }
+
+  const baseParams = {
+    "vote_count.gte": 800,
+    "vote_average.gte": 6.8,
+    "with_runtime.gte": 75,
+    "primary_release_date.lte": today,
+    include_adult: "false",
+  };
+
+  const fetches = pages.map(p =>
+    tmdbDiscover(env, { ...baseParams, ...p }, lang).catch(() => ({ results: [] }))
+  );
+  const all = await Promise.all(fetches);
+  let pool = all.flatMap(r => r.results || []);
+
+  // De-dupe + drop excluded
+  const seen = new Set();
+  pool = pool.filter(f => {
+    if (excludeSet.has(f.id)) return false;
+    if (seen.has(f.id)) return false;
+    seen.add(f.id);
+    return true;
+  });
+
+  // Shuffle + pick 4
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const top = pool.slice(0, 4);
+
+  const enriched = await Promise.all(top.map(async (f) => {
+    const [providers, credits, details] = await Promise.all([
+      tmdbProviders(env, f.id, country),
+      tmdbCredits(env, f.id),
+      tmdbDetails(env, f.id, lang),
+    ]);
+    const cur = curatedFor(f.id);
+    return {
+      id: f.id,
+      title: f.title,
+      year: (f.release_date || "").slice(0, 4),
+      director: credits.director || null,
+      runtime: details.runtime || null,
+      genres: (f.genre_ids || []).slice(0, 2),
+      poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
+      justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
+      tmdb: `https://www.themoviedb.org/movie/${f.id}`,
+      curated_note: cur?.note || null,
+      from_list: null,
+    };
+  }));
+
+  return { films: enriched, mode: "surprise" };
 }
 
 export default {
@@ -161,6 +289,17 @@ export default {
         return json(out, {}, cors);
       } catch (e) {
         console.log("recommend err:", e?.stack || e);
+        return json({ error: "generic", message: String(e?.message || e) }, { status: 500 }, cors);
+      }
+    }
+
+    if (url.pathname === "/surprise") {
+      try {
+        const out = await surprise(req, env, ctx);
+        if (out.error) return json(out, { status: out.status || 500 }, cors);
+        return json(out, {}, cors);
+      } catch (e) {
+        console.log("surprise err:", e?.stack || e);
         return json({ error: "generic", message: String(e?.message || e) }, { status: 500 }, cors);
       }
     }

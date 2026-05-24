@@ -931,6 +931,28 @@
     const m = (navigator.language || "").match(/-([A-Z]{2})/i);
     return m ? m[1].toUpperCase() : "US";
   }
+  async function surpriseFlow({ exclude } = {}) {
+    show("loading");
+    $("#load-msg").textContent = window.t("loading");
+    const country = guessCountry();
+    const lang = window.LANG;
+    const params = new URLSearchParams({ country, lang });
+    if (exclude && exclude.length) params.set("exclude", exclude.join(","));
+    params.set("seed", String(Math.floor(Math.random() * 1e9)));
+    try {
+      const r = await fetch(`${API_BASE}/surprise?${params}`);
+      const data = await r.json();
+      if (!r.ok) {
+        const code = data.error || "generic";
+        return showError(window.t(`err_${code}`) || window.t("err_generic"));
+      }
+      state.shownIds = (state.shownIds || []).concat((data.films || []).map(f => f.id).filter(Boolean));
+      renderResults(data);
+    } catch {
+      showError(window.t("err_generic"));
+    }
+  }
+
   async function recommend({ withUser, exclude }) {
     show("loading");
     $("#load-msg").textContent = withUser && state.user ? window.t("loading_lb") : window.t("loading");
@@ -991,7 +1013,8 @@
       <h3>${escapeHtml(f.title || "")} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
       <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
-      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span><p class="note">${escapeHtml(f.curated_note)}</p>` : ""}`;
+      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span><p class="note">${escapeHtml(f.curated_note)}</p>` : ""}
+      ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}`;
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
@@ -1060,6 +1083,13 @@
       renderQuestion();
       show("quiz");
     });
+    $("#path-surprise").addEventListener("click", async () => {
+      state.path = "surprise";
+      state.answers = {};
+      state.shownIds = [];
+      state.lastWithUser = false;
+      await surpriseFlow();
+    });
     $("#path-lb").addEventListener("click", () => {
       state.path = "lb";
       show("lb-ask");
@@ -1089,7 +1119,11 @@
       show("intro");
     });
     $("#reroll").addEventListener("click", () => {
-      recommend({ withUser: state.lastWithUser, exclude: state.shownIds || [] });
+      if (state.path === "surprise") {
+        surpriseFlow({ exclude: state.shownIds || [] });
+      } else {
+        recommend({ withUser: state.lastWithUser, exclude: state.shownIds || [] });
+      }
     });
     $("#retry").addEventListener("click", () => recommend({ withUser: state.path === "lb" }));
   });
