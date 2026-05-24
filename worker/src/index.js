@@ -327,7 +327,7 @@ async function surprise(req, env, ctx) {
     const j = Math.floor(Math.random() * (i + 1));
     [unlisted[i], unlisted[j]] = [unlisted[j], unlisted[i]];
   }
-  const top = [...listed.slice(0, 3), ...unlisted.slice(0, 4)].slice(0, 4);
+  const top = listed.length >= 4 ? listed.slice(0, 4) : [...listed, ...unlisted].slice(0, 4);
 
   const enriched = await Promise.all(top.map(async (f) => {
     const [providers, credits, details] = await Promise.all([
