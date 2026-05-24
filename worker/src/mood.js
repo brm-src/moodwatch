@@ -120,7 +120,8 @@ function voteFilters(mood) {
 export async function discoverByMood(env, mood, language) {
   const params = {
     sort_by: "vote_average.desc",
-    "vote_count.gte": 200,
+    "vote_count.gte": 800,        // raised from 200 to filter out fresh-release noise
+    "vote_average.gte": 6.5,      // baseline quality
     include_adult: "false",
     page: 1,
     ...genreSet(mood),

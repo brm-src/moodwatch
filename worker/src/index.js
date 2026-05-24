@@ -89,19 +89,20 @@ async function recommend(req, env, ctx) {
     return { ...f, _score: score, _curated: cur || null };
   }).sort((a, b) => b._score - a._score).slice(0, 8);
 
-  // 4. Enrich top picks with director + providers
+  // 4. Enrich top picks with director + providers + runtime (parallel)
   const top = ranked.slice(0, 4);
   const enriched = await Promise.all(top.map(async (f) => {
-    const [providers, credits] = await Promise.all([
+    const [providers, credits, details] = await Promise.all([
       tmdbProviders(env, f.id, country),
       tmdbCredits(env, f.id),
+      tmdbDetails(env, f.id, lang),
     ]);
     return {
       id: f.id,
       title: f.title,
       year: (f.release_date || "").slice(0, 4),
       director: credits.director || null,
-      runtime: f.runtime || null,
+      runtime: details.runtime || null,
       genres: f.genres || [],
       poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
       justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
