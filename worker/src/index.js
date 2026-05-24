@@ -37,7 +37,11 @@ function decodeMood(b64) {
 function justwatchUrl(film, country) {
   // Always use JustWatch search — TMDb's providers_link 404s often
   const c = (country || "us").toLowerCase();
-  const q = encodeURIComponent(film.title || "");
+  // Use title + year for better matching; strip special chars
+  const title = (film.title || "").replace(/[^\w\s-]/g, "").trim();
+  const year = film.release_date ? new Date(film.release_date).getFullYear() : "";
+  const query = year ? `${title} ${year}` : title;
+  const q = encodeURIComponent(query);
   return `https://www.justwatch.com/${c}/search?q=${q}`;
 }
 
@@ -208,7 +212,7 @@ async function recommend(req, env, ctx) {
       genres: f.genres || (details.genres || []).map(g => g.name?.toLowerCase()),
       poster: (f.poster_path || details.poster_path) ? `${tmdbImageBase()}w342${f.poster_path || details.poster_path}` : null,
       overview: f.overview || details.overview || null,
-      justwatch: justwatchUrl({ title: f.title || details.title, providers_link: providers.link }, country),
+      justwatch: justwatchUrl({ title: f.title || details.title, release_date: f.release_date || details.release_date, providers_link: providers.link }, country),
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
@@ -337,7 +341,7 @@ async function surprise(req, env, ctx) {
       genres: f.genres || (details.genres || []).map(g => g.name),
       poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
       overview: f.overview || null,
-      justwatch: justwatchUrl({ title: f.title, providers_link: providers.link }, country),
+      justwatch: justwatchUrl({ title: f.title, release_date: f.release_date, providers_link: providers.link }, country),
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: cur?.note || null,
       from_list: f._list || null,
