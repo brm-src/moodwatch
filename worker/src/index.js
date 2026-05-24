@@ -61,51 +61,39 @@ async function recommend(req, env, ctx) {
 
   // 1b. Pull films from matching curated Letterboxd lists, fetch their TMDb data,
   // merge into pool. List films get marked _list = listName for soft boost.
+  // Wrap whole block in timeout — if LB scrape is slow we proceed without it.
   const matched = matchLists(mood);
-  const listIds = new Map(); // tmdb_id -> list name
+  const listIds = new Map();
   if (matched.length > 0) {
-    try {
-      const allListSlugs = await Promise.all(matched.map(m => fetchListSlugs(env, m.list, 2).catch(() => [])));
-      for (let i = 0; i < matched.length; i++) {
-        const slugs = allListSlugs[i].slice(0, 60); // cap per list
+    const TIMEOUT_MS = 6000;
+    const work = (async () => {
+      const allListSlugs = await Promise.all(
+        matched.slice(0, 2).map(m => fetchListSlugs(env, m.list, 1).catch(() => []))
+      );
+      for (let i = 0; i < allListSlugs.length; i++) {
+        const slugs = allListSlugs[i].slice(0, 25); // small cap, KV-cached anyway
         const ids = await slugsToTmdbIds(env, slugs);
         for (const id of ids) {
           if (!listIds.has(id)) listIds.set(id, matched[i].list.name);
         }
       }
+    })();
+    try {
+      await Promise.race([
+        work,
+        new Promise((_, rej) => setTimeout(() => rej(new Error("list-timeout")), TIMEOUT_MS)),
+      ]);
     } catch (e) {
-      console.log("lists fail:", e?.message);
+      console.log("lists skipped:", e?.message);
     }
   }
 
-  // Fetch TMDb minimal data for any list-only ids missing from candidates
-  const candidateIds = new Set(candidates.map(c => c.id));
-  const missingFromCandidates = [...listIds.keys()].filter(id => !candidateIds.has(id));
-  let extraFromLists = [];
-  if (missingFromCandidates.length > 0) {
-    // batch via /movie/{id} — pricey, so cap to 30
-    const cap = missingFromCandidates.slice(0, 30);
-    extraFromLists = (await Promise.all(cap.map(id =>
-      tmdbDetails(env, id, lang).then(d => d).catch(() => null)
-    ))).filter(Boolean).map(d => ({
-      id: d.id,
-      title: d.title,
-      release_date: d.release_date,
-      vote_average: d.vote_average,
-      vote_count: d.vote_count,
-      popularity: d.popularity,
-      genre_ids: (d.genres || []).map(g => g.id),
-      genres: (d.genres || []).map(g => g.name?.toLowerCase()),
-      poster_path: d.poster_path,
-      runtime: d.runtime,
-    }));
-  }
-
-  // Combined candidates with list tag
-  const allCandidates = [
-    ...candidates.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
-    ...extraFromLists.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
-  ];
+  // Don't fetch extra TMDb details for list-only ids — too expensive in worker.
+  // Just tag candidates that are in matching lists.
+  const allCandidates = candidates.map(c => ({
+    ...c,
+    _list: listIds.get(c.id) || null,
+  }));
 
   // 2. If LB user provided, intersect with their watchlist TMDb IDs
   let pool = allCandidates;
