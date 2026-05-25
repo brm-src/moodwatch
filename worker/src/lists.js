@@ -223,6 +223,46 @@ export const LISTS = [
     signature: { trust: "horror", appetite: "horror", first_act: "thriller_horror" },
     ids: [71790, 1606, 67419, 113962, 81356, 90802, 95057, 84958, 66732, 110316, 1402],
   },
+  // ─── Pool diversity lists (no signature match required, used as seeds) ───
+  {
+    slug: "indie-2010s",
+    name: "Indie 2010s",
+    signature: { decade: ["now", "00s"], depth: ["thoughtful", "fun"] },
+    ids: [37165, 38, 76, 80, 77338, 246741, 369557, 156700, 466282, 458156, 530385, 503919, 530915, 414906, 467244, 290098, 244786, 369557, 27205, 244786, 13183, 530385, 530915, 568124, 466272, 423108, 76600, 567646, 522627, 374720, 313369, 522627, 466272, 466420, 545611],
+  },
+  {
+    slug: "feel-good-recent",
+    name: "Feel-good recientes",
+    signature: { tone: "light", energy: "unwind", decade: "now" },
+    ids: [508442, 508439, 568124, 508943, 12, 9806, 10681, 14160, 38757, 109445, 269149, 354912, 495764, 333339, 11324, 9377, 49793, 38757, 9377, 18785, 11377, 14160, 269149, 109445],
+  },
+  {
+    slug: "thriller-discover",
+    name: "Thrillers para descubrir",
+    signature: { tone: "dark", first_act: "thriller_horror" },
+    ids: [490132, 491045, 530915, 446696, 447277, 591538, 537402, 644479, 458156, 458423, 564328, 519182, 553604, 558031, 522627, 580489, 615457, 550988, 597208, 615175, 736357, 762504, 626063, 545611, 718789, 764273, 502356, 504949, 530915],
+  },
+  {
+    slug: "tv-comedy-recent",
+    name: "Comedia TV reciente",
+    media: "tv",
+    signature: { tone: "light", energy: "unwind" },
+    ids: [97546, 60875, 67915, 61222, 136315, 60625, 73375, 76479, 90400, 71791, 66631, 65494, 89674, 73796, 71712, 90802, 1668, 1100, 138502, 212808, 73762, 92783, 110492],
+  },
+  {
+    slug: "tv-drama-prestige",
+    name: "Drama TV prestige",
+    media: "tv",
+    signature: { depth: ["thoughtful", "ruined"], tone: "dark" },
+    ids: [1396, 60059, 1438, 1437, 95396, 76331, 67419, 71790, 113962, 1399, 60622, 87108, 100088, 218230, 76479, 81356, 71790, 60863, 87739, 95011, 90802, 110316, 114695, 212808, 95057, 84958, 92783, 105248, 94605, 60863, 76332],
+  },
+  {
+    slug: "tv-mindbender",
+    name: "TV mindbender",
+    media: "tv",
+    signature: { trust: "weird", appetite: "weird" },
+    ids: [70523, 62286, 60863, 95396, 90802, 110316, 71712, 67419, 113962, 81356, 95011, 87108, 100088],
+  },
 ];
 
 function matchesValue(want, got) {

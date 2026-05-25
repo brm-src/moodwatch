@@ -238,19 +238,21 @@ async function recommend(req, env, ctx) {
   let pool = allCandidates;
   let lbUsed = false;
   if (user && media === "movie") {
-    if (!/^[a-z0-9_-]{1,30}$/.test(user)) {
-      return { error: "invalid_user", status: 400 };
-    }
-    try {
-      const wlIds = await fetchWatchlistTmdbIds(env, user);
-      if (!wlIds || wlIds.size === 0) {
-        return { error: "empty_watchlist", status: 404 };
+    if (/^[a-z0-9_-]{1,30}$/.test(user)) {
+      try {
+        const wlIds = await fetchWatchlistTmdbIds(env, user);
+        if (wlIds && wlIds.size > 0) {
+          const filtered = allCandidates.filter(f => wlIds.has(f.id));
+          if (filtered.length >= 3) { pool = filtered; lbUsed = true; }
+          // If filter is too narrow (<3), fall through to full pool — never break.
+        }
+        // Empty watchlist or LB scraping returned nothing: silently fall through.
+        // (Letterboxd's HTML changed; slug extraction can fail. Don't break the user.)
+      } catch (e) {
+        console.log("LB fail:", e?.message);
       }
-      const filtered = allCandidates.filter(f => wlIds.has(f.id));
-      if (filtered.length >= 3) { pool = filtered; lbUsed = true; }
-    } catch (e) {
-      console.log("LB fail:", e?.message);
     }
+    // Invalid handle format: ignore silently. Bad chars shouldn't block recs.
   }
 
   // Drop excluded ids (re-roll case) and future releases
