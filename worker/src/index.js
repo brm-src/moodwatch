@@ -328,7 +328,6 @@ async function recommend(req, env, ctx) {
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
-      reason: pickReason({ ...f, runtime: details.runtime || f.runtime }, mood, lang),
     };
   }));
 
@@ -466,14 +465,14 @@ async function surprise(req, env, ctx) {
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: cur?.note || null,
       from_list: f._list || null,
-      reason: pickReason({ ...f, _curated: cur || null, runtime: details.runtime || f.runtime || null }, surpriseMood, lang),
+      from_feedback: !!f._likeBoost,
     };
   }));
 
   const enriched = enrichedRaw.filter(f => {
     if (profile === "short" && f.runtime && f.runtime > 95) return false;
     return true;
-  }).slice(0, 6);
+  }).slice(0, 4);
 
   return { films: enriched, mode: "surprise", profile, why: moodSummary(surpriseMood, lang), matched_lists: matched.map(m => m.list.name) };
 }

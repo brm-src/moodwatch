@@ -23,8 +23,6 @@
       <h1 data-i18n="intro_title">A film, <em>chosen by mood.</em></h1>
     </div>
     <div class="hero-card-dark hero-card" style="background:transparent;color:var(--paper);align-self:flex-start;max-width:520px;padding:0;">
-      <p style="color:var(--paper-3);font-family:var(--font-display);font-style:italic;font-size:var(--t-lead);line-height:1.4;margin-bottom:var(--s-3);"
-         data-i18n="intro_lead">Pick how I'll choose.</p>
       <div class="hero-actions">
         <!-- Primary: full ritual -->
         <button class="pill primary big" id="path-global">
@@ -43,15 +41,20 @@
         </div>
 
         <!-- Tertiary: Letterboxd entry, side option for power users -->
-        <button class="lb-entry" id="path-lb" data-i18n-attr="title:lb_tooltip">
-          <svg class="lb-logo" viewBox="0 0 80 14" aria-hidden="true">
-            <circle cx="7"  cy="7" r="5.5" fill="#00e054"/>
-            <circle cx="40" cy="7" r="5.5" fill="#40bcf4"/>
-            <circle cx="73" cy="7" r="5.5" fill="#ff8000"/>
-          </svg>
-          <span class="lb-text" data-i18n="lb_entry">Use my Letterboxd watchlist</span>
-          <span class="lb-info" aria-hidden="true">i</span>
-        </button>
+        <div class="lb-row">
+          <button class="lb-entry" id="path-lb">
+            <svg class="lb-logo" viewBox="0 0 80 14" aria-hidden="true">
+              <circle cx="7"  cy="7" r="5.5" fill="#00e054"/>
+              <circle cx="40" cy="7" r="5.5" fill="#40bcf4"/>
+              <circle cx="73" cy="7" r="5.5" fill="#ff8000"/>
+            </svg>
+            <span class="lb-text" data-i18n="lb_entry">Use my Letterboxd watchlist</span>
+          </button>
+          <button type="button" class="lb-info-btn" id="lb-info-btn" aria-label="Info" aria-haspopup="dialog">i</button>
+          <div class="lb-popover" id="lb-popover" role="dialog" hidden>
+            <p data-i18n="lb_tooltip">We only read your public watchlist. Your @ is not stored.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>

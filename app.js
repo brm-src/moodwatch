@@ -970,6 +970,8 @@
     const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
     const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
     params.set("seed", String(Math.floor(Math.random() * 1e9)));
+    state.lastMode = "surprise";
+    state.lastProfile = activeProfile;
     try {
       const r = await fetch(`${API_BASE}/surprise?${params}`);
       const data = await r.json();
@@ -999,6 +1001,8 @@
     // cache-bust: the edge cached recommend responses kill rotation
     params.set("seed", String(Math.floor(Math.random() * 1e9)));
     state.lastWithUser = !!withUser;
+    state.lastMode = "recommend";
+    state.lastMoodB64 = moodB64;
     try {
       const r = await fetch(`${API_BASE}/recommend?${params}`);
       const data = await r.json();
@@ -1048,6 +1052,7 @@
   function filmCard(f, rank) {
     const c = document.createElement("article");
     c.className = "card";
+    c._filmId = f.id;
     const taste = getTaste(f.id);
     if (taste === "liked") c.classList.add("is-liked");
     if (taste === "disliked") c.classList.add("is-disliked");
@@ -1071,7 +1076,7 @@
       </button>
       <button type="button" class="fb-btn fb-like" data-act="like"     title="${window.t("fb_like")}"     aria-label="${window.t("fb_like")}">👍</button>
       <button type="button" class="fb-btn fb-dis"  data-act="dislike"  title="${window.t("fb_dislike")}"  aria-label="${window.t("fb_dislike")}">👎</button>`;
-    fb.addEventListener("click", (e) => {
+    fb.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-act]");
       if (!btn) return;
       const act = btn.dataset.act;
@@ -1085,6 +1090,16 @@
       if (next === "liked")    c.classList.add("is-liked");
       if (next === "disliked") c.classList.add("is-disliked");
       if (next === "seen")     c.classList.add("is-seen");
+      // On dislike: fetch a replacement film and swap this card
+      if (next === "disliked") {
+        try {
+          const repl = await fetchReplacementFilm();
+          if (repl) {
+            const newCard = filmCard(repl, rank);
+            c.replaceWith(newCard);
+          }
+        } catch {}
+      }
     });
     posterWrap.appendChild(fb);
     c.appendChild(posterWrap);
@@ -1101,7 +1116,6 @@
       ${f.from_feedback ? `<span class="taste-badge">${window.t("from_feedback")}</span>` : ""}`;
     if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 90));
     else if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 160));
-    if (f.reason) meta.appendChild(expandableText(f.reason, "reason", 80));
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
@@ -1167,6 +1181,41 @@
     return Object.entries(t).filter(([_, v]) => v === kind).map(([k]) => parseInt(k, 10)).filter(Number.isFinite);
   }
   function clearTaste() { writeTaste({}); }
+
+  // Fetch a single replacement film (for dislike-swap), excluding current cards
+  async function fetchReplacementFilm() {
+    const country = guessCountry();
+    const lang = window.LANG;
+    const onCards = [...document.querySelectorAll("#cards .card")]
+      .map(c => c._filmId).filter(Boolean);
+    const exclude = (state.shownIds || []).concat(onCards);
+    const params = new URLSearchParams({ country, lang });
+    if (exclude.length) params.set("exclude", exclude.join(","));
+    const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
+    const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
+    params.set("seed", String(Math.floor(Math.random() * 1e9)));
+    let url;
+    if (state.lastMode === "surprise") {
+      params.set("profile", state.lastProfile || state.surpriseProfile || "quality");
+      url = `${API_BASE}/surprise?${params}`;
+    } else if (state.lastMode === "recommend" && state.lastMoodB64) {
+      params.set("mood", state.lastMoodB64);
+      if (state.lastWithUser && state.user) params.set("user", state.user);
+      url = `${API_BASE}/recommend?${params}`;
+    } else {
+      params.set("profile", "quality");
+      url = `${API_BASE}/surprise?${params}`;
+    }
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const data = await r.json();
+    const film = (data.films || [])[0];
+    if (film) {
+      film.from_feedback = film.from_feedback || (liked.length > 0);
+      state.shownIds = (state.shownIds || []).concat([film.id]);
+    }
+    return film || null;
+  }
 
   function escapeHtml(s) {
     return String(s || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1247,6 +1296,26 @@
       show("quiz");
     });
     $("#lb-back").addEventListener("click", () => { state.path = null; show("intro"); });
+
+    // LB info popover toggle
+    const lbInfoBtn = $("#lb-info-btn");
+    const lbPopover = $("#lb-popover");
+    if (lbInfoBtn && lbPopover) {
+      const closeLB = () => {
+        lbPopover.hidden = true;
+        lbInfoBtn.setAttribute("aria-expanded", "false");
+      };
+      lbInfoBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const open = lbPopover.hidden;
+        lbPopover.hidden = !open;
+        lbInfoBtn.setAttribute("aria-expanded", String(open));
+      });
+      document.addEventListener("click", (e) => {
+        if (!lbPopover.hidden && !lbPopover.contains(e.target) && e.target !== lbInfoBtn) closeLB();
+      });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLB(); });
+    }
 
     // Surprise chips: render 4 random + wire shuffle
     renderChips();
