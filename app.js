@@ -1218,7 +1218,7 @@
       renderQuestion();
       show("quiz");
     });
-    $("#path-surprise").addEventListener("click", async () => {
+    $("#path-surprise")?.addEventListener("click", async () => {
       state.path = "surprise";
       state.answers = {};
       state.shownIds = [];
