@@ -3,7 +3,7 @@
 // Returns:  { films: [{title, year, director, runtime, genres, poster, justwatch, tmdb, curated_note?}] }
 
 import { discoverByMood } from "./mood.js";
-import { tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase, tmdbDiscover } from "./tmdb.js";
+import { tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase, tmdbDiscover, tmdbSimilar, tmdbRecommendations } from "./tmdb.js";
 import { fetchWatchlistTmdbIds } from "./letterboxd.js";
 import { CURATED, curatedFor } from "./curated.js";
 import { matchLists } from "./lists.js";
@@ -142,6 +142,10 @@ async function recommend(req, env, ctx) {
   const exclude = (url.searchParams.get("exclude") || "")
     .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
   const excludeSet = new Set(exclude);
+  const liked = (url.searchParams.get("liked") || "")
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n)).slice(0, 30);
+  const disliked = (url.searchParams.get("disliked") || "")
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n)).slice(0, 30);
   const mood    = decodeMood(moodB64);
 
   if (!env.TMDB_API_KEY) {
@@ -220,19 +224,65 @@ async function recommend(req, env, ctx) {
   // Drop excluded ids (re-roll case) and future releases
   pool = pool.filter(f => !excludeSet.has(f.id) && (!f.release_date || f.release_date <= today));
 
-  // 3. Score with curated + list boost
+  // 2b. Taste signal from local feedback (liked/disliked)
+  // - liked → fetch /similar + /recommendations of recent likes, build boost set
+  // - disliked → tally dominant genres + decade + language, build penalty profile
+  const likeBoostSet = new Set();
+  if (liked.length) {
+    const likeSeeds = liked.slice(-6); // last 6 likes are most relevant
+    const sims = await Promise.all(likeSeeds.flatMap(id => [
+      tmdbSimilar(env, id).catch(() => []),
+      tmdbRecommendations(env, id).catch(() => []),
+    ]));
+    // Films appearing in ≥2 seed sources get the strong boost; ≥1 gets soft
+    const counts = new Map();
+    for (const arr of sims) for (const id of arr) counts.set(id, (counts.get(id) || 0) + 1);
+    for (const [id, n] of counts) if (n >= 1) likeBoostSet.add(id);
+    // Don't recommend things they already liked back
+    for (const id of liked) excludeSet.add(id);
+  }
+  const dislikedSet = new Set(disliked);
+  // Penalty signal: fetch genres of disliked items (cached). Tally top genres.
+  let dislikeGenres = new Set();
+  let dislikeLangs  = new Set();
+  if (disliked.length) {
+    const details = await Promise.all(disliked.slice(-10).map(id =>
+      tmdbDetails(env, id, lang).catch(() => null)
+    ));
+    const gCount = new Map(), lCount = new Map();
+    for (const d of details) {
+      if (!d) continue;
+      for (const g of (d.genres || [])) gCount.set(g.id, (gCount.get(g.id) || 0) + 1);
+      if (d.original_language) lCount.set(d.original_language, (lCount.get(d.original_language) || 0) + 1);
+    }
+    // Genre is "dominant" if it shows up in ≥3 dislikes
+    for (const [gid, n] of gCount) if (n >= 3) dislikeGenres.add(gid);
+    for (const [lc, n]  of lCount) if (n >= 3) dislikeLangs.add(lc);
+    // Always exclude already-disliked
+    for (const id of disliked) excludeSet.add(id);
+  }
+  // Re-apply exclude after taste signals
+  pool = pool.filter(f => !excludeSet.has(f.id));
+
+  // 3. Score with curated + list boost + taste signals
   const ranked = pool.map(f => {
     const cur = curatedFor(f.id);
     const listName = f._list;
+    const likeBoost = likeBoostSet.has(f.id) ? 4 : 0;
+    const genreOverlap = (f.genre_ids || []).some(g => dislikeGenres.has(g)) ? -3 : 0;
+    const langPenalty  = f.original_language && dislikeLangs.has(f.original_language) ? -2 : 0;
     const score =
       (f.vote_average || (f._listOnly ? 7 : 0)) * 1.5 +
       Math.min((f.popularity || 0) / 35, 3.2) +
       fitScore(f, mood) +
       (cur ? 6 : 0) +
-      (listName ? 3 : 0) -
+      (listName ? 3 : 0) +
+      likeBoost +
+      genreOverlap +
+      langPenalty -
       (mood.popularity === "low" ? Math.min((f.popularity || 0) / 42, 3) : 0) +
       (Math.random() * 0.9);
-    return { ...f, _score: score, _curated: cur || null, _list: listName };
+    return { ...f, _score: score, _curated: cur || null, _list: listName, _likeBoost: likeBoost > 0 };
   }).sort((a, b) => b._score - a._score);
 
   // Prefer editorial list hits when a mood clearly matches a list; TMDb discover fills gaps.

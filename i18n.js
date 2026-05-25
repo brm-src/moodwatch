@@ -19,6 +19,10 @@ const STRINGS = {
     lb_entry: "Use my Letterboxd watchlist",
     lb_tooltip: "We only read your public watchlist. Your @ is not stored.",
     shuffle_title: "Shuffle suggestions",
+    fb_seen: "Mark as watched",
+    fb_like: "I liked it",
+    fb_dislike: "I didn't like it",
+    clear_taste: "Reset my taste",
 
     lb_label: "Letterboxd",
     lb_ask_title: "Your <em>username.</em>",
@@ -408,6 +412,10 @@ const STRINGS = {
     lb_entry: "Usar mi watchlist de Letterboxd",
     lb_tooltip: "Solo leemos tu watchlist pública. Tu @ no se guarda.",
     shuffle_title: "Cambiar sugerencias",
+    fb_seen: "Marcar como vista",
+    fb_like: "Me gustó",
+    fb_dislike: "No me gustó",
+    clear_taste: "Reiniciar mi gusto",
 
     lb_label: "Letterboxd",
     lb_ask_title: "Tu <em>usuario.</em>",

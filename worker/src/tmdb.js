@@ -52,6 +52,20 @@ export async function tmdbCredits(env, id) {
   }
 }
 
+export async function tmdbSimilar(env, id) {
+  try {
+    const data = await tmdbFetch(env, `/movie/${id}/similar`, { page: 1 });
+    return (data.results || []).map(r => r.id).filter(Boolean);
+  } catch { return []; }
+}
+
+export async function tmdbRecommendations(env, id) {
+  try {
+    const data = await tmdbFetch(env, `/movie/${id}/recommendations`, { page: 1 });
+    return (data.results || []).map(r => r.id).filter(Boolean);
+  } catch { return []; }
+}
+
 // Genre IDs (TMDb stable list)
 export const GENRES = {
   action: 28, adventure: 12, animation: 16, comedy: 35, crime: 80,

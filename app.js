@@ -967,6 +967,8 @@
     const activeProfile = profile || state.surpriseProfile || "quality";
     params.set("profile", activeProfile);
     if (exclude && exclude.length) params.set("exclude", exclude.join(","));
+    const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
+    const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
     params.set("seed", String(Math.floor(Math.random() * 1e9)));
     try {
       const r = await fetch(`${API_BASE}/surprise?${params}`);
@@ -992,6 +994,8 @@
     const params = new URLSearchParams({ country, lang, mood: moodB64 });
     if (withUser && state.user) params.set("user", state.user);
     if (exclude && exclude.length) params.set("exclude", exclude.join(","));
+    const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
+    const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
     // cache-bust: the edge cached recommend responses kill rotation
     params.set("seed", String(Math.floor(Math.random() * 1e9)));
     state.lastWithUser = !!withUser;
@@ -1044,12 +1048,47 @@
   function filmCard(f, rank) {
     const c = document.createElement("article");
     c.className = "card";
+    const taste = getTaste(f.id);
+    if (taste === "liked") c.classList.add("is-liked");
+    if (taste === "disliked") c.classList.add("is-disliked");
+    if (taste === "seen") c.classList.add("is-seen");
+
+    const posterWrap = document.createElement("div");
+    posterWrap.className = "poster-wrap";
     const img = document.createElement("img");
     img.className = "poster";
     img.loading = "lazy";
     img.alt = f.title || "";
     img.src = f.poster || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 90'><rect width='60' height='90' fill='%23d8cfbc'/></svg>";
-    c.appendChild(img);
+    posterWrap.appendChild(img);
+
+    // Feedback overlay: Watched (eye) toggle, then 👍/👎 reveal when seen
+    const fb = document.createElement("div");
+    fb.className = "feedback";
+    fb.innerHTML = `
+      <button type="button" class="fb-btn fb-seen"  data-act="seen"     title="${window.t("fb_seen")}"     aria-label="${window.t("fb_seen")}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+      <button type="button" class="fb-btn fb-like" data-act="like"     title="${window.t("fb_like")}"     aria-label="${window.t("fb_like")}">👍</button>
+      <button type="button" class="fb-btn fb-dis"  data-act="dislike"  title="${window.t("fb_dislike")}"  aria-label="${window.t("fb_dislike")}">👎</button>`;
+    fb.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      const act = btn.dataset.act;
+      const cur = getTaste(f.id);
+      let next = null;
+      if (act === "seen")    next = cur === "seen" ? null : "seen";
+      if (act === "like")    next = cur === "liked" ? "seen" : "liked";
+      if (act === "dislike") next = cur === "disliked" ? "seen" : "disliked";
+      setTaste(f.id, next);
+      c.classList.remove("is-liked", "is-disliked", "is-seen");
+      if (next === "liked")    c.classList.add("is-liked");
+      if (next === "disliked") c.classList.add("is-disliked");
+      if (next === "seen")     c.classList.add("is-seen");
+    });
+    posterWrap.appendChild(fb);
+    c.appendChild(posterWrap);
+
     const meta = document.createElement("div");
     meta.className = "meta";
     meta.innerHTML = `
@@ -1105,6 +1144,28 @@
     }
     return wrap;
   }
+
+  // ────────────────────────────────────────────────────────────
+  // TASTE — local-only feedback (seen / liked / disliked)
+  // ────────────────────────────────────────────────────────────
+  const TASTE_KEY = "moodwatch.taste.v1";
+  function readTaste() {
+    try { return JSON.parse(localStorage.getItem(TASTE_KEY) || "{}"); } catch { return {}; }
+  }
+  function writeTaste(obj) {
+    try { localStorage.setItem(TASTE_KEY, JSON.stringify(obj)); } catch {}
+  }
+  function getTaste(id) { return readTaste()[String(id)] || null; }
+  function setTaste(id, value) {
+    const t = readTaste();
+    if (!value) delete t[String(id)]; else t[String(id)] = value;
+    writeTaste(t);
+  }
+  function tasteIds(kind) {
+    const t = readTaste();
+    return Object.entries(t).filter(([_, v]) => v === kind).map(([k]) => parseInt(k, 10)).filter(Number.isFinite);
+  }
+  function clearTaste() { writeTaste({}); }
 
   function escapeHtml(s) {
     return String(s || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1204,6 +1265,13 @@
       }
     });
     $("#retry").addEventListener("click", () => recommend({ withUser: state.path === "lb" }));
+    $("#clear-taste")?.addEventListener("click", () => {
+      if (confirm(window.LANG === "es" ? "¿Borrar tu historial de Vista/Me gustó/No me gustó?" : "Clear your Watched/Liked/Disliked history?")) {
+        clearTaste();
+        document.querySelectorAll(".card.is-seen,.card.is-liked,.card.is-disliked").forEach(c =>
+          c.classList.remove("is-seen", "is-liked", "is-disliked"));
+      }
+    });
   });
 
   // Pool of surprise chips. Each entry: { profile, key }.
