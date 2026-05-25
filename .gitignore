@@ -22,3 +22,4 @@ enrich_cache.json
 # Node / Netlify (legacy from initial scaffold)
 node_modules/
 .netlify/
+scripts/out/*.log

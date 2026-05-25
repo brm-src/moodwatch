@@ -1,7 +1,7 @@
 // moodwatch — i18n. Auto-detects EN/ES from navigator.language.
 const STRINGS = {
   en: {
-    kicker: "Cinema · Mood · Pick",
+    kicker: "",
     back: "Back",
     skip: "Skip",
     next: "Next",
@@ -354,7 +354,7 @@ const STRINGS = {
   },
 
   es: {
-    kicker: "Cine · Mood · Pick",
+    kicker: "",
     back: "Atrás",
     skip: "Saltar",
     next: "Siguiente",

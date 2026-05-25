@@ -589,7 +589,7 @@ header.top {
   font-size: 1.5rem;
   line-height: 1.1;
   letter-spacing: -0.015em;
-  color: var(--ink);
+  color: var(--accent);
   font-variation-settings: "opsz" 36;
   overflow-wrap: anywhere;
   word-break: normal;
