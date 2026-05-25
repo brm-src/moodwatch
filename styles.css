@@ -1036,9 +1036,6 @@ footer.bottom small a:hover { color: var(--accent); }
   display: inline-flex;
 }
 
-/* media-pick is the first screen now — back button serves no purpose */
-[data-step="media-pick"] #media-back { display: none; }
-
 /* loader: rotating icons + cross-fading text */
 .loader-icon {
   position: relative;

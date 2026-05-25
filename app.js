@@ -770,13 +770,22 @@
     "intro": "intro", "lb-ask": "lbAsk", "media-pick": "mediaPick", "quiz": "quiz",
     "loading": "loading", "results": "results", "error": "error",
   };
+  let _shownOnce = false;
   function show(name) {
     if (name !== "loading") stopLoader();
     const want = stepKeyByName[name] || name;
+    const wasShown = _shownOnce;
+    _shownOnce = true;
     Object.entries(steps).forEach(([k, el]) => el && el.classList.toggle("active", k === want));
     document.body.classList.toggle("on-hero", want === "intro");
-    // After paint, scroll to where the new section actually starts
+    // First call (on page load) → never scroll, leave the user at the top.
+    if (!wasShown) return;
+    // Hero/intro → always go to 0. Other steps → scroll the section into view.
     requestAnimationFrame(() => {
+      if (want === "intro") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
       const el = steps[want];
       if (el) {
         const top = el.getBoundingClientRect().top + window.scrollY;
@@ -1317,7 +1326,7 @@
   // WIRE
   // ────────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
-    show("media-pick");
+    show("intro");
     loadRandomHero();
     $("#q-back").addEventListener("click", backQ);
     $("#q-skip").addEventListener("click", skipQ);
@@ -1325,20 +1334,20 @@
     $("#path-global").addEventListener("click", () => {
       state.path = "global";
       state.answers = {};
-      QUIZ = buildSession();
-      state.qIdx = 0;
-      renderQuestion();
-      show("quiz");
+      show("media-pick");
     });
 
     // Media pick: Movie / TV / Either → then start quiz.
     document.querySelectorAll("[data-media]").forEach(btn => {
       btn.addEventListener("click", () => {
         state.media = btn.dataset.media || "movie";
-        show("intro");
+        QUIZ = buildSession();
+        state.qIdx = 0;
+        renderQuestion();
+        show("quiz");
       });
     });
-    // media-pick is now first; back button hidden via CSS.
+    $("#media-back")?.addEventListener("click", () => { show("intro"); });
     $("#path-surprise")?.addEventListener("click", async () => {
       state.path = "surprise";
       state.answers = {};
