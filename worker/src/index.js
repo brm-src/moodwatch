@@ -66,10 +66,11 @@ function decodeMood(b64) {
   } catch { return {}; }
 }
 
-function justwatchUrl(film, country, contentType = "movie") {
+function justwatchUrl(film, country, _contentType = "movie") {
   // Always use JustWatch search — TMDb's providers_link and locale paths 404 often.
+  // NOTE: JustWatch's `content_type` query param breaks search on /cl/buscar (returns
+  // "No hemos encontrado" for any value: movie/tv/tvshow/show). Dropped on purpose.
   const c = (country || "us").toLowerCase();
-  // Spanish-locale JustWatch uses /buscar, not /search. CL was the reported 404.
   const spanishSearch = new Set(["cl", "es", "mx", "ar", "co", "pe", "uy", "ec"]);
   const searchPath = spanishSearch.has(c) ? "buscar" : "search";
   // Use title + year for better matching; strip special chars but preserve unicode letters.
@@ -81,7 +82,7 @@ function justwatchUrl(film, country, contentType = "movie") {
   const year = film.release_date ? new Date(film.release_date).getFullYear() : "";
   const query = year ? `${title} ${year}` : title;
   const q = encodeURIComponent(query);
-  return `https://www.justwatch.com/${c}/${searchPath}?content_type=${contentType}&q=${q}`;
+  return `https://www.justwatch.com/${c}/${searchPath}?q=${q}`;
 }
 
 function fitScore(film, mood = {}) {
