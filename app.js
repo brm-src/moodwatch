@@ -1186,16 +1186,9 @@
     });
     $("#lb-back").addEventListener("click", () => { state.path = null; show("intro"); });
 
-    $$(".quick-surprise button[data-profile]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        state.path = "surprise";
-        state.answers = {};
-        state.shownIds = [];
-        state.lastWithUser = false;
-        state.surpriseProfile = btn.dataset.profile || "quality";
-        await surpriseFlow({ profile: state.surpriseProfile });
-      });
-    });
+    // Surprise chips: render 4 random + wire shuffle
+    renderChips();
+    $("#shuffle-chips")?.addEventListener("click", shuffleChipsAnimated);
 
     $("#restart").addEventListener("click", () => {
       state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality";
@@ -1212,4 +1205,63 @@
     });
     $("#retry").addEventListener("click", () => recommend({ withUser: state.path === "lb" }));
   });
+
+  // Pool of surprise chips. Each entry: { profile, key }.
+  // 'profile' must be a worker preset (see surpriseMoodForProfile).
+  // 'key' is the i18n string. We render 4 random per shuffle.
+  const CHIP_POOL = [
+    { profile: "weird",      key: "chip_weird" },
+    { profile: "weird",      key: "chip_fever" },
+    { profile: "short",      key: "chip_short" },
+    { profile: "short",      key: "chip_quick_bite" },
+    { profile: "beautiful",  key: "chip_beautiful" },
+    { profile: "beautiful",  key: "chip_soft" },
+    { profile: "hurt",       key: "chip_hurt" },
+    { profile: "hurt",       key: "chip_devastate" },
+    { profile: "pace",       key: "chip_pace" },
+    { profile: "pace",       key: "chip_chase" },
+    { profile: "horror",     key: "chip_horror" },
+    { profile: "horror",     key: "chip_dread" },
+    { profile: "classic",    key: "chip_classic" },
+    { profile: "classic",    key: "chip_old" },
+    { profile: "quality",    key: "chip_quality" },
+    { profile: "rainy",      key: "chip_rainy" },
+    { profile: "lonely",     key: "chip_lonely" },
+    { profile: "trip",       key: "chip_trip" },
+    { profile: "neon",       key: "chip_neon" },
+    { profile: "warm",       key: "chip_warm" },
+    { profile: "cult",       key: "chip_cult" },
+    { profile: "latam",      key: "chip_latam" },
+    { profile: "asian",      key: "chip_asian" },
+    { profile: "noir",       key: "chip_noir" },
+    { profile: "lost-20s",   key: "chip_lost20s" },
+  ];
+
+  function renderChips() {
+    const host = $("#quick-surprise");
+    if (!host) return;
+    const pool = [...CHIP_POOL].sort(() => Math.random() - 0.5).slice(0, 4);
+    host.innerHTML = "";
+    for (const c of pool) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.profile = c.profile;
+      b.dataset.i18n = c.key;
+      b.textContent = (window.t && window.t(c.key)) || c.profile;
+      b.addEventListener("click", async () => {
+        state.path = "surprise";
+        state.answers = {};
+        state.shownIds = [];
+        state.lastWithUser = false;
+        state.surpriseProfile = c.profile;
+        await surpriseFlow({ profile: c.profile });
+      });
+      host.appendChild(b);
+    }
+  }
+  function shuffleChipsAnimated() {
+    const btn = $("#shuffle-chips");
+    if (btn) { btn.classList.remove("spinning"); void btn.offsetWidth; btn.classList.add("spinning"); }
+    renderChips();
+  }
 })();

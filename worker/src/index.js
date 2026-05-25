@@ -111,14 +111,24 @@ function pickReason(film, mood, lang = "en") {
 function surpriseMoodForProfile(profile) {
   const p = (profile || "quality").toLowerCase();
   const presets = {
-    weird: { trust: "weird", risk: "discover", popularity: "low" },
-    short: { runtime: "short", risk: "safe" },
+    weird:     { trust: "weird", risk: "discover", popularity: "low" },
+    short:     { runtime: "short", risk: "safe" },
     beautiful: { tone: "light", energy: "unwind", want: "soothed", quality: "high" },
-    hurt: { memory: "heartbreak", want: "haunted", depth: "ruined" },
-    pace: { energy: "engage", first_act: "action_adventure", popularity: "mid" },
-    horror: { trust: "horror", tone: "dark", first_act: "thriller_horror" },
-    classic: { decade: "old", quality: "high" },
-    quality: { quality: "high" },
+    hurt:      { memory: "heartbreak", want: "haunted", depth: "ruined" },
+    pace:      { energy: "engage", first_act: "action_adventure", popularity: "mid" },
+    horror:    { trust: "horror", tone: "dark", first_act: "thriller_horror" },
+    classic:   { decade: "old", quality: "high" },
+    quality:   { quality: "high" },
+    rainy:     { weather: "rain", window: "rain", light: "neon", tone: "dark", temperature: "cool" },
+    lonely:    { company: "alone", state: "pensive", depth: "thoughtful", temperature: "cool" },
+    trip:      { trust: "weird", risk: "discover", appetite: "weird", depth: "uneasy" },
+    neon:      { color: "neon", light: "neon", tone: "dark", energy: "engage" },
+    warm:      { tone: "light", energy: "unwind", depth: "warm", want: "soothed" },
+    cult:      { trust: "weird", risk: "discover", popularity: "low", depth: "uneasy" },
+    latam:     { language_pref: "spanish", risk: "discover" },
+    asian:     { language_pref: "asian", quality: "high" },
+    noir:      { tone: "dark", first_act: "thriller_horror", trust: "thriller", quality: "high" },
+    "lost-20s":{ appetite: "lost-20s", depth: "thoughtful", state: "pensive", memory: "regret" },
   };
   return presets[p] || presets.quality;
 }

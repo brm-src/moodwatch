@@ -18,33 +18,40 @@
     <div>
       <header class="top" style="background:transparent;padding:0;margin-bottom:var(--s-4);">
         <span class="brand">mood<em>watch</em></span>
-        <span class="kicker" data-i18n="kicker">Cinema · Mood · Pick</span>
+        <span class="kicker" data-i18n="kicker"></span>
       </header>
       <h1 data-i18n="intro_title">A film, <em>chosen by mood.</em></h1>
     </div>
-    <div class="hero-card-dark hero-card" style="background:transparent;color:var(--paper);align-self:flex-start;max-width:480px;padding:0;">
+    <div class="hero-card-dark hero-card" style="background:transparent;color:var(--paper);align-self:flex-start;max-width:520px;padding:0;">
       <p style="color:var(--paper-3);font-family:var(--font-display);font-style:italic;font-size:var(--t-lead);line-height:1.4;margin-bottom:var(--s-3);"
-         data-i18n="intro_lead">Pick how I'll choose. The questions are the same.</p>
+         data-i18n="intro_lead">Pick how I'll choose.</p>
       <div class="hero-actions">
-        <button class="pill primary" id="path-lb">
-          <span data-i18n="path_lb">Use my Letterboxd watchlist</span>
+        <!-- Primary: full ritual -->
+        <button class="pill primary big" id="path-global">
+          <span data-i18n="path_global">Recommend me something</span>
           <span class="arrow">→</span>
         </button>
-        <button class="pill" id="path-global">
-          <span data-i18n="path_global">Just recommend something</span>
-          <span class="arrow">→</span>
-        </button>
-        <button class="pill ghost" id="path-surprise">
-          <span data-i18n="path_surprise">Surprise me</span>
-          <span class="arrow">→</span>
-        </button>
-        <div class="quick-surprise" aria-label="Quick surprise filters">
-          <button type="button" data-profile="weird" data-i18n="quick_weird">Algo raro</button>
-          <button type="button" data-profile="short" data-i18n="quick_short">Algo corto</button>
-          <button type="button" data-profile="beautiful" data-i18n="quick_beautiful">Algo hermoso</button>
-          <button type="button" data-profile="hurt" data-i18n="quick_hurt">Algo que duela</button>
-          <button type="button" data-profile="pace" data-i18n="quick_pace">Algo con ritmo</button>
+
+        <!-- Secondary: surprise me + 4 random chips -->
+        <div class="surprise-block">
+          <div class="surprise-head">
+            <span class="surprise-label" data-i18n="path_surprise">Surprise me</span>
+            <button type="button" class="shuffle" id="shuffle-chips" aria-label="Shuffle"
+                    data-i18n-attr="title:shuffle_title" title="Shuffle">↻</button>
+          </div>
+          <div class="quick-surprise" id="quick-surprise" aria-label="Quick surprise filters"></div>
         </div>
+
+        <!-- Tertiary: Letterboxd entry, side option for power users -->
+        <button class="lb-entry" id="path-lb" data-i18n-attr="title:lb_tooltip">
+          <svg class="lb-logo" viewBox="0 0 80 14" aria-hidden="true">
+            <circle cx="7"  cy="7" r="5.5" fill="#00e054"/>
+            <circle cx="40" cy="7" r="5.5" fill="#40bcf4"/>
+            <circle cx="73" cy="7" r="5.5" fill="#ff8000"/>
+          </svg>
+          <span class="lb-text" data-i18n="lb_entry">Use my Letterboxd watchlist</span>
+          <span class="lb-info" aria-hidden="true">i</span>
+        </button>
       </div>
     </div>
   </section>
