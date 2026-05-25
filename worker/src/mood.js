@@ -75,11 +75,14 @@ function runtimeRange(mood) {
 
 function dateRange(mood) {
   const d = mood.decade;
-  if (d === "old") return { "primary_release_date.lte": "1969-12-31" };
-  if (d === "70s") return { "primary_release_date.gte": "1970-01-01", "primary_release_date.lte": "1979-12-31" };
-  if (d === "90s") return { "primary_release_date.gte": "1990-01-01", "primary_release_date.lte": "1999-12-31" };
-  if (d === "00s") return { "primary_release_date.gte": "2000-01-01", "primary_release_date.lte": "2009-12-31" };
-  if (d === "now") return { "primary_release_date.gte": "2020-01-01" };
+  if (d === "old")    return { "primary_release_date.lte": "1969-12-31" };
+  if (d === "70s80s") return { "primary_release_date.gte": "1970-01-01", "primary_release_date.lte": "1989-12-31" };
+  if (d === "90s00s") return { "primary_release_date.gte": "1990-01-01", "primary_release_date.lte": "2009-12-31" };
+  if (d === "now")    return { "primary_release_date.gte": "2010-01-01" };
+  // legacy values still supported
+  if (d === "70s")    return { "primary_release_date.gte": "1970-01-01", "primary_release_date.lte": "1979-12-31" };
+  if (d === "90s")    return { "primary_release_date.gte": "1990-01-01", "primary_release_date.lte": "1999-12-31" };
+  if (d === "00s")    return { "primary_release_date.gte": "2000-01-01", "primary_release_date.lte": "2009-12-31" };
   return {};
 }
 

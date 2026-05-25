@@ -180,13 +180,16 @@ const STRINGS = {
     q_texture_wood:      "Old wood.",
     q_texture_glass:     "Cold glass.",
 
-    q_decade_t: "Which <em>decade?</em>",
-    q_decade_old: "Black and white.",
+    q_decade_t: "Which <em>era?</em>",
+    q_decade_old: "Pre-70s. Black and white.",
+    q_decade_70s80s: "70s & 80s. Grain and analog.",
+    q_decade_90s00s: "90s & 2000s. VHS and digital.",
+    q_decade_now: "2010 onwards.",
+    q_decade_any: "Doesn't matter.",
+    // legacy aliases (kept so old answers still resolve)
     q_decade_70s: "70s grain.",
     q_decade_90s: "90s VHS.",
     q_decade_00s: "Early 2000s.",
-    q_decade_now: "Right now.",
-    q_decade_any: "Doesn't matter.",
 
     q_place_t: "Take me to a <em>place.</em>",
     q_place_town:       "A small town.",
@@ -574,13 +577,16 @@ const STRINGS = {
     q_texture_wood:      "Madera vieja.",
     q_texture_glass:     "Vidrio frío.",
 
-    q_decade_t: "¿Qué <em>década?</em>",
-    q_decade_old: "Blanco y negro.",
+    q_decade_t: "¿Qué <em>época?</em>",
+    q_decade_old: "Pre-70s. Blanco y negro.",
+    q_decade_70s80s: "70s y 80s. Grano y analógico.",
+    q_decade_90s00s: "90s y 2000s. VHS y digital.",
+    q_decade_now: "2010 en adelante.",
+    q_decade_any: "Da igual.",
+    // legacy aliases
     q_decade_70s: "Grano de los 70.",
     q_decade_90s: "VHS noventero.",
     q_decade_00s: "Inicios de los 2000.",
-    q_decade_now: "Justo ahora.",
-    q_decade_any: "Da igual.",
 
     q_place_t: "Llévame a un <em>lugar.</em>",
     q_place_town:       "Un pueblo chico.",

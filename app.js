@@ -146,12 +146,11 @@
     decade: {
       key: "decade", kind: "real", titleKey: "q_decade_t",
       options: [
-        { value: "old",  labelKey: "q_decade_old"  },
-        { value: "70s",  labelKey: "q_decade_70s"  },
-        { value: "90s",  labelKey: "q_decade_90s"  },
-        { value: "00s",  labelKey: "q_decade_00s"  },
-        { value: "now",  labelKey: "q_decade_now"  },
-        { value: "any",  labelKey: "q_decade_any"  },
+        { value: "old",   labelKey: "q_decade_old"   },
+        { value: "70s80s",labelKey: "q_decade_70s80s"},
+        { value: "90s00s",labelKey: "q_decade_90s00s"},
+        { value: "now",   labelKey: "q_decade_now"   },
+        { value: "any",   labelKey: "q_decade_any"   },
       ],
     },
     place: {
@@ -464,7 +463,7 @@
   // like runtime/language/taste. Keep the ritual feel, but always collect the
   // axes that materially improve recommendations.
   function buildSession() {
-    const spine = ["state", "appetite", "intent"];
+    const spine = ["state", "appetite", "decade", "intent"];
     const format = takeRandom(["runtime", "language_pref"], 1);
     const taste = takeRandom(["depth", "risk_taste", "director_vibe", "first_act", "trust", "avoid", "rewatch_taste"], 2);
     const texture = takeRandom(["weather", "light", "texture", "place", "sound", "temperature", "memory", "want", "pace", "opening"], 2);
