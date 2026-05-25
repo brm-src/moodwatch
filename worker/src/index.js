@@ -245,10 +245,10 @@ async function recommend(req, env, ctx) {
       if (!top.some(x => x.id === item.id)) top.push(item);
     }
   };
-  pushUnique(curatedHits.slice(0, 3), 2);
-  pushUnique(listHits.slice(0, 24), matched.length ? 6 : 3);
-  pushUnique(otherHits.slice(0, 40), 8);
-  const enrichedPool = await Promise.all(top.slice(0, 8).map(async (f) => {
+  pushUnique(curatedHits.slice(0, 4), 3);
+  pushUnique(listHits.slice(0, 24), matched.length ? 8 : 3);
+  pushUnique(otherHits.slice(0, 40), 10);
+  const enrichedPool = await Promise.all(top.slice(0, 9).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       tmdbProviders(env, f.id, country),
       tmdbCredits(env, f.id),
@@ -383,9 +383,9 @@ async function surprise(req, env, ctx) {
   })).sort((a, b) => b._score - a._score);
   const listed = pool.filter(f => f._list);
   const unlisted = pool.filter(f => !f._list);
-  const top = listed.length >= 4 ? listed.slice(0, 4) : [...listed, ...unlisted].slice(0, 4);
+  const top = listed.length >= 6 ? listed.slice(0, 7) : [...listed, ...unlisted].slice(0, 8);
 
-  const enriched = await Promise.all(top.map(async (f) => {
+  const enrichedRaw = await Promise.all(top.map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       tmdbProviders(env, f.id, country),
       tmdbCredits(env, f.id),
@@ -408,6 +408,11 @@ async function surprise(req, env, ctx) {
       reason: pickReason({ ...f, _curated: cur || null, runtime: details.runtime || f.runtime || null }, surpriseMood, lang),
     };
   }));
+
+  const enriched = enrichedRaw.filter(f => {
+    if (profile === "short" && f.runtime && f.runtime > 95) return false;
+    return true;
+  }).slice(0, 6);
 
   return { films: enriched, mode: "surprise", profile, why: moodSummary(surpriseMood, lang), matched_lists: matched.map(m => m.list.name) };
 }

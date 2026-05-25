@@ -457,9 +457,9 @@
     const spine = ["state", "intent"];
     const format = takeRandom(["runtime", "language_pref"], 1);
     const taste = takeRandom(["depth", "risk_taste", "director_vibe", "first_act", "trust", "avoid", "rewatch_taste"], 2);
-    const texture = takeRandom(["weather", "light", "texture", "place", "sound", "temperature", "memory", "want", "pace", "opening"], 1);
-    const wild = takeRandom(["scene", "door", "decade", "smell", "window", "object", "body", "phrase"], 1);
-    const keys = [...new Set([...spine, ...taste, ...texture, ...format, ...wild])].slice(0, 6);
+    const texture = takeRandom(["weather", "light", "texture", "place", "sound", "temperature", "memory", "want", "pace", "opening"], 2);
+    const wild = takeRandom(["scene", "door", "decade", "smell", "window", "object", "body", "phrase"], 2);
+    const keys = [...new Set([...spine, ...taste, ...format, ...texture, ...wild])].slice(0, 8);
     return [...keys.map(k => BANK[k]), BANK.ink];
   }
 
@@ -1107,6 +1107,12 @@
       if (!Array.isArray(list) || !list.length) return;
       const pick = list[Math.floor(Math.random() * list.length)];
       const hero = document.getElementById("hero");
+      const fig = document.getElementById("hero-fig");
+      if (fig && pick.caption) {
+        fig.textContent = pick.caption;
+        fig.hidden = false;
+        fig.title = pick.caption;
+      }
       if (hero) {
         const img = new Image();
         img.onload = () => {
