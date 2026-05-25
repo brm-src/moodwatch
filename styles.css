@@ -1039,3 +1039,33 @@ footer.bottom small a:hover { color: var(--accent); }
 /* media-pick is the first screen now — back button serves no purpose */
 [data-step="media-pick"] #media-back { display: none; }
 
+/* loader: rotating icons + cross-fading text */
+.loader-icon {
+  position: relative;
+  display: inline-block;
+  width: 64px; height: 64px;
+  margin-top: var(--s-3);
+  color: var(--accent);
+  opacity: .9;
+}
+.loader-icon .lico {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  transform: scale(.85) rotate(-6deg);
+  transition: opacity .45s ease, transform .45s ease;
+}
+.loader-icon .lico.is-on {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+}
+.loader-icon .lico[data-icon="reel"].is-on { animation: lico-spin 4s linear infinite; transform-origin: 50% 50%; }
+@keyframes lico-spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  transition: opacity .35s ease;
+}
+.loader-text.is-fading {
+  opacity: 0;
+}
+

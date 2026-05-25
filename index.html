@@ -122,7 +122,54 @@
     <div class="fig"><span data-i18n="loading_label">Searching</span><span class="bar"></span></div>
     <div class="loader">
       <p class="loader-text" id="load-msg" data-i18n="loading">Reading the room…</p>
-      <div class="shutter"></div>
+      <div class="loader-icon" id="load-icon" aria-hidden="true">
+        <!-- film reel -->
+        <svg class="lico" data-icon="reel" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="4" fill="currentColor"/>
+          <circle cx="32" cy="14" r="3"/><circle cx="32" cy="50" r="3"/>
+          <circle cx="14" cy="32" r="3"/><circle cx="50" cy="32" r="3"/>
+          <circle cx="19" cy="19" r="3"/><circle cx="45" cy="45" r="3"/>
+          <circle cx="19" cy="45" r="3"/><circle cx="45" cy="19" r="3"/>
+        </svg>
+        <!-- clapperboard -->
+        <svg class="lico" data-icon="clap" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="8" y="22" width="48" height="32" rx="2"/>
+          <path d="M8 22 L18 12 L26 12 L16 22 Z M26 12 L34 12 L24 22 L16 22 Z M34 12 L42 12 L32 22 L24 22 Z M42 12 L50 12 L40 22 L32 22 Z M50 12 L56 12 L56 18 L48 22 L40 22 Z" fill="currentColor" stroke="none" opacity=".25"/>
+          <path d="M8 22 L18 12 M26 12 L16 22 M34 12 L24 22 M42 12 L32 22 M50 12 L40 22"/>
+        </svg>
+        <!-- ticket -->
+        <svg class="lico" data-icon="ticket" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M6 22 q4 0 4 -4 v-2 h44 v2 q0 4 4 4 v20 q-4 0 -4 4 v2 h-44 v-2 q0 -4 -4 -4 z"/>
+          <line x1="34" y1="14" x2="34" y2="50" stroke-dasharray="3 4"/>
+        </svg>
+        <!-- projector -->
+        <svg class="lico" data-icon="proj" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="6" y="22" width="36" height="22" rx="3"/>
+          <circle cx="18" cy="33" r="6"/>
+          <path d="M42 28 L58 18 L58 48 L42 38 Z"/>
+          <line x1="14" y1="48" x2="14" y2="54"/><line x1="34" y1="48" x2="34" y2="54"/>
+        </svg>
+        <!-- film strip -->
+        <svg class="lico" data-icon="strip" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="10" y="8" width="44" height="48" rx="2"/>
+          <rect x="14" y="14" width="36" height="10"/>
+          <rect x="14" y="28" width="36" height="10"/>
+          <rect x="14" y="42" width="36" height="10"/>
+          <line x1="10" y1="14" x2="14" y2="14" stroke-width="3"/><line x1="10" y1="20" x2="14" y2="20" stroke-width="3"/>
+          <line x1="10" y1="28" x2="14" y2="28" stroke-width="3"/><line x1="10" y1="34" x2="14" y2="34" stroke-width="3"/>
+          <line x1="10" y1="42" x2="14" y2="42" stroke-width="3"/><line x1="10" y1="48" x2="14" y2="48" stroke-width="3"/>
+          <line x1="50" y1="14" x2="54" y2="14" stroke-width="3"/><line x1="50" y1="20" x2="54" y2="20" stroke-width="3"/>
+          <line x1="50" y1="28" x2="54" y2="28" stroke-width="3"/><line x1="50" y1="34" x2="54" y2="34" stroke-width="3"/>
+          <line x1="50" y1="42" x2="54" y2="42" stroke-width="3"/><line x1="50" y1="48" x2="54" y2="48" stroke-width="3"/>
+        </svg>
+        <!-- TV/CRT -->
+        <svg class="lico" data-icon="tv" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="8" y="14" width="48" height="34" rx="3"/>
+          <line x1="20" y1="14" x2="32" y2="6"/><line x1="44" y1="14" x2="32" y2="6"/>
+          <circle cx="50" cy="22" r="1.5" fill="currentColor"/>
+          <line x1="14" y1="42" x2="40" y2="42"/>
+        </svg>
+      </div>
     </div>
   </section>
 

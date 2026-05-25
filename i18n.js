@@ -84,6 +84,25 @@ const STRINGS = {
     loading_label: "Searching",
     loading: "Reading the room.",
     loading_lb: "Reading your watchlist.",
+    loading_msgs: [
+      "Reading the room.",
+      "Cross-checking moods.",
+      "Tuning the projector.",
+      "Sifting the archive.",
+      "Calibrating taste.",
+      "Threading the reel.",
+      "Asking the cinephiles.",
+      "Fading in."
+    ],
+    loading_msgs_lb: [
+      "Reading your watchlist.",
+      "Sorting your saved films.",
+      "Matching against your mood.",
+      "Cross-checking your shelf.",
+      "Filtering noise.",
+      "Tuning the projector.",
+      "Almost there."
+    ],
     oops_label: "Trouble",
     oops: "Something <em>broke.</em>",
     err_invalid_user: "That username doesn't look right.",
@@ -486,6 +505,25 @@ const STRINGS = {
     loading_label: "Buscando",
     loading: "Leyendo el ambiente.",
     loading_lb: "Leyendo tu watchlist.",
+    loading_msgs: [
+      "Leyendo el ambiente.",
+      "Cruzando estados de ánimo.",
+      "Ajustando el proyector.",
+      "Revisando el archivo.",
+      "Calibrando el gusto.",
+      "Cargando el rollo.",
+      "Consultando a los cinéfilos.",
+      "Fundiendo a entrada."
+    ],
+    loading_msgs_lb: [
+      "Leyendo tu watchlist.",
+      "Ordenando tus pelis guardadas.",
+      "Cruzando con tu mood.",
+      "Revisando tu repisa.",
+      "Filtrando el ruido.",
+      "Ajustando el proyector.",
+      "Casi listo."
+    ],
     oops_label: "Problema",
     oops: "Algo se <em>rompió.</em>",
     err_invalid_user: "Ese usuario no se ve bien.",

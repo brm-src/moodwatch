@@ -771,6 +771,7 @@
     "loading": "loading", "results": "results", "error": "error",
   };
   function show(name) {
+    if (name !== "loading") stopLoader();
     const want = stepKeyByName[name] || name;
     Object.entries(steps).forEach(([k, el]) => el && el.classList.toggle("active", k === want));
     document.body.classList.toggle("on-hero", want === "intro");
@@ -958,9 +959,35 @@
     const m = (navigator.language || "").match(/-([A-Z]{2})/i);
     return m ? m[1].toUpperCase() : "US";
   }
+  // ─── loader rotator: cycles caption + cinema icon every ~1.6s ─────────
+  let _loaderTimer = null;
+  let _loaderStarted = 0;
+  function startLoader(useLB = false) {
+    stopLoader();
+    const msgs = (useLB && window.t("loading_msgs_lb")) || window.t("loading_msgs") || [window.t(useLB ? "loading_lb" : "loading")];
+    const icons = document.querySelectorAll("#load-icon .lico");
+    const txt = document.getElementById("load-msg");
+    let i = 0;
+    _loaderStarted = Date.now();
+    const swap = () => {
+      const m = Array.isArray(msgs) ? msgs[i % msgs.length] : msgs;
+      if (txt) {
+        txt.classList.add("is-fading");
+        setTimeout(() => { txt.textContent = m; txt.classList.remove("is-fading"); }, 280);
+      }
+      icons.forEach((el, idx) => el.classList.toggle("is-on", idx === (i % icons.length)));
+      i++;
+    };
+    swap();
+    _loaderTimer = setInterval(swap, 1600);
+  }
+  function stopLoader() {
+    if (_loaderTimer) { clearInterval(_loaderTimer); _loaderTimer = null; }
+  }
+
   async function surpriseFlow({ exclude, profile } = {}) {
     show("loading");
-    $("#load-msg").textContent = window.t("loading");
+    startLoader(false);
     const country = guessCountry();
     const lang = window.LANG;
     const params = new URLSearchParams({ country, lang });
@@ -999,7 +1026,7 @@
 
   async function recommend({ withUser, exclude }) {
     show("loading");
-    $("#load-msg").textContent = withUser && state.user ? window.t("loading_lb") : window.t("loading");
+    startLoader(Boolean(withUser && state.user));
     const country = guessCountry();
     const lang = window.LANG;
     const mood = ritualToMood(state.answers);
@@ -1050,6 +1077,7 @@
       p.textContent = window.t("no_picks");
       cards.appendChild(p);
     } else {
+      stopLoader();
       data.films.forEach((f, i) => cards.appendChild(filmCard(f, i + 1)));
       pushShown(data.films.map(f => f.id).filter(Boolean));
     }
