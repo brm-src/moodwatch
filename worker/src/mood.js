@@ -4,12 +4,11 @@
 //   language_pref, decade, first_act, fear:?, exclude:[], avoid, trust,
 //   phrase }
 
-import { tmdbDiscover, GENRES } from "./tmdb.js";
-
-const G = GENRES;
+import { tmdbDiscover, tmdbDiscoverTV, GENRES, TV_GENRES } from "./tmdb.js";
 
 // Genre presets per axis. Multiple axes combine via union (with_genres OR-ed in TMDb).
-function genreSet(mood) {
+function genreSet(mood, media = "movie") {
+  const G = media === "tv" ? TV_GENRES : GENRES;
   const inc = new Set();
   const exc = new Set();
 
@@ -73,16 +72,17 @@ function runtimeRange(mood) {
   return {};
 }
 
-function dateRange(mood) {
+function dateRange(mood, media = "movie") {
   const d = mood.decade;
-  if (d === "old")    return { "primary_release_date.lte": "1969-12-31" };
-  if (d === "70s80s") return { "primary_release_date.gte": "1970-01-01", "primary_release_date.lte": "1989-12-31" };
-  if (d === "90s00s") return { "primary_release_date.gte": "1990-01-01", "primary_release_date.lte": "2009-12-31" };
-  if (d === "now")    return { "primary_release_date.gte": "2010-01-01" };
+  const k = media === "tv" ? "first_air_date" : "primary_release_date";
+  if (d === "old")    return { [`${k}.lte`]: "1969-12-31" };
+  if (d === "70s80s") return { [`${k}.gte`]: "1970-01-01", [`${k}.lte`]: "1989-12-31" };
+  if (d === "90s00s") return { [`${k}.gte`]: "1990-01-01", [`${k}.lte`]: "2009-12-31" };
+  if (d === "now")    return { [`${k}.gte`]: "2010-01-01" };
   // legacy values still supported
-  if (d === "70s")    return { "primary_release_date.gte": "1970-01-01", "primary_release_date.lte": "1979-12-31" };
-  if (d === "90s")    return { "primary_release_date.gte": "1990-01-01", "primary_release_date.lte": "1999-12-31" };
-  if (d === "00s")    return { "primary_release_date.gte": "2000-01-01", "primary_release_date.lte": "2009-12-31" };
+  if (d === "70s")    return { [`${k}.gte`]: "1970-01-01", [`${k}.lte`]: "1979-12-31" };
+  if (d === "90s")    return { [`${k}.gte`]: "1990-01-01", [`${k}.lte`]: "1999-12-31" };
+  if (d === "00s")    return { [`${k}.gte`]: "2000-01-01", [`${k}.lte`]: "2009-12-31" };
   return {};
 }
 
@@ -128,41 +128,51 @@ function voteFilters(mood) {
   return out;
 }
 
-export async function discoverByMood(env, mood, language) {
+export async function discoverByMood(env, mood, language, media = "movie") {
   const today = new Date().toISOString().slice(0, 10);
+  const isTV = media === "tv";
+  const dateKey = isTV ? "first_air_date" : "primary_release_date";
   const baseParams = {
-    "vote_count.gte": 800,        // raised from 200 to filter out fresh-release noise
-    "vote_average.gte": 6.5,      // baseline quality
-    "with_runtime.gte": 75,       // drop shorts / TV specials
-    "primary_release_date.lte": today, // already-released only
+    "vote_count.gte": 800,
+    "vote_average.gte": 6.5,
+    [`${dateKey}.lte`]: today,
     include_adult: "false",
-    ...genreSet(mood),
-    ...runtimeRange(mood),
-    ...dateRange(mood),
+    ...genreSet(mood, media),
+    ...(isTV ? {} : runtimeRange(mood)),
+    ...(isTV ? {} : { "with_runtime.gte": 75 }),
+    ...dateRange(mood, media),
     ...languagePref(mood),
     ...voteFilters(mood),
   };
 
-  // Cast a wide net: 5 pages by vote_average + 5 by popularity, all in parallel.
-  // Different sort orders pull totally different films into the pool.
+  const discover = isTV ? tmdbDiscoverTV : tmdbDiscover;
   const fetches = [];
   for (let p = 1; p <= 5; p++) {
-    fetches.push(tmdbDiscover(env, { ...baseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
-    fetches.push(tmdbDiscover(env, { ...baseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
+    fetches.push(discover(env, { ...baseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
+    fetches.push(discover(env, { ...baseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
   }
   const all = await Promise.all(fetches);
   const results = all.flatMap(r => r.results || []);
 
-  // De-dupe by id
   const seen = new Set();
   const dedup = [];
   for (const r of results) {
     if (seen.has(r.id)) continue;
     seen.add(r.id);
-    dedup.push(r);
+    // Normalize TV shape to match movie shape used downstream
+    if (isTV) {
+      dedup.push({
+        ...r,
+        title: r.name || r.title,
+        release_date: r.first_air_date || r.release_date,
+        _media: "tv",
+      });
+    } else {
+      dedup.push({ ...r, _media: "movie" });
+    }
   }
 
-  // Map genre_ids -> names for the response
+  const G = isTV ? TV_GENRES : GENRES;
   const idToName = Object.fromEntries(Object.entries(G).map(([k, v]) => [v, k]));
   return dedup.map(r => ({
     ...r,

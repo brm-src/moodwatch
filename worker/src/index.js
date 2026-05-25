@@ -3,10 +3,42 @@
 // Returns:  { films: [{title, year, director, runtime, genres, poster, justwatch, tmdb, curated_note?}] }
 
 import { discoverByMood } from "./mood.js";
-import { tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase, tmdbDiscover, tmdbSimilar, tmdbRecommendations } from "./tmdb.js";
+import {
+  tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase, tmdbDiscover,
+  tmdbSimilar, tmdbRecommendations,
+  tmdbDetailsTV, tmdbProvidersTV, tmdbCreditsTV, tmdbDiscoverTV,
+} from "./tmdb.js";
 import { fetchWatchlistTmdbIds } from "./letterboxd.js";
-import { CURATED, curatedFor } from "./curated.js";
+import { CURATED, curatedFor, CURATED_TV, curatedTvFor } from "./curated.js";
 import { matchLists } from "./lists.js";
+
+// Per-media TMDb helper bundle. Keeps movie path identical when media === "movie".
+function mediaApi(media) {
+  if (media === "tv") {
+    return {
+      details: tmdbDetailsTV,
+      providers: tmdbProvidersTV,
+      credits: tmdbCreditsTV,
+      discover: tmdbDiscoverTV,
+      curatedFor: curatedTvFor,
+      tmdbUrl: id => `https://www.themoviedb.org/tv/${id}`,
+      titleOf: x => x.name || x.title,
+      dateOf: x => x.first_air_date || x.release_date,
+      jwContentType: "tvshow",
+    };
+  }
+  return {
+    details: tmdbDetails,
+    providers: tmdbProviders,
+    credits: tmdbCredits,
+    discover: tmdbDiscover,
+    curatedFor,
+    tmdbUrl: id => `https://www.themoviedb.org/movie/${id}`,
+    titleOf: x => x.title,
+    dateOf: x => x.release_date,
+    jwContentType: "movie",
+  };
+}
 
 function corsHeaders(origin, env) {
   const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim());
@@ -34,7 +66,7 @@ function decodeMood(b64) {
   } catch { return {}; }
 }
 
-function justwatchUrl(film, country) {
+function justwatchUrl(film, country, contentType = "movie") {
   // Always use JustWatch search — TMDb's providers_link and locale paths 404 often.
   const c = (country || "us").toLowerCase();
   // Spanish-locale JustWatch uses /buscar, not /search. CL was the reported 404.
@@ -49,7 +81,7 @@ function justwatchUrl(film, country) {
   const year = film.release_date ? new Date(film.release_date).getFullYear() : "";
   const query = year ? `${title} ${year}` : title;
   const q = encodeURIComponent(query);
-  return `https://www.justwatch.com/${c}/${searchPath}?content_type=movie&q=${q}`;
+  return `https://www.justwatch.com/${c}/${searchPath}?content_type=${contentType}&q=${q}`;
 }
 
 function fitScore(film, mood = {}) {
@@ -139,6 +171,9 @@ async function recommend(req, env, ctx) {
   const lang    = (url.searchParams.get("lang") || "en").startsWith("es") ? "es-ES" : "en-US";
   const moodB64 = url.searchParams.get("mood") || "";
   const user    = (url.searchParams.get("user") || "").trim().toLowerCase();
+  const mediaParam = (url.searchParams.get("media") || "movie").toLowerCase();
+  const media = mediaParam === "tv" ? "tv" : "movie";
+  const M = mediaApi(media);
   const exclude = (url.searchParams.get("exclude") || "")
     .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
   const excludeSet = new Set(exclude);
@@ -153,12 +188,10 @@ async function recommend(req, env, ctx) {
   }
 
   // 1. Get candidate pool from TMDb /discover (multi-page if discoverable)
-  const candidates = await discoverByMood(env, mood, lang);
+  const candidates = await discoverByMood(env, mood, lang, media);
 
   // 1b. Merge mood-matched editorial list seeds into the candidate pool.
-  // This replaces live Letterboxd scraping: LB blocks Workers and list URLs rot.
-  // List hits get tagged with `from_list` and a soft score boost.
-  const matched = matchLists(mood);
+  const matched = matchLists(mood, media);
   const listIds = new Map();
   for (const m of matched) {
     for (const id of (m.list.ids || [])) {
@@ -174,10 +207,10 @@ async function recommend(req, env, ctx) {
     [missingListIds[i], missingListIds[j]] = [missingListIds[j], missingListIds[i]];
   }
   const extraFromLists = (await Promise.all(missingListIds.slice(0, 6).map(id =>
-    tmdbDetails(env, id, lang).then(d => ({
+    M.details(env, id, lang).then(d => ({
       id: d.id,
-      title: d.title,
-      release_date: d.release_date,
+      title: M.titleOf(d),
+      release_date: M.dateOf(d),
       vote_average: d.vote_average,
       vote_count: d.vote_count,
       popularity: d.popularity,
@@ -185,15 +218,18 @@ async function recommend(req, env, ctx) {
       genres: (d.genres || []).map(g => g.name?.toLowerCase()),
       poster_path: d.poster_path,
       overview: d.overview,
-      runtime: d.runtime,
+      runtime: d.runtime || (d.episode_run_time && d.episode_run_time[0]) || null,
       _list: listIds.get(id) || null,
       _listOnly: true,
+      _media: media,
     })).catch(() => null)
   ))).filter(f => {
     if (!f) return false;
     if (f.release_date && f.release_date > today) return false;
-    if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
-    if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+    if (media === "movie") {
+      if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
+      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+    }
     return true;
   });
 
@@ -202,10 +238,11 @@ async function recommend(req, env, ctx) {
     ...extraFromLists,
   ];
 
-  // 2. If LB user provided, intersect with their watchlist TMDb IDs
+  // 2. If LB user provided, intersect with their watchlist TMDb IDs.
+  // Letterboxd is movies only — skip for TV requests.
   let pool = allCandidates;
   let lbUsed = false;
-  if (user) {
+  if (user && media === "movie") {
     if (!/^[a-z0-9_-]{1,30}$/.test(user)) {
       return { error: "invalid_user", status: 400 };
     }
@@ -231,8 +268,8 @@ async function recommend(req, env, ctx) {
   if (liked.length) {
     const likeSeeds = liked.slice(-6); // last 6 likes are most relevant
     const sims = await Promise.all(likeSeeds.flatMap(id => [
-      tmdbSimilar(env, id).catch(() => []),
-      tmdbRecommendations(env, id).catch(() => []),
+      tmdbSimilar(env, id, media).catch(() => []),
+      tmdbRecommendations(env, id, media).catch(() => []),
     ]));
     // Films appearing in ≥2 seed sources get the strong boost; ≥1 gets soft
     const counts = new Map();
@@ -247,7 +284,7 @@ async function recommend(req, env, ctx) {
   let dislikeLangs  = new Set();
   if (disliked.length) {
     const details = await Promise.all(disliked.slice(-10).map(id =>
-      tmdbDetails(env, id, lang).catch(() => null)
+      M.details(env, id, lang).catch(() => null)
     ));
     const gCount = new Map(), lCount = new Map();
     for (const d of details) {
@@ -266,7 +303,7 @@ async function recommend(req, env, ctx) {
 
   // 3. Score with curated + list boost + taste signals
   const ranked = pool.map(f => {
-    const cur = curatedFor(f.id);
+    const cur = M.curatedFor(f.id);
     const listName = f._list;
     const likeBoost = likeBoostSet.has(f.id) ? 4 : 0;
     const genreOverlap = (f.genre_ids || []).some(g => dislikeGenres.has(g)) ? -3 : 0;
@@ -310,35 +347,43 @@ async function recommend(req, env, ctx) {
   pushUnique(otherHits.slice(0, 40), 10);
   const enrichedPool = await Promise.all(top.slice(0, 9).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
-      tmdbProviders(env, f.id, country),
-      tmdbCredits(env, f.id),
-      tmdbDetails(env, f.id, lang),
+      M.providers(env, f.id, country),
+      M.credits(env, f.id),
+      M.details(env, f.id, lang),
     ]);
+    const title = f.title || M.titleOf(details);
+    const date = f.release_date || M.dateOf(details);
+    const runtime = (media === "tv")
+      ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
+      : (details.runtime || f.runtime || null);
     return {
       id: f.id,
-      title: f.title || details.title,
-      year: (f.release_date || details.release_date || "").slice(0, 4),
+      title,
+      year: (date || "").slice(0, 4),
       director: credits.director || null,
-      runtime: details.runtime || null,
+      runtime,
       genres: f.genres || (details.genres || []).map(g => g.name?.toLowerCase()),
       poster: (f.poster_path || details.poster_path) ? `${tmdbImageBase()}w342${f.poster_path || details.poster_path}` : null,
       overview: f.overview || details.overview || null,
-      justwatch: justwatchUrl({ title: f.title || details.title, release_date: f.release_date || details.release_date, providers_link: providers.link }, country),
-      tmdb: `https://www.themoviedb.org/movie/${f.id}`,
+      justwatch: justwatchUrl({ title, release_date: date }, country, M.jwContentType),
+      tmdb: M.tmdbUrl(f.id),
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
+      media,
     };
   }));
 
   const enriched = enrichedPool.filter(f => {
-    if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
-    if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
-    if (mood.runtime === "long" && f.runtime && f.runtime < 110) return false;
+    if (media === "movie") {
+      if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
+      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+      if (mood.runtime === "long" && f.runtime && f.runtime < 110) return false;
+    }
     return true;
   }).slice(0, 4);
 
-  return { films: enriched, lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matched.map(m => m.list.name) };
+  return { films: enriched, lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matched.map(m => m.list.name), media };
 }
 
 async function surprise(req, env, ctx) {
@@ -346,6 +391,9 @@ async function surprise(req, env, ctx) {
   const country = (url.searchParams.get("country") || "US").toUpperCase();
   const lang    = (url.searchParams.get("lang") || "en").startsWith("es") ? "es-ES" : "en-US";
   const profile = (url.searchParams.get("profile") || "quality").toLowerCase();
+  const mediaParam = (url.searchParams.get("media") || "movie").toLowerCase();
+  const media = mediaParam === "tv" ? "tv" : "movie";
+  const M = mediaApi(media);
   const surpriseMood = surpriseMoodForProfile(profile);
   const exclude = (url.searchParams.get("exclude") || "")
     .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
@@ -353,7 +401,7 @@ async function surprise(req, env, ctx) {
 
   if (!env.TMDB_API_KEY) return { error: "config" };
 
-  // Random page 1-20 of TMDb top-rated, with quality floor
+  // Random pages of TMDb top-rated, with quality floor
   const today = new Date().toISOString().slice(0, 10);
   const sorts = ["vote_average.desc", "popularity.desc"];
   const pages = [];
@@ -364,27 +412,31 @@ async function surprise(req, env, ctx) {
     });
   }
 
+  const dateKey = media === "tv" ? "first_air_date" : "primary_release_date";
   const baseParams = {
     "vote_count.gte": profile === "weird" ? 80 : 800,
     "vote_average.gte": profile === "pace" ? 6.3 : 6.8,
-    "with_runtime.gte": 75,
-    "primary_release_date.lte": today,
+    [`${dateKey}.lte`]: today,
     include_adult: "false",
   };
-  if (profile === "short") baseParams["with_runtime.lte"] = 95;
+  if (media === "movie") baseParams["with_runtime.gte"] = 75;
+  if (profile === "short" && media === "movie") baseParams["with_runtime.lte"] = 95;
   if (profile === "weird") baseParams["vote_count.lte"] = 1500;
-  if (profile === "classic") baseParams["primary_release_date.lte"] = "1979-12-31";
-  if (profile === "horror") baseParams.with_genres = "27|53|9648";
-  if (profile === "pace") baseParams.with_genres = "28|12|53";
+  if (profile === "classic") baseParams[`${dateKey}.lte`] = "1979-12-31";
+  if (profile === "horror") baseParams.with_genres = media === "tv" ? "9648" : "27|53|9648";
+  if (profile === "pace") baseParams.with_genres = media === "tv" ? "10759" : "28|12|53";
   if (profile === "hurt") baseParams["vote_count.gte"] = 120;
 
   const fetches = pages.map(p =>
-    tmdbDiscover(env, { ...baseParams, ...p }, lang).catch(() => ({ results: [] }))
+    M.discover(env, { ...baseParams, ...p }, lang).catch(() => ({ results: [] }))
   );
   const all = await Promise.all(fetches);
-  let pool = all.flatMap(r => r.results || []);
+  let pool = all.flatMap(r => (r.results || []).map(x => media === "tv"
+    ? { ...x, title: x.name || x.title, release_date: x.first_air_date || x.release_date, _media: "tv" }
+    : { ...x, _media: "movie" }
+  ));
 
-  const matched = matchLists(surpriseMood);
+  const matched = matchLists(surpriseMood, media);
   const listIds = new Map();
   for (const m of matched) {
     for (const id of (m.list.ids || [])) if (!listIds.has(id)) listIds.set(id, m.list.name);
@@ -395,10 +447,10 @@ async function surprise(req, env, ctx) {
     [shuffledListIds[i], shuffledListIds[j]] = [shuffledListIds[j], shuffledListIds[i]];
   }
   const extraFromLists = (await Promise.all(shuffledListIds.slice(0, 8).map(id =>
-    tmdbDetails(env, id, lang).then(d => ({
+    M.details(env, id, lang).then(d => ({
       id: d.id,
-      title: d.title,
-      release_date: d.release_date,
+      title: M.titleOf(d),
+      release_date: M.dateOf(d),
       vote_average: d.vote_average,
       vote_count: d.vote_count,
       popularity: d.popularity,
@@ -406,14 +458,17 @@ async function surprise(req, env, ctx) {
       genres: (d.genres || []).map(g => g.name?.toLowerCase()),
       poster_path: d.poster_path,
       overview: d.overview,
-      runtime: d.runtime,
+      runtime: d.runtime || (d.episode_run_time && d.episode_run_time[0]) || null,
       _list: listIds.get(id) || null,
+      _media: media,
     })).catch(() => null)
   ))).filter(f => {
     if (!f) return false;
     if (f.release_date && f.release_date > today) return false;
-    if (f.runtime && f.runtime < 75) return false;
-    if (profile === "short" && f.runtime && f.runtime > 95) return false;
+    if (media === "movie") {
+      if (f.runtime && f.runtime < 75) return false;
+      if (profile === "short" && f.runtime && f.runtime > 95) return false;
+    }
     return true;
   });
   pool = [
@@ -426,7 +481,7 @@ async function surprise(req, env, ctx) {
   pool = pool.filter(f => {
     if (excludeSet.has(f.id)) return false;
     if (seen.has(f.id)) return false;
-    if (profile === "short" && f.runtime && f.runtime > 95) return false;
+    if (media === "movie" && profile === "short" && f.runtime && f.runtime > 95) return false;
     seen.add(f.id);
     return true;
   });
@@ -438,7 +493,7 @@ async function surprise(req, env, ctx) {
       Math.min((f.popularity || 0) / 45, 2.5) +
       fitScore(f, surpriseMood) +
       (f._list ? 3 : 0) +
-      (curatedFor(f.id) ? 4 : 0) +
+      (M.curatedFor(f.id) ? 4 : 0) +
       (Math.random() * 1.2),
   })).sort((a, b) => b._score - a._score);
   const listed = pool.filter(f => f._list);
@@ -447,34 +502,40 @@ async function surprise(req, env, ctx) {
 
   const enrichedRaw = await Promise.all(top.map(async (f) => {
     const [providers, credits, details] = await Promise.all([
-      tmdbProviders(env, f.id, country),
-      tmdbCredits(env, f.id),
-      tmdbDetails(env, f.id, lang),
+      M.providers(env, f.id, country),
+      M.credits(env, f.id),
+      M.details(env, f.id, lang),
     ]);
-    const cur = curatedFor(f.id);
+    const cur = M.curatedFor(f.id);
+    const title = f.title || M.titleOf(details);
+    const date = f.release_date || M.dateOf(details);
+    const runtime = media === "tv"
+      ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
+      : (details.runtime || f.runtime || null);
     return {
       id: f.id,
-      title: f.title,
-      year: (f.release_date || "").slice(0, 4),
+      title,
+      year: (date || "").slice(0, 4),
       director: credits.director || null,
-      runtime: details.runtime || null,
+      runtime,
       genres: f.genres || (details.genres || []).map(g => g.name),
       poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
       overview: f.overview || null,
-      justwatch: justwatchUrl({ title: f.title, release_date: f.release_date, providers_link: providers.link }, country),
-      tmdb: `https://www.themoviedb.org/movie/${f.id}`,
+      justwatch: justwatchUrl({ title, release_date: date }, country, M.jwContentType),
+      tmdb: M.tmdbUrl(f.id),
       curated_note: cur?.note || null,
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
+      media,
     };
   }));
 
   const enriched = enrichedRaw.filter(f => {
-    if (profile === "short" && f.runtime && f.runtime > 95) return false;
+    if (media === "movie" && profile === "short" && f.runtime && f.runtime > 95) return false;
     return true;
   }).slice(0, 4);
 
-  return { films: enriched, mode: "surprise", profile, why: moodSummary(surpriseMood, lang), matched_lists: matched.map(m => m.list.name) };
+  return { films: enriched, mode: "surprise", profile, why: moodSummary(surpriseMood, lang), matched_lists: matched.map(m => m.list.name), media };
 }
 async function alt(req, env) {
   const url = new URL(req.url);
@@ -482,6 +543,9 @@ async function alt(req, env) {
   const kind = url.searchParams.get("kind") === "opposite" ? "opposite" : "similar";
   const country = (url.searchParams.get("country") || "US").toUpperCase();
   const lang    = (url.searchParams.get("lang") || "en").startsWith("es") ? "es-ES" : "en-US";
+  const mediaParam = (url.searchParams.get("media") || "movie").toLowerCase();
+  const media = mediaParam === "tv" ? "tv" : "movie";
+  const M = mediaApi(media);
   const exclude = (url.searchParams.get("exclude") || "")
     .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
   const excludeSet = new Set(exclude);
@@ -493,37 +557,37 @@ async function alt(req, env) {
   let candidateIds = [];
 
   if (kind === "similar") {
-    // Pull both feeds, prefer items appearing in both
     const [sims, recs] = await Promise.all([
-      tmdbSimilar(env, seed).catch(() => []),
-      tmdbRecommendations(env, seed).catch(() => []),
+      tmdbSimilar(env, seed, media).catch(() => []),
+      tmdbRecommendations(env, seed, media).catch(() => []),
     ]);
     const tally = new Map();
     for (const id of sims) tally.set(id, (tally.get(id) || 0) + 1);
-    for (const id of recs) tally.set(id, (tally.get(id) || 0) + 2); // recs weighted higher
+    for (const id of recs) tally.set(id, (tally.get(id) || 0) + 2);
     candidateIds = [...tally.entries()]
       .filter(([id]) => !excludeSet.has(id))
       .sort((a, b) => b[1] - a[1])
       .slice(0, 12)
       .map(([id]) => id);
   } else {
-    // Opposite: discover with without_genres = seed's genres
-    const seedDetails = await tmdbDetails(env, seed, lang).catch(() => null);
+    const seedDetails = await M.details(env, seed, lang).catch(() => null);
     const seedGenres = (seedDetails?.genres || []).map(g => g.id);
     const without = seedGenres.length ? seedGenres.join(",") : "";
     const today = new Date().toISOString().slice(0, 10);
     const sortBy = ["vote_average.desc", "popularity.desc"][Math.floor(Math.random() * 2)];
     const page   = 1 + Math.floor(Math.random() * 10);
-    const data = await tmdbDiscover(env, {
+    const dateKey = media === "tv" ? "first_air_date" : "primary_release_date";
+    const params = {
       sort_by: sortBy,
       page,
       "vote_count.gte": 400,
       "vote_average.gte": 6.6,
-      "with_runtime.gte": 75,
-      "primary_release_date.lte": today,
+      [`${dateKey}.lte`]: today,
       include_adult: "false",
       ...(without ? { without_genres: without } : {}),
-    }, lang).catch(() => ({ results: [] }));
+    };
+    if (media === "movie") params["with_runtime.gte"] = 75;
+    const data = await M.discover(env, params, lang).catch(() => ({ results: [] }));
     candidateIds = (data.results || [])
       .map(r => r.id)
       .filter(id => !excludeSet.has(id))
@@ -532,30 +596,35 @@ async function alt(req, env) {
 
   if (!candidateIds.length) return { error: "no_alt", status: 404 };
 
-  // Enrich the top candidate
   for (const id of candidateIds) {
     try {
       const [details, providers, credits] = await Promise.all([
-        tmdbDetails(env, id, lang),
-        tmdbProviders(env, id, country),
-        tmdbCredits(env, id),
+        M.details(env, id, lang),
+        M.providers(env, id, country),
+        M.credits(env, id),
       ]);
       const today = new Date().toISOString().slice(0, 10);
-      if (details.release_date && details.release_date > today) continue;
+      const date = M.dateOf(details);
+      if (date && date > today) continue;
+      const title = M.titleOf(details);
+      const runtime = media === "tv"
+        ? (details.episode_run_time && details.episode_run_time[0]) || null
+        : (details.runtime || null);
       const film = {
         id: details.id,
-        title: details.title,
-        year: (details.release_date || "").slice(0, 4),
+        title,
+        year: (date || "").slice(0, 4),
         director: credits.director || null,
-        runtime: details.runtime || null,
+        runtime,
         genres: (details.genres || []).map(g => g.name?.toLowerCase()),
         poster: details.poster_path ? `${tmdbImageBase()}w342${details.poster_path}` : null,
         overview: details.overview || null,
-        justwatch: justwatchUrl({ title: details.title, release_date: details.release_date, providers_link: providers.link }, country),
-        tmdb: `https://www.themoviedb.org/movie/${details.id}`,
-        curated_note: curatedFor(details.id)?.note || null,
+        justwatch: justwatchUrl({ title, release_date: date }, country, M.jwContentType),
+        tmdb: M.tmdbUrl(details.id),
+        curated_note: M.curatedFor(details.id)?.note || null,
         from_list: null,
         from_feedback: kind === "similar",
+        media,
       };
       return { film, kind };
     } catch (e) {

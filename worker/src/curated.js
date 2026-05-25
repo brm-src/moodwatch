@@ -185,3 +185,56 @@ const _byId = new Map(CURATED.map(c => [c.id, c]));
 export function curatedFor(tmdbId) {
   return _byId.get(tmdbId) || null;
 }
+
+// ────────────────────────────────────────────────────────────────────
+// CURATED TV — series picks. Same shape as CURATED, distinct namespace.
+// ────────────────────────────────────────────────────────────────────
+export const CURATED_TV = [
+  // ── PRESTIGE LENTO ───────────────────────────────────────────────
+  { id: 1396,  note: "Vince Gilligan filmó la transformación moral más completa de la TV. Cada decisión pesa." },
+  { id: 60059, note: "Spinoff que termina superando a la madre. Tragedia legal con paciencia de monje." },
+  { id: 95396, note: "Ben Stiller dirige el capitalismo como horror corporativo. Ritmo, diseño y desconcierto." },
+  { id: 1399,  note: "Ambición, traición y dragones. Las primeras temporadas siguen siendo TV gigante." },
+
+  // ── MINISERIE DEVASTADORA ────────────────────────────────────────
+  { id: 87108, note: "Mazin reconstruyó Chernóbil con precisión documental. Cinco episodios que no se olvidan." },
+  { id: 100088, note: "Adaptación rara: respeta el videojuego sin perder cine. El primer episodio te deja mudo." },
+  { id: 218230, note: "Shōgun versión 2024. Ambición, poder y silencio japonés filmados con cuidado obsesivo." },
+
+  // ── TENSIÓN / THRILLER ───────────────────────────────────────────
+  { id: 46648, note: "True Detective S1: McConaughey y Harrelson en el sur gótico. Resto de temporadas ignorables." },
+  { id: 60622, note: "Noah Hawley convierte el universo Coen en serie sin traicionarlo. Cada temporada es nueva." },
+  { id: 76479, note: "Sátira ultraviolenta sobre el poder. Funciona porque le importan los personajes." },
+  { id: 81356, note: "Squid Game llegó hondo porque el dolor de clase está bien filmado bajo la sangre." },
+
+  // ── HORROR ATMOSFÉRICO TV ────────────────────────────────────────
+  { id: 71790, note: "Mike Flanagan filma el duelo como casa que respira. Más triste que aterradora." },
+  { id: 60863, note: "Twin Peaks: The Return. Lynch en absoluta libertad. No es para todos, es para nosotros." },
+
+  // ── COMEDIA CON ALMA ─────────────────────────────────────────────
+  { id: 60625, note: "Rick and Morty cuando funciona es nihilismo cómico de primer nivel." },
+
+  // ── ANIME PRESTIGIO ──────────────────────────────────────────────
+  { id: 1429,  note: "Attack on Titan termina cumpliendo la promesa. Política, guerra y trauma sin escapatoria." },
+  { id: 95479, note: "Jujutsu Kaisen: animación de combate al nivel más alto del medio." },
+
+  // ── FANTASÍA / SCI-FI ────────────────────────────────────────────
+  { id: 66732, note: "Stranger Things temporada 1 y 4. Los Duffer saben cuándo el homenaje funciona." },
+  { id: 90802, note: "The Sandman: Gaiman llevado a imagen con respeto y presupuesto. La serie más visual del catálogo." },
+  { id: 110316, note: "Alice in Borderland: el mejor survival japonés actual. Tensión sin descanso." },
+
+  // ── ZOMBIE / POSTAPOC ────────────────────────────────────────────
+  { id: 1402,  note: "The Walking Dead: las primeras 4 temporadas son TV de género en su mejor momento." },
+
+  // ── PROCEDURAL CON PERSONAJE ─────────────────────────────────────
+  { id: 1408,  note: "House M.D.: Hugh Laurie sostiene un procedural médico con química shakesperiana." },
+
+  // ── RAREZA / WTF ─────────────────────────────────────────────────
+  { id: 95057, note: "Wednesday funciona porque Jenna Ortega entendió a Burton mejor que el propio Burton." },
+  { id: 84958, note: "Loki: la sorpresa de Marvel que se permite ser rara. Owen Wilson como ancla emocional." },
+];
+
+const _tvById = new Map(CURATED_TV.map(c => [c.id, c]));
+export function curatedTvFor(tmdbId) {
+  return _tvById.get(tmdbId) || null;
+}

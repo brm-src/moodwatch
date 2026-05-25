@@ -755,18 +755,19 @@
   // ────────────────────────────────────────────────────────────
   // STATE & STEP MGMT
   // ────────────────────────────────────────────────────────────
-  const state = { qIdx: 0, answers: {}, user: "", path: null, surpriseProfile: "quality" };
+  const state = { qIdx: 0, answers: {}, user: "", path: null, surpriseProfile: "quality", media: "movie" };
 
   const steps = {
-    intro:   $('[data-step="intro"]'),
-    lbAsk:   $('[data-step="lb-ask"]'),
-    quiz:    $('[data-step="quiz"]'),
-    loading: $('[data-step="loading"]'),
-    results: $('[data-step="results"]'),
-    error:   $('[data-step="error"]'),
+    intro:    $('[data-step="intro"]'),
+    lbAsk:    $('[data-step="lb-ask"]'),
+    mediaPick:$('[data-step="media-pick"]'),
+    quiz:     $('[data-step="quiz"]'),
+    loading:  $('[data-step="loading"]'),
+    results:  $('[data-step="results"]'),
+    error:    $('[data-step="error"]'),
   };
   const stepKeyByName = {
-    "intro": "intro", "lb-ask": "lbAsk", "quiz": "quiz",
+    "intro": "intro", "lb-ask": "lbAsk", "media-pick": "mediaPick", "quiz": "quiz",
     "loading": "loading", "results": "results", "error": "error",
   };
   function show(name) {
@@ -965,6 +966,8 @@
     const params = new URLSearchParams({ country, lang });
     const activeProfile = profile || state.surpriseProfile || "quality";
     params.set("profile", activeProfile);
+    const m = resolveMedia(state.media);
+    params.set("media", m);
     if (exclude && exclude.length) params.set("exclude", exclude.join(","));
     const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
     const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
@@ -985,6 +988,13 @@
     }
   }
 
+  // "any" = coin flip per call. Mixes movie/tv across rerolls.
+  function resolveMedia(media) {
+    if (media === "tv") return "tv";
+    if (media === "any") return Math.random() < 0.5 ? "tv" : "movie";
+    return "movie";
+  }
+
   async function recommend({ withUser, exclude }) {
     show("loading");
     $("#load-msg").textContent = withUser && state.user ? window.t("loading_lb") : window.t("loading");
@@ -994,6 +1004,7 @@
     const moodB64 = btoa(unescape(encodeURIComponent(JSON.stringify(mood))));
     const params = new URLSearchParams({ country, lang, mood: moodB64 });
     if (withUser && state.user) params.set("user", state.user);
+    params.set("media", resolveMedia(state.media));
     if (exclude && exclude.length) params.set("exclude", exclude.join(","));
     const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
     const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
@@ -1254,12 +1265,22 @@
 
     $("#path-global").addEventListener("click", () => {
       state.path = "global";
-      QUIZ = buildSession();
-      state.qIdx = 0;
       state.answers = {};
-      renderQuestion();
-      show("quiz");
+      state.media = "movie";
+      show("media-pick");
     });
+
+    // Media pick: Movie / TV / Either → then start quiz.
+    document.querySelectorAll("[data-media]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.media = btn.dataset.media || "movie";
+        QUIZ = buildSession();
+        state.qIdx = 0;
+        renderQuestion();
+        show("quiz");
+      });
+    });
+    $("#media-back")?.addEventListener("click", () => { show("intro"); });
     $("#path-surprise")?.addEventListener("click", async () => {
       state.path = "surprise";
       state.answers = {};

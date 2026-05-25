@@ -180,6 +180,49 @@ export const LISTS = [
     signature: { appetite: "lost-20s", memory: ["regret", "heartbreak"], lately: ["stuck", "numb", "heartbroken"], state: "pensive" },
     ids: [1626,76,660120,11104,290098,194,531428,313369,39056,434773,1600,8051,1278,49020,169813,2108,200727,5967,20770,342737,491584,814340,11171,376867,152601,265177,791177,393519,664297,84892,1018,18491,122906,26280,109302,29845,505600,80,19913,16859,11305,10494,595671,483297,37797,75233,952701,391713,44018,207,786,468,473019,2011,37165,51828,93934,718032,773,11220,340485,11599,221,14448,15804,54898,9377,49984,3558,37247,804095,499,8073,25062,111469,550,44214,209274,38,965150,331482,4710,16664,99,26005,1629,41662,20108,382170,252171,24183,106380,13552,1802,9571,439,46705,2786,83761,308369,7326,57564,64544,576352,45126,57811,5708,928713,469,135,82283,44754,30309,683363,1836,537116,56935,451915,354275,85550,65943,69454,85350,448491,130824,1541,5915,13531,1628,823754,31742,47735,499255,821427,42098,104251,666277,501929,510,103,846795,60363,401,76025,15080,11985,28387,502033,20348,522039,565310,1429,11557,20530,50247,920332,86814,15389,102001,2788,46883,571265,102506,795811,662401,776501,986280,713,42229,59336,4550,2767,8072,48831,15484,8416,36196,16980,25188,2433,1075175,702,11553,32097,22538,617882,477044,244267,544812,40886,73939,208277,121986,153,101482,993784,1937,914206,948549,4688,414453,46919,10310,258,120522,664300,653664,34796,382143,861325,49479,124485,1205515],
   },
+  // ─── TV (series) lists ────────────────────────────────────────────
+  {
+    slug: "slow-burn-prestige-tv",
+    name: "Slow-burn prestige TV",
+    media: "tv",
+    signature: { depth: ["thoughtful", "ruined"], temperature: ["cool"], pace: ["slow", "steady"] },
+    ids: [1396, 60059, 1437, 1438, 95396, 76331, 60625],
+  },
+  {
+    slug: "miniserie-devastadora",
+    name: "Miniseries that hurt",
+    media: "tv",
+    signature: { memory: ["heartbreak", "regret", "loss"], want: ["moved", "haunted"], depth: ["thoughtful", "ruined"] },
+    ids: [87108, 95011, 87739, 90400, 100757, 100088, 218230],
+  },
+  {
+    slug: "comedia-tv-con-alma",
+    name: "TV comedy with a soul",
+    media: "tv",
+    signature: { trust: "comedy", depth: ["fun", "warm"], want: "entertained" },
+    ids: [67915, 60875, 97546, 61222, 136315, 60625],
+  },
+  {
+    slug: "anime-prestigio",
+    name: "Prestige anime",
+    media: "tv",
+    signature: { trust: "animation" },
+    ids: [1429, 95479, 30991, 13916, 42509, 88329, 30984],
+  },
+  {
+    slug: "thriller-tv",
+    name: "Thriller TV",
+    media: "tv",
+    signature: { tone: "dark", first_act: ["thriller_horror", "action_adventure"], trust: ["thriller", "horror"] },
+    ids: [46648, 60622, 62286, 70523, 76479, 1399],
+  },
+  {
+    slug: "horror-tv-atmospheric",
+    name: "Atmospheric horror TV",
+    media: "tv",
+    signature: { trust: "horror", appetite: "horror", first_act: "thriller_horror" },
+    ids: [71790, 1606, 67419, 113962, 81356],
+  },
 ];
 
 function matchesValue(want, got) {
@@ -188,9 +231,11 @@ function matchesValue(want, got) {
   return want === got;
 }
 
-export function matchLists(mood) {
+export function matchLists(mood, media = "movie") {
   const matches = [];
   for (const list of LISTS) {
+    const listMedia = list.media || "movie";
+    if (listMedia !== media) continue;
     const sig = list.signature || {};
     let score = 0;
     for (const [k, want] of Object.entries(sig)) {
