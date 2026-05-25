@@ -36,7 +36,6 @@ export const CURATED = [
   { id: 641,     note: "Adicción filmada como caída libre." },
   { id: 25237,   note: "La guerra como trauma absoluto." },
   { id: 12477,   note: "Animación que destruye sin exagerar." },
-  { id: 965150,  note: "Memoria, pérdida y tristeza silenciosa." },
   { id: 670,     note: "Venganza enfermiza con golpe emocional." },
   { id: 6977,    note: "Fatalismo seco, violento y perfecto." },
 
@@ -77,7 +76,6 @@ export const CURATED = [
   { id: 531428,  note: "Romance contenido, elegante y devastador." },
   { id: 76,      note: "Enamorarse conversando, sin artificio." },
   { id: 80,      note: "Romance adulto con tiempo encima." },
-  { id: 666277,  note: "Amor posible, distancia y madurez." },
   { id: 38,      note: "Romance roto con imaginación emocional." },
   { id: 284,     note: "Romance clásico con tristeza adulta." },
 
@@ -109,7 +107,6 @@ export const CURATED = [
   { id: 293670,  note: "Folklore coreano, exorcismo y paranoia. Absolutamente impredecible." },
   { id: 27374,   note: "La película de terror más melancólica que existe. Documental falso. Duelo como horror." },
   { id: 575776,  note: "Powell filmó la fe como posesión. Horror que nace de la devoción." },
-  { id: 503919,  note: "Locura marítima en blanco y negro." },
   { id: 694,     note: "Aislamiento, arquitectura y terror psicológico." },
   { id: 805,     note: "Paranoia doméstica con elegancia diabólica." },
   { id: 36095,   note: "Hipnosis, crimen y miedo invisible." },
@@ -144,6 +141,27 @@ export const CURATED = [
   { id: 30017,   note: "Documental, ficción e identidad mezcladas." },
   { id: 26317,   note: "Cine mirando al cine desde el origen." },
 
+
+  // ── MÁS PICKS (oscuro/luz/calido/frío/clásico) ──────────────────
+  { id: 769    , note: "Scorsese filmó el mafioso como pesadilla americana. Tres horas que pasan como una hora." },
+  { id: 311    , note: "Leone hizo el adiós más largo del cine. Cuatro horas de melancolía y memoria fragmentada." },
+  { id: 510    , note: "Forman convirtió el manicomio en alegoría política. Nicholson nunca volvió a estar mejor." },
+  { id: 274    , note: "Demme hizo del thriller psicológico una conversación. Foster y Hopkins en estado puro." },
+  { id: 550    , note: "Fincher nos enseñó a odiar nuestros muebles. Ironía masculina antes de que se entendiera." },
+  { id: 16     , note: "Von Trier convirtió el musical en martirio. Björk te destruye sin filtro." },
+  { id: 24     , note: "Tarantino reescribió la grieta del cine moderno. Amargura, ritmo, charla y muerte." },
+  { id: 8587   , note: "Disney peak. Dolor edípico filmado con coros zulúes y un león filosófico." },
+  { id: 12     , note: "Pixar al máximo: oceáno, padre roto y un pez con memoria de tres segundos." },
+  { id: 78     , note: "Scott pintó Los Ángeles 2019 con humo y neón. Cyberpunk antes del término." },
+  { id: 335984 , note: "Villeneuve respetó a Scott y agregó tristeza ambiental. Sequel imposible que existe." },
+  { id: 4348   , note: "Wright filmó Austen como tormenta de campo inglés. Knightley nunca tan radiante." },
+  { id: 1585   , note: "Donen convirtió el thriller en comedia romántica. Hepburn y Grant casi flirteando con la muerte." },
+  { id: 539    , note: "Hitchcock destruyó la lógica narrativa en una ducha. 1960 y todavía marca el reloj del género." },
+  { id: 567    , note: "Hitchcock mirando el voyeurismo del cine. Stewart en su silla, todos somos él." },
+  { id: 238    , note: "Coppola convirtió la familia mafiosa en Shakespeare moderno. Estructura perfecta." },
+  { id: 240    , note: "Coppola hizo la secuela más ambiciosa del cine americano. De Niro joven, Pacino congelándose." },
+  { id: 597    , note: "Cameron filmó el desastre como melodrama eficaz. Hate quien quiera, funciona en la sala." },
+  { id: 4584   , note: "Jeunet hizo París como cuento de hadas. Tautou inventó un tipo de protagonista." },
   // ── JOYA INVISIBLE ───────────────────────────────────────────────
 
   { id: 565743,  note: "Sci-fi retro pequeña y elegante." },
@@ -232,6 +250,26 @@ export const CURATED_TV = [
   // ── RAREZA / WTF ─────────────────────────────────────────────────
   { id: 95057, note: "Wednesday funciona porque Jenna Ortega entendió a Burton mejor que el propio Burton." },
   { id: 84958, note: "Loki: la sorpresa de Marvel que se permite ser rara. Owen Wilson como ancla emocional." },
+  // ── MÁS SERIES (prestige / comedy / weird) ─────────────────────
+  { id: 1438   , note: "The Wire. Simon hizo cinco temporadas de tesis sociológica disfrazada de policial. La cumbre del medio." },
+  { id: 1437   , note: "Deadwood. Milch escribió Shakespeare con groserías. Diálogo como arte." },
+  { id: 76331  , note: "Succession. Drama familiar con mejor diálogo que cualquier obra teatral del siglo." },
+  { id: 61222  , note: "BoJack Horseman. La animación más triste y honesta sobre depresión y autodestrucción." },
+  { id: 30991  , note: "Cowboy Bebop. Watanabe inventó el jazz space-noir. Sigue siendo el techo del anime adulto." },
+  { id: 13916  , note: "Death Note. El cat-and-mouse más adictivo del medio." },
+  { id: 67915  , note: "Atlanta. Glover hace que cada episodio sea una película distinta. Surrealismo y peso de raza." },
+  { id: 60875  , note: "Fleabag temporada 2. Phoebe Waller-Bridge convirtió la cuarta pared en arma." },
+  { id: 97546  , note: "Reservation Dogs. Sterlin Harjo filmó adolescencia indígena con ternura y humor seco." },
+  { id: 90400  , note: "I May Destroy You. Coel escribe trauma como comedia incómoda. Sin red de seguridad." },
+  { id: 87739  , note: "The Queen's Gambit. Ajedrez como drama interno. Anya Taylor-Joy lleva todo." },
+  { id: 95011  , note: "WandaVision. Marvel cuando se permite duelo y experimentación formal." },
+  { id: 1668   , note: "Friends. Conducta social de los 90 fosilizada. Funciona porque el cast químico es real." },
+  { id: 1100   , note: "How I Met Your Mother. Pegada cómica fuerte hasta que el final se desinfló." },
+  { id: 212808 , note: "The Bear. Carmy en cocina como purgatorio existencial. Ritmo de pulso." },
+  { id: 114695 , note: "Andor. Star Wars hecho thriller adulto. Gilroy escribe revolución sin caricatura." },
+  { id: 94605  , note: "Arcane. Animación que reinventa el biopic de superhéroe. League of Legends sin parecerlo." },
+  { id: 138502 , note: "Mr. & Mrs. Smith. Donald Glover y Maya Erskine como espías casados. Comedy + thriller." },
+
 ];
 
 const _tvById = new Map(CURATED_TV.map(c => [c.id, c]));
