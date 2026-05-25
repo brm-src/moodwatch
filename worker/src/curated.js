@@ -162,6 +162,30 @@ export const CURATED = [
   { id: 240    , note: "Coppola hizo la secuela más ambiciosa del cine americano. De Niro joven, Pacino congelándose." },
   { id: 597    , note: "Cameron filmó el desastre como melodrama eficaz. Hate quien quiera, funciona en la sala." },
   { id: 4584   , note: "Jeunet hizo París como cuento de hadas. Tautou inventó un tipo de protagonista." },
+
+  // ── EXTRAS · pool diversity ─────────────────────────────────────
+  { id: 637    , note: "Benigni convirtió el horror en cuento. Comedia y tragedia en la misma respiración." },
+  { id: 1124   , note: "Aronofsky filmó la matemática como obsesión paranoide. B&N y dolor de cabeza." },
+  { id: 629    , note: "Singer escondió el final en plain sight. Spacey antes de cancelarse." },
+  { id: 497    , note: "Frears + Cusack: comedia de listas y rupturas como única estructura emocional." },
+  { id: 4011   , note: "Burton + Depp: cuento gótico de pueblo americano. Christopher Walken sin cabeza." },
+  { id: 1417   , note: "Inside Llewyn Davis. Coens en clave folk. Fracaso artístico filmado con cariño." },
+  { id: 1538   , note: "Sicario. Villeneuve. Frontera, narcos, moral en pedazos." },
+  { id: 313369 , note: "La La Land. Chazelle. Romance que termina en lo posible no escogido." },
+  { id: 157336 , note: "Interstellar. Nolan. Padre, hija, tiempo elástico." },
+  { id: 508442 , note: "Soul. Pixar adulta. Jazz y existencialismo de muñeco." },
+  { id: 508439 , note: "Onward. Hermanos y duelo paterno animado." },
+  { id: 598    , note: "Ciudad de Dios. Meirelles. Río como purgatorio infantil." },
+  { id: 426426 , note: "Roma. Cuarón. Memoria personal filmada con grúa." },
+  { id: 160068 , note: "El club. Larraín. Iglesia, abuso y silencio chileno." },
+  { id: 32     , note: "Gondry rebobinó la memoria del amor. Carrey y Winslet sin caretas." },
+  { id: 425    , note: "Polanski. París como laberinto familiar. Repulsión disfrazada de departamento." },
+  { id: 508943 , note: "Luca. Pixar Italia. Verano y monstruosidad escondida." },
+  { id: 615457 , note: "Nobody. Saulnier-meets-John Wick. Bob Odenkirk inesperado." },
+  { id: 12158  , note: "The Curious Case of Benjamin Button. Fincher. Tiempo invertido y tristeza." },
+  { id: 5915   , note: "Into the Wild. Penn. Soledad como elección final." },
+  { id: 45269  , note: "Searching for Sugar Man. Bendjelloul. Mito musical sudafricano." },
+  { id: 87502  , note: "Cartel Land. Heineman. Vigilantes, narcos, sin maquillaje." },
   // ── JOYA INVISIBLE ───────────────────────────────────────────────
 
   { id: 565743,  note: "Sci-fi retro pequeña y elegante." },
@@ -269,6 +293,17 @@ export const CURATED_TV = [
   { id: 114695 , note: "Andor. Star Wars hecho thriller adulto. Gilroy escribe revolución sin caricatura." },
   { id: 94605  , note: "Arcane. Animación que reinventa el biopic de superhéroe. League of Legends sin parecerlo." },
   { id: 138502 , note: "Mr. & Mrs. Smith. Donald Glover y Maya Erskine como espías casados. Comedy + thriller." },
+
+  // ── EXTRAS · más series ─────────────────────────────────────
+  { id: 62286  , note: "Mr. Robot. Esmail. Paranoia digital y tipografía neurótica." },
+  { id: 70523  , note: "Dark. Friese. Pueblo alemán, túnel temporal y ciencia narrativa apretada." },
+  { id: 1606   , note: "American Horror Story. Murphy excesivo, antología desigual pero memorable." },
+  { id: 67419  , note: "The Haunting of Hill House. Flanagan. Casa como duelo familiar." },
+  { id: 113962 , note: "Midnight Mass. Flanagan. Iglesia, fe y vampiros sin nombrarlos." },
+  { id: 456    , note: "The Simpsons (clásica). Temporadas 3-9 son canon comedia americana." },
+  { id: 615    , note: "Futurama. Groening en sci-fi blanda y emotiva." },
+  { id: 62127  , note: "Atypical. Comedia familiar sobre autismo. Liviana pero con corazón." },
+  { id: 94997  , note: "House of the Dragon. Game of Thrones precuela, dragones y crisis sucesoria." },
 
 ];
 

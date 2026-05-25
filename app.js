@@ -968,7 +968,9 @@
     params.set("profile", activeProfile);
     const m = resolveMedia(state.media);
     params.set("media", m);
-    if (exclude && exclude.length) params.set("exclude", exclude.join(","));
+    const _autoExclude = recentlyShown(80);
+    const _allExclude = (exclude && exclude.length ? [...exclude, ..._autoExclude] : _autoExclude);
+    if (_allExclude.length) params.set("exclude", Array.from(new Set(_allExclude)).join(","));
     const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
     const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
     params.set("seed", String(Math.floor(Math.random() * 1e9)));
@@ -1005,7 +1007,9 @@
     const params = new URLSearchParams({ country, lang, mood: moodB64 });
     if (withUser && state.user) params.set("user", state.user);
     params.set("media", resolveMedia(state.media));
-    if (exclude && exclude.length) params.set("exclude", exclude.join(","));
+    const _autoExclude = recentlyShown(80);
+    const _allExclude = (exclude && exclude.length ? [...exclude, ..._autoExclude] : _autoExclude);
+    if (_allExclude.length) params.set("exclude", Array.from(new Set(_allExclude)).join(","));
     const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
     const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
     // cache-bust: the edge cached recommend responses kill rotation
@@ -1032,7 +1036,12 @@
     const words = vibeWords(state.answers, window.LANG);
     const desc = $("#vibe-desc");
     if (desc) desc.textContent = data?.why?.headline || (words.length ? words.join(" · ") : "");
-    renderWhy(data);
+    if (state.lastMode === "surprise") {
+      const panel = $("#why-panel");
+      if (panel) { panel.hidden = true; panel.innerHTML = ""; }
+    } else {
+      renderWhy(data);
+    }
     const cards = $("#cards");
     cards.innerHTML = "";
     if (!data.films || !data.films.length) {
@@ -1042,6 +1051,7 @@
       cards.appendChild(p);
     } else {
       data.films.forEach((f, i) => cards.appendChild(filmCard(f, i + 1)));
+      pushShown(data.films.map(f => f.id).filter(Boolean));
     }
     show("results");
   }
@@ -1128,8 +1138,8 @@
       ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span>` : ""}
       ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}
       ${f.from_feedback ? `<span class="taste-badge">${window.t("from_feedback")}</span>` : ""}`;
-    if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 90));
-    else if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 160));
+    if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 220));
+    else if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 280));
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
@@ -1178,6 +1188,27 @@
   // TASTE — local-only feedback (seen / liked / disliked)
   // ────────────────────────────────────────────────────────────
   const TASTE_KEY = "moodwatch.taste.v1";
+  const SHOWN_KEY = "moodwatch.shown.v1";
+  function readShown() {
+    try { const a = JSON.parse(localStorage.getItem(SHOWN_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch { return []; }
+  }
+  function pushShown(ids) {
+    try {
+      const cur = readShown();
+      const merged = [...cur, ...ids.map(Number).filter(Number.isFinite)];
+      // keep last 200, dedup keeping recency
+      const seen = new Set();
+      const out = [];
+      for (let i = merged.length - 1; i >= 0; i--) {
+        if (seen.has(merged[i])) continue;
+        seen.add(merged[i]);
+        out.unshift(merged[i]);
+        if (out.length >= 200) break;
+      }
+      localStorage.setItem(SHOWN_KEY, JSON.stringify(out));
+    } catch {}
+  }
+  function recentlyShown(n = 80) { return readShown().slice(-n); }
   function readTaste() {
     try { return JSON.parse(localStorage.getItem(TASTE_KEY) || "{}"); } catch { return {}; }
   }
@@ -1258,7 +1289,7 @@
   // WIRE
   // ────────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
-    show("intro");
+    show("media-pick");
     loadRandomHero();
     $("#q-back").addEventListener("click", backQ);
     $("#q-skip").addEventListener("click", skipQ);
@@ -1266,21 +1297,20 @@
     $("#path-global").addEventListener("click", () => {
       state.path = "global";
       state.answers = {};
-      state.media = "movie";
-      show("media-pick");
+      QUIZ = buildSession();
+      state.qIdx = 0;
+      renderQuestion();
+      show("quiz");
     });
 
     // Media pick: Movie / TV / Either → then start quiz.
     document.querySelectorAll("[data-media]").forEach(btn => {
       btn.addEventListener("click", () => {
         state.media = btn.dataset.media || "movie";
-        QUIZ = buildSession();
-        state.qIdx = 0;
-        renderQuestion();
-        show("quiz");
+        show("intro");
       });
     });
-    $("#media-back")?.addEventListener("click", () => { show("intro"); });
+    // media-pick is now first; back button hidden via CSS.
     $("#path-surprise")?.addEventListener("click", async () => {
       state.path = "surprise";
       state.answers = {};

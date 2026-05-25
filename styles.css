@@ -1027,3 +1027,15 @@ footer.bottom small a:hover { color: var(--accent); }
   .card { grid-template-columns: 88px minmax(0, 1fr); gap: var(--s-2); }
   .card h3 { font-size: 1.25rem; }
 }
+
+/* feedback: like/dislike solo aparecen tras marcar Watched */
+.feedback .fb-like, .feedback .fb-dis { display: none; }
+.card.is-seen .feedback .fb-like, .card.is-seen .feedback .fb-dis,
+.card.is-liked .feedback .fb-like, .card.is-liked .feedback .fb-dis,
+.card.is-disliked .feedback .fb-like, .card.is-disliked .feedback .fb-dis {
+  display: inline-flex;
+}
+
+/* media-pick is the first screen now — back button serves no purpose */
+[data-step="media-pick"] #media-back { display: none; }
+
