@@ -728,6 +728,16 @@ header.top {
 
 /* ─── results ─── */
 #cards { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-3); }
+@media (min-width: 900px) {
+  #cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--s-5);
+    row-gap: var(--s-4);
+  }
+  #cards .card { border-top: 1px solid var(--rule); padding-top: var(--s-3); }
+  #cards .card:nth-child(-n+2) { border-top: 0; padding-top: 0; }
+}
 .why-panel {
   border: 1px solid var(--rule);
   background: rgba(216,207,188,0.22);
