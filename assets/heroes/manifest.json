@@ -198,5 +198,37 @@
   {
     "file": "./assets/heroes/wings-of-desire-1987-01.jpg",
     "caption": "Wings of Desire · Wenders · 1987"
+  },
+  {
+    "file": "./assets/heroes/atlanta-2016-00.jpg",
+    "caption": "Atlanta · Glover · 2016"
+  },
+  {
+    "file": "./assets/heroes/chernobyl-2019-00.jpg",
+    "caption": "Chernobyl · Mazin · 2019"
+  },
+  {
+    "file": "./assets/heroes/mad-men-2007-00.jpg",
+    "caption": "Mad Men · Weiner · 2007"
+  },
+  {
+    "file": "./assets/heroes/the-leftovers-2014-00.jpg",
+    "caption": "The Leftovers · Lindelof · 2014"
+  },
+  {
+    "file": "./assets/heroes/the-sopranos-1999-00.jpg",
+    "caption": "The Sopranos · Chase · 1999"
+  },
+  {
+    "file": "./assets/heroes/true-detective-2014-00.jpg",
+    "caption": "True Detective · Pizzolatto · 2014"
+  },
+  {
+    "file": "./assets/heroes/twin-peaks-the-return-2017-00.jpg",
+    "caption": "Twin Peaks: The Return · Lynch · 2017"
+  },
+  {
+    "file": "./assets/heroes/twin-peaks-the-return-2017-01.jpg",
+    "caption": "Twin Peaks: The Return · Lynch · 2017"
   }
 ]

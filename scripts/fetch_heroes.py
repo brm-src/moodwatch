@@ -2,8 +2,9 @@
 """Fetch hero backdrops from TMDb for the moodwatch hero pool.
 
 Mixes color art-cinema (Wenders, WKW, Tarkovsky, etc.) with extra
-public-domain silents (Metropolis, Nosferatu, Caligari, ...). Saves
-into ./assets/heroes/ and rewrites manifest.json from scratch.
+public-domain silents (Metropolis, Nosferatu, Caligari, ...) and
+prestige TV stills (Twin Peaks, Mad Men, etc.). Saves into
+./assets/heroes/ and rewrites manifest.json from scratch.
 
 Run from repo root:
     TMDB_API_KEY=... python3 scripts/fetch_heroes.py
@@ -54,6 +55,18 @@ PICKS: list[tuple[str, int, int, str]] = [
     ("The Passion of Joan of Arc", 1928, 1, "Dreyer"),
 ]
 
+# (title, year, max_backdrops, creator_for_caption)
+TV_PICKS: list[tuple[str, int, int, str]] = [
+    ("Twin Peaks: The Return", 2017, 2, "Lynch"),
+    ("Mad Men", 2007, 1, "Weiner"),
+    ("The Leftovers", 2014, 1, "Lindelof"),
+    ("True Detective", 2014, 1, "Pizzolatto"),
+    ("Chernobyl", 2019, 1, "Mazin"),
+    ("Atlanta", 2016, 1, "Glover"),
+    ("The Sopranos", 1999, 1, "Chase"),
+    ("Better Call Saul", 2015, 1, "Gilligan"),
+]
+
 
 def http_json(url: str) -> dict:
     req = urllib.request.Request(url, headers={"Accept": "application/json"})
@@ -77,16 +90,40 @@ def search(title: str, year: int) -> int | None:
     return results[0]["id"] if results else None
 
 
+def search_tv(title: str, year: int) -> int | None:
+    q = urllib.parse.urlencode({"api_key": KEY, "query": title, "first_air_date_year": year, "include_adult": "false"})
+    data = http_json(f"{API}/search/tv?{q}")
+    results = data.get("results") or []
+    if not results:
+        q = urllib.parse.urlencode({"api_key": KEY, "query": title, "include_adult": "false"})
+        data = http_json(f"{API}/search/tv?{q}")
+        results = data.get("results") or []
+    for r in results:
+        rd = (r.get("first_air_date") or "")[:4]
+        if rd and abs(int(rd) - year) <= 1:
+            return r["id"]
+    return results[0]["id"] if results else None
+
+
+def _score(b: dict):
+    ar = (b.get("aspect_ratio") or 0) or 0
+    ar_pen = abs(ar - 1.777)
+    return (-(b.get("vote_average") or 0), ar_pen, -(b.get("width") or 0))
+
+
 def backdrops(movie_id: int) -> list[dict]:
     q = urllib.parse.urlencode({"api_key": KEY, "include_image_language": "en,null"})
     data = http_json(f"{API}/movie/{movie_id}/images?{q}")
     bd = data.get("backdrops") or []
-    # Score: prefer 16:9 wide (~1.77), high vote_avg, big width
-    def score(b):
-        ar = (b.get("aspect_ratio") or 0) or 0
-        ar_pen = abs(ar - 1.777)
-        return (-(b.get("vote_average") or 0), ar_pen, -(b.get("width") or 0))
-    bd.sort(key=score)
+    bd.sort(key=_score)
+    return bd
+
+
+def tv_backdrops(tv_id: int) -> list[dict]:
+    q = urllib.parse.urlencode({"api_key": KEY, "include_image_language": "en,null"})
+    data = http_json(f"{API}/tv/{tv_id}/images?{q}")
+    bd = data.get("backdrops") or []
+    bd.sort(key=_score)
     return bd
 
 
@@ -108,26 +145,26 @@ def download(url: str, dest: Path) -> bool:
         return False
 
 
-def main() -> int:
-    new_files: list[tuple[str, str]] = []  # (filename, caption)
-    for title, year, n, director in PICKS:
-        print(f"[{title} · {year}]")
+def fetch_set(picks, search_fn, images_fn, label):
+    new_files: list[tuple[str, str]] = []
+    for title, year, n, author in picks:
+        print(f"[{label}] [{title} · {year}]")
         try:
-            mid = search(title, year)
+            mid = search_fn(title, year)
         except Exception as e:
             print(f"  search error: {e}")
             continue
         if not mid:
             print("  not found"); continue
         try:
-            bd = backdrops(mid)
+            bd = images_fn(mid)
         except Exception as e:
             print(f"  images error: {e}"); continue
         if not bd:
             print("  no backdrops"); continue
         chosen = bd[:n]
         base = slug(title, year)
-        caption = f"{title} · {director} · {year}"
+        caption = f"{title} · {author} · {year}"
         for i, b in enumerate(chosen):
             path = b["file_path"]
             ext = Path(path).suffix or ".jpg"
@@ -138,8 +175,15 @@ def main() -> int:
                 new_files.append((fname, caption))
                 print(f"  + {fname}")
             time.sleep(0.15)
+    return new_files
 
-    # Rebuild manifest: keep all existing files (silents already on disk) + new color/silents.
+
+def main() -> int:
+    new_files: list[tuple[str, str]] = []
+    new_files += fetch_set(PICKS, search, backdrops, "movie")
+    new_files += fetch_set(TV_PICKS, search_tv, tv_backdrops, "tv")
+
+    # Rebuild manifest: keep all existing files (silents already on disk) + new color/silents/tv.
     existing = sorted(p.name for p in OUT.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"})
     existing_captions = {}
     # Try to preserve existing captions from old manifest
