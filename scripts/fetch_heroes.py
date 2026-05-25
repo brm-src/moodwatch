@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Fetch hero backdrops from TMDb for the moodwatch hero pool.
+
+Mixes color art-cinema (Wenders, WKW, Tarkovsky, etc.) with extra
+public-domain silents (Metropolis, Nosferatu, Caligari, ...). Saves
+into ./assets/heroes/ and rewrites manifest.json from scratch.
+
+Run from repo root:
+    TMDB_API_KEY=... python3 scripts/fetch_heroes.py
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import sys
+import time
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+API = "https://api.themoviedb.org/3"
+IMG = "https://image.tmdb.org/t/p/w1280"
+KEY = os.environ.get("TMDB_API_KEY") or sys.argv[1] if len(sys.argv) > 1 else os.environ.get("TMDB_API_KEY")
+if not KEY:
+    sys.exit("set TMDB_API_KEY")
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "assets" / "heroes"
+OUT.mkdir(parents=True, exist_ok=True)
+
+# (title, year, max_backdrops, director_for_caption)
+PICKS: list[tuple[str, int, int, str]] = [
+    # Color — art cinema, paletas distintivas
+    ("Paris, Texas", 1984, 2, "Wenders"),
+    ("Wings of Desire", 1987, 2, "Wenders"),
+    ("In the Mood for Love", 2000, 2, "Wong Kar-wai"),
+    ("Chungking Express", 1994, 1, "Wong Kar-wai"),
+    ("Stalker", 1979, 2, "Tarkovsky"),
+    ("Three Colors: Blue", 1993, 1, "Kieślowski"),
+    ("Days of Heaven", 1978, 2, "Malick"),
+    ("Mulholland Drive", 2001, 1, "Lynch"),
+    ("Stranger Than Paradise", 1984, 1, "Jarmusch"),
+    ("Dead Man", 1995, 1, "Jarmusch"),
+    ("Red Desert", 1964, 1, "Antonioni"),
+    ("The Master", 2012, 1, "P.T. Anderson"),
+    ("Don't Look Now", 1973, 1, "Roeg"),
+    # Silents extra (los ya bajados se mantienen en disco; TMDb tiene buenos backdrops)
+    ("Metropolis", 1927, 2, "Lang"),
+    ("Nosferatu", 1922, 1, "Murnau"),
+    ("The Cabinet of Dr. Caligari", 1920, 1, "Wiene"),
+    ("Sunrise: A Song of Two Humans", 1927, 1, "Murnau"),
+    ("M", 1931, 1, "Lang"),
+    ("The Passion of Joan of Arc", 1928, 1, "Dreyer"),
+]
+
+
+def http_json(url: str) -> dict:
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return json.load(r)
+
+
+def search(title: str, year: int) -> int | None:
+    q = urllib.parse.urlencode({"api_key": KEY, "query": title, "year": year, "include_adult": "false"})
+    data = http_json(f"{API}/search/movie?{q}")
+    results = data.get("results") or []
+    if not results:
+        # retry without year
+        q = urllib.parse.urlencode({"api_key": KEY, "query": title, "include_adult": "false"})
+        data = http_json(f"{API}/search/movie?{q}")
+        results = data.get("results") or []
+    for r in results:
+        rd = (r.get("release_date") or "")[:4]
+        if rd and abs(int(rd) - year) <= 1:
+            return r["id"]
+    return results[0]["id"] if results else None
+
+
+def backdrops(movie_id: int) -> list[dict]:
+    q = urllib.parse.urlencode({"api_key": KEY, "include_image_language": "en,null"})
+    data = http_json(f"{API}/movie/{movie_id}/images?{q}")
+    bd = data.get("backdrops") or []
+    # Score: prefer 16:9 wide (~1.77), high vote_avg, big width
+    def score(b):
+        ar = (b.get("aspect_ratio") or 0) or 0
+        ar_pen = abs(ar - 1.777)
+        return (-(b.get("vote_average") or 0), ar_pen, -(b.get("width") or 0))
+    bd.sort(key=score)
+    return bd
+
+
+def slug(title: str, year: int) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    return f"{s}-{year}"
+
+
+def download(url: str, dest: Path) -> bool:
+    if dest.exists() and dest.stat().st_size > 0:
+        return True
+    req = urllib.request.Request(url, headers={"User-Agent": "moodwatch-heroes/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r, dest.open("wb") as f:
+            f.write(r.read())
+        return True
+    except Exception as e:
+        print(f"  ! download failed: {e}")
+        return False
+
+
+def main() -> int:
+    new_files: list[tuple[str, str]] = []  # (filename, caption)
+    for title, year, n, director in PICKS:
+        print(f"[{title} · {year}]")
+        try:
+            mid = search(title, year)
+        except Exception as e:
+            print(f"  search error: {e}")
+            continue
+        if not mid:
+            print("  not found"); continue
+        try:
+            bd = backdrops(mid)
+        except Exception as e:
+            print(f"  images error: {e}"); continue
+        if not bd:
+            print("  no backdrops"); continue
+        chosen = bd[:n]
+        base = slug(title, year)
+        caption = f"{title} · {director} · {year}"
+        for i, b in enumerate(chosen):
+            path = b["file_path"]
+            ext = Path(path).suffix or ".jpg"
+            fname = f"{base}-{i:02d}{ext}"
+            dest = OUT / fname
+            ok = download(IMG + path, dest)
+            if ok:
+                new_files.append((fname, caption))
+                print(f"  + {fname}")
+            time.sleep(0.15)
+
+    # Rebuild manifest: keep all existing files (silents already on disk) + new color/silents.
+    existing = sorted(p.name for p in OUT.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"})
+    existing_captions = {}
+    # Try to preserve existing captions from old manifest
+    old = OUT / "manifest.json"
+    if old.exists():
+        try:
+            for entry in json.loads(old.read_text()):
+                fname = Path(entry["file"]).name
+                existing_captions[fname] = entry.get("caption", "")
+        except Exception:
+            pass
+    for fname, cap in new_files:
+        existing_captions[fname] = cap
+
+    manifest = []
+    for fname in existing:
+        cap = existing_captions.get(fname, "")
+        manifest.append({"file": f"./assets/heroes/{fname}", "caption": cap})
+    (OUT / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+    print(f"\nmanifest entries: {len(manifest)}")
+    print(f"new files added: {len(new_files)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
