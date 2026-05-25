@@ -65,6 +65,13 @@ const STRINGS = {
     q_state_pensive:  "Heavy. Ruminating.",
     q_state_good:     "Good. Up for whatever.",
 
+    q_appetite_t: "What are you <em>in the mood for?</em>",
+    q_appetite_feel:   "Something that makes me feel.",
+    q_appetite_horror: "Horror.",
+    q_appetite_weird:  "Something strange. Fever-dream.",
+    q_appetite_lost:   "Lost in my 20s energy.",
+    q_appetite_any:    "Surprise me.",
+
     q_scene_t: "Which scene <em>is you right now?</em>",
     q_scene_road:      "A car driving with no destination.",
     q_scene_city:      "A vast city where nobody knows anyone.",
@@ -417,6 +424,13 @@ const STRINGS = {
     q_state_restless: "Con inquietud. Necesito algo.",
     q_state_pensive:  "Con pesadez, rumiando mis pensamientos.",
     q_state_good:     "Bien. Con disposición a lo que sea.",
+
+    q_appetite_t: "¿Qué te <em>provoca esta noche?</em>",
+    q_appetite_feel:   "Algo que me haga sentir.",
+    q_appetite_horror: "Terror.",
+    q_appetite_weird:  "Algo raro. Sueño febril.",
+    q_appetite_lost:   "Perdido en mis 20s.",
+    q_appetite_any:    "Sorpréndeme.",
 
     q_scene_t: "¿Qué escena te <em>representa en este momento?</em>",
     q_scene_road:      "Un auto manejando sin destino.",

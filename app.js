@@ -19,6 +19,16 @@
         { value: "good",     labelKey: "q_state_good"     },
       ],
     },
+    appetite: {
+      key: "appetite", kind: "real", titleKey: "q_appetite_t",
+      options: [
+        { value: "feel-deep", labelKey: "q_appetite_feel" },
+        { value: "horror",    labelKey: "q_appetite_horror" },
+        { value: "weird",     labelKey: "q_appetite_weird" },
+        { value: "lost-20s",  labelKey: "q_appetite_lost" },
+        { value: "any",       labelKey: "q_appetite_any" },
+      ],
+    },
     door: {
       key: "door", kind: "doors", titleKey: "q_door_t",
       options: [
@@ -454,7 +464,7 @@
   // like runtime/language/taste. Keep the ritual feel, but always collect the
   // axes that materially improve recommendations.
   function buildSession() {
-    const spine = ["state", "intent"];
+    const spine = ["state", "appetite", "intent"];
     const format = takeRandom(["runtime", "language_pref"], 1);
     const taste = takeRandom(["depth", "risk_taste", "director_vibe", "first_act", "trust", "avoid", "rewatch_taste"], 2);
     const texture = takeRandom(["weather", "light", "texture", "place", "sound", "temperature", "memory", "want", "pace", "opening"], 2);
@@ -621,6 +631,11 @@
     if (a.state === "restless") { m.energy = "engage"; m.risk = "discover"; }
     if (a.state === "pensive")  { m.energy = "engage"; }
     if (a.state === "good")     { m.risk = m.risk || "discover"; }
+    if (a.appetite && a.appetite !== "any") m.appetite = a.appetite;
+    if (a.appetite === "feel-deep") { m.energy = "engage"; m.depth = m.depth || "thoughtful"; }
+    if (a.appetite === "horror")    { m.tone = "dark"; m.trust = "horror"; m.first_act = m.first_act || "thriller_horror"; }
+    if (a.appetite === "weird")     { m.tone = "dark"; m.trust = "weird"; m.risk = "discover"; }
+    if (a.appetite === "lost-20s")  { m.depth = m.depth || "thoughtful"; m.tone = m.tone || "dark"; }
     if (a.scene === "survival" || a.scene === "discovery") m.energy = "engage";
     if (a.scene === "dialogue" || a.scene === "house")     m.company = m.company || "alone";
     if (a.intent === "escape")  { m.energy = "unwind"; m.tone = m.tone || "light"; }
