@@ -66,23 +66,17 @@ function decodeMood(b64) {
   } catch { return {}; }
 }
 
-function justwatchUrl(film, country, _contentType = "movie") {
-  // Always use JustWatch search — TMDb's providers_link and locale paths 404 often.
-  // NOTE: JustWatch's `content_type` query param breaks search on /cl/buscar (returns
-  // "No hemos encontrado" for any value: movie/tv/tvshow/show). Dropped on purpose.
-  const c = (country || "us").toLowerCase();
-  const spanishSearch = new Set(["cl", "es", "mx", "ar", "co", "pe", "uy", "ec"]);
-  const searchPath = spanishSearch.has(c) ? "buscar" : "search";
-  // Use title + year for better matching; strip special chars but preserve unicode letters.
-  const title = (film.title || "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
-    .trim();
-  const year = film.release_date ? new Date(film.release_date).getFullYear() : "";
-  const query = year ? `${title} ${year}` : title;
-  const q = encodeURIComponent(query);
-  return `https://www.justwatch.com/${c}/${searchPath}?q=${q}`;
+// Build the "Where to watch" URL for a film card.
+// Strategy:
+//   1) If TMDb returned a providers.link (a deep JustWatch URL to the exact title),
+//      use it. Best UX, lands on the right page.
+//   2) Otherwise, use TMDb's own /watch?locale=XX page — always exists, shows
+//      providers in the user's country, no 404. Better than a JustWatch search.
+function watchUrl({ providersLink, mediaType, tmdbId, country }) {
+  if (providersLink) return providersLink;
+  const c = (country || "US").toUpperCase();
+  const path = mediaType === "tv" ? "tv" : "movie";
+  return `https://www.themoviedb.org/${path}/${tmdbId}/watch?locale=${c}`;
 }
 
 function fitScore(film, mood = {}) {
@@ -366,7 +360,7 @@ async function recommend(req, env, ctx) {
       genres: f.genres || (details.genres || []).map(g => g.name?.toLowerCase()),
       poster: (f.poster_path || details.poster_path) ? `${tmdbImageBase()}w342${f.poster_path || details.poster_path}` : null,
       overview: f.overview || details.overview || null,
-      justwatch: justwatchUrl({ title, release_date: date }, country, M.jwContentType),
+      justwatch: watchUrl({ providersLink: providers.link, mediaType: media, tmdbId: f.id, country }),
       tmdb: M.tmdbUrl(f.id),
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
@@ -522,7 +516,7 @@ async function surprise(req, env, ctx) {
       genres: f.genres || (details.genres || []).map(g => g.name),
       poster: f.poster_path ? `${tmdbImageBase()}w342${f.poster_path}` : null,
       overview: f.overview || null,
-      justwatch: justwatchUrl({ title, release_date: date }, country, M.jwContentType),
+      justwatch: watchUrl({ providersLink: providers.link, mediaType: media, tmdbId: f.id, country }),
       tmdb: M.tmdbUrl(f.id),
       curated_note: cur?.note || null,
       from_list: f._list || null,
@@ -620,7 +614,7 @@ async function alt(req, env) {
         genres: (details.genres || []).map(g => g.name?.toLowerCase()),
         poster: details.poster_path ? `${tmdbImageBase()}w342${details.poster_path}` : null,
         overview: details.overview || null,
-        justwatch: justwatchUrl({ title, release_date: date }, country, M.jwContentType),
+        justwatch: watchUrl({ providersLink: providers.link, mediaType: media, tmdbId: details.id, country }),
         tmdb: M.tmdbUrl(details.id),
         curated_note: M.curatedFor(details.id)?.note || null,
         from_list: null,
