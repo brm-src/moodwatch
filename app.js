@@ -1090,13 +1090,17 @@
       if (next === "liked")    c.classList.add("is-liked");
       if (next === "disliked") c.classList.add("is-disliked");
       if (next === "seen")     c.classList.add("is-seen");
-      // On dislike: fetch a replacement film and swap this card
-      if (next === "disliked") {
+      // Like → replace with a similar one. Dislike → replace with an opposite one.
+      if (next === "liked" || next === "disliked") {
+        const kind = next === "liked" ? "similar" : "opposite";
         try {
-          const repl = await fetchReplacementFilm();
+          const repl = await fetchAltFilm(f.id, kind);
           if (repl) {
             const newCard = filmCard(repl, rank);
-            c.replaceWith(newCard);
+            // tiny crossfade
+            c.style.transition = "opacity .2s";
+            c.style.opacity = "0";
+            setTimeout(() => c.replaceWith(newCard), 180);
           }
         } catch {}
       }
@@ -1182,40 +1186,30 @@
   }
   function clearTaste() { writeTaste({}); }
 
-  // Fetch a single replacement film (for dislike-swap), excluding current cards
-  async function fetchReplacementFilm() {
+  // Fetch a single replacement film tied to a SPECIFIC seed film.
+  // kind="similar" → use TMDb /similar+/recommendations of seed (for likes).
+  // kind="opposite" → discover excluding seed's genres (for dislikes).
+  async function fetchAltFilm(seedId, kind) {
     const country = guessCountry();
     const lang = window.LANG;
     const onCards = [...document.querySelectorAll("#cards .card")]
       .map(c => c._filmId).filter(Boolean);
     const exclude = (state.shownIds || []).concat(onCards);
-    const params = new URLSearchParams({ country, lang });
+    const params = new URLSearchParams({ country, lang, seed: String(seedId), kind });
     if (exclude.length) params.set("exclude", exclude.join(","));
-    const liked = tasteIds("liked"); if (liked.length) params.set("liked", liked.slice(-30).join(","));
-    const disliked = tasteIds("disliked"); if (disliked.length) params.set("disliked", disliked.slice(-30).join(","));
-    params.set("seed", String(Math.floor(Math.random() * 1e9)));
-    let url;
-    if (state.lastMode === "surprise") {
-      params.set("profile", state.lastProfile || state.surpriseProfile || "quality");
-      url = `${API_BASE}/surprise?${params}`;
-    } else if (state.lastMode === "recommend" && state.lastMoodB64) {
-      params.set("mood", state.lastMoodB64);
-      if (state.lastWithUser && state.user) params.set("user", state.user);
-      url = `${API_BASE}/recommend?${params}`;
-    } else {
-      params.set("profile", "quality");
-      url = `${API_BASE}/surprise?${params}`;
-    }
-    const r = await fetch(url);
-    if (!r.ok) return null;
-    const data = await r.json();
-    const film = (data.films || [])[0];
-    if (film) {
-      film.from_feedback = film.from_feedback || (liked.length > 0);
-      state.shownIds = (state.shownIds || []).concat([film.id]);
-    }
-    return film || null;
+    try {
+      const r = await fetch(`${API_BASE}/alt?${params}`);
+      if (!r.ok) return null;
+      const data = await r.json();
+      const film = data.film;
+      if (film) {
+        film.from_feedback = kind === "similar";
+        state.shownIds = (state.shownIds || []).concat([film.id]);
+      }
+      return film || null;
+    } catch { return null; }
   }
+
 
   function escapeHtml(s) {
     return String(s || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));

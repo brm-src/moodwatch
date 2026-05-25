@@ -476,6 +476,95 @@ async function surprise(req, env, ctx) {
 
   return { films: enriched, mode: "surprise", profile, why: moodSummary(surpriseMood, lang), matched_lists: matched.map(m => m.list.name) };
 }
+async function alt(req, env) {
+  const url = new URL(req.url);
+  const seed = parseInt(url.searchParams.get("seed") || "0", 10);
+  const kind = url.searchParams.get("kind") === "opposite" ? "opposite" : "similar";
+  const country = (url.searchParams.get("country") || "US").toUpperCase();
+  const lang    = (url.searchParams.get("lang") || "en").startsWith("es") ? "es-ES" : "en-US";
+  const exclude = (url.searchParams.get("exclude") || "")
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
+  const excludeSet = new Set(exclude);
+  excludeSet.add(seed);
+
+  if (!Number.isFinite(seed) || seed <= 0) return { error: "bad_seed", status: 400 };
+  if (!env.TMDB_API_KEY) return { error: "config", status: 500 };
+
+  let candidateIds = [];
+
+  if (kind === "similar") {
+    // Pull both feeds, prefer items appearing in both
+    const [sims, recs] = await Promise.all([
+      tmdbSimilar(env, seed).catch(() => []),
+      tmdbRecommendations(env, seed).catch(() => []),
+    ]);
+    const tally = new Map();
+    for (const id of sims) tally.set(id, (tally.get(id) || 0) + 1);
+    for (const id of recs) tally.set(id, (tally.get(id) || 0) + 2); // recs weighted higher
+    candidateIds = [...tally.entries()]
+      .filter(([id]) => !excludeSet.has(id))
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([id]) => id);
+  } else {
+    // Opposite: discover with without_genres = seed's genres
+    const seedDetails = await tmdbDetails(env, seed, lang).catch(() => null);
+    const seedGenres = (seedDetails?.genres || []).map(g => g.id);
+    const without = seedGenres.length ? seedGenres.join(",") : "";
+    const today = new Date().toISOString().slice(0, 10);
+    const sortBy = ["vote_average.desc", "popularity.desc"][Math.floor(Math.random() * 2)];
+    const page   = 1 + Math.floor(Math.random() * 10);
+    const data = await tmdbDiscover(env, {
+      sort_by: sortBy,
+      page,
+      "vote_count.gte": 400,
+      "vote_average.gte": 6.6,
+      "with_runtime.gte": 75,
+      "primary_release_date.lte": today,
+      include_adult: "false",
+      ...(without ? { without_genres: without } : {}),
+    }, lang).catch(() => ({ results: [] }));
+    candidateIds = (data.results || [])
+      .map(r => r.id)
+      .filter(id => !excludeSet.has(id))
+      .slice(0, 12);
+  }
+
+  if (!candidateIds.length) return { error: "no_alt", status: 404 };
+
+  // Enrich the top candidate
+  for (const id of candidateIds) {
+    try {
+      const [details, providers, credits] = await Promise.all([
+        tmdbDetails(env, id, lang),
+        tmdbProviders(env, id, country),
+        tmdbCredits(env, id),
+      ]);
+      const today = new Date().toISOString().slice(0, 10);
+      if (details.release_date && details.release_date > today) continue;
+      const film = {
+        id: details.id,
+        title: details.title,
+        year: (details.release_date || "").slice(0, 4),
+        director: credits.director || null,
+        runtime: details.runtime || null,
+        genres: (details.genres || []).map(g => g.name?.toLowerCase()),
+        poster: details.poster_path ? `${tmdbImageBase()}w342${details.poster_path}` : null,
+        overview: details.overview || null,
+        justwatch: justwatchUrl({ title: details.title, release_date: details.release_date, providers_link: providers.link }, country),
+        tmdb: `https://www.themoviedb.org/movie/${details.id}`,
+        curated_note: curatedFor(details.id)?.note || null,
+        from_list: null,
+        from_feedback: kind === "similar",
+      };
+      return { film, kind };
+    } catch (e) {
+      continue;
+    }
+  }
+  return { error: "no_alt", status: 404 };
+}
+
 async function verifyCurated(req, env) {
   const url = new URL(req.url);
   const max = Math.min(parseInt(url.searchParams.get("max") || "40", 10), 50);
@@ -528,6 +617,17 @@ export default {
         return json(out, {}, cors);
       } catch (e) {
         console.log("surprise err:", e?.stack || e);
+        return json({ error: "generic", message: String(e?.message || e) }, { status: 500 }, cors);
+      }
+    }
+
+    if (url.pathname === "/alt") {
+      try {
+        const out = await alt(req, env);
+        if (out.error) return json(out, { status: out.status || 500 }, cors);
+        return json(out, {}, cors);
+      } catch (e) {
+        console.log("alt err:", e?.stack || e);
         return json({ error: "generic", message: String(e?.message || e) }, { status: 500 }, cors);
       }
     }
