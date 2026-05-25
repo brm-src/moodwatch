@@ -23,6 +23,7 @@ const STRINGS = {
     fb_like: "I liked it",
     fb_dislike: "I didn't like it",
     clear_taste: "Reset my taste",
+    from_feedback: "Based on what you liked",
 
     lb_label: "Letterboxd",
     lb_ask_title: "Your <em>username.</em>",
@@ -416,6 +417,7 @@ const STRINGS = {
     fb_like: "Me gustó",
     fb_dislike: "No me gustó",
     clear_taste: "Reiniciar mi gusto",
+    from_feedback: "Recomendada por tu feedback",
 
     lb_label: "Letterboxd",
     lb_ask_title: "Tu <em>usuario.</em>",

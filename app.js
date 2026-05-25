@@ -1097,7 +1097,8 @@
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
       <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
       ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span>` : ""}
-      ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}`;
+      ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}
+      ${f.from_feedback ? `<span class="taste-badge">${window.t("from_feedback")}</span>` : ""}`;
     if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 90));
     else if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 160));
     if (f.reason) meta.appendChild(expandableText(f.reason, "reason", 80));

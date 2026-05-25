@@ -327,6 +327,7 @@ async function recommend(req, env, ctx) {
       tmdb: `https://www.themoviedb.org/movie/${f.id}`,
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
+      from_feedback: !!f._likeBoost,
       reason: pickReason({ ...f, runtime: details.runtime || f.runtime }, mood, lang),
     };
   }));
