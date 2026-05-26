@@ -960,7 +960,8 @@ footer.bottom small a { color: var(--paper-3); text-decoration: none; }
 footer.bottom small a:hover { color: var(--accent); }
 
 .editor-badge {
-  display: inline-block;
+  align-self: flex-start;
+  max-width: 100%;
   font-family: var(--font-body);
   font-size: 10px;
   font-weight: 700;
@@ -971,9 +972,13 @@ footer.bottom small a:hover { color: var(--accent); }
   padding: 4px 10px 5px;
   border-radius: 999px;
   margin: 6px 0 4px;
+  white-space: normal;
+  word-break: keep-all;
+  line-height: 1.3;
 }
 .list-badge {
-  display: inline-block;
+  align-self: flex-start;
+  max-width: 100%;
   font-family: var(--font-body);
   font-size: 9.5px;
   font-weight: 600;
@@ -984,6 +989,9 @@ footer.bottom small a:hover { color: var(--accent); }
   padding: 3px 8px 4px;
   border-radius: 999px;
   margin: 6px 0 4px;
+  white-space: normal;
+  word-break: keep-all;
+  line-height: 1.3;
 }
 .pill.ghost {
   background: transparent;
