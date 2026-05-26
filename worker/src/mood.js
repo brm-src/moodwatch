@@ -147,8 +147,8 @@ export async function discoverByMood(env, mood, language, media = "movie") {
 
   const discover = isTV ? tmdbDiscoverTV : tmdbDiscover;
   const fetches = [];
-  // Strict pool: 12 pages × 2 sorts = up to 24 pages of mood-filtered hits.
-  for (let p = 1; p <= 12; p++) {
+  // Strict pool: 5 pages × 2 sorts = 10 fetches (was 12×2=24, hitting CF subrequest cap).
+  for (let p = 1; p <= 5; p++) {
     fetches.push(discover(env, { ...baseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
     fetches.push(discover(env, { ...baseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
   }
@@ -158,13 +158,12 @@ export async function discoverByMood(env, mood, language, media = "movie") {
   delete looseParams["with_runtime.gte"];
   delete looseParams["with_runtime.lte"];
   looseParams["vote_count.gte"] = Math.max(60, Math.floor((baseParams["vote_count.gte"] || 500) / 4));
-  for (let p = 1; p <= 8; p++) {
+  // 3 pages × 2 sorts = 6 fetches (was 8×2=16).
+  for (let p = 1; p <= 3; p++) {
     fetches.push(discover(env, { ...looseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
     fetches.push(discover(env, { ...looseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
   }
-  // Wildcard: ignore mood genres entirely, just chase quality. Adds ~50 more
-  // candidates that would never surface from the strict path. The scorer
-  // filters them by mood fit anyway.
+  // Wildcard: ignore mood genres entirely, just chase quality. 2 pages.
   const wildParams = {
     "vote_count.gte": 200,
     "vote_average.gte": 7.0,
@@ -173,7 +172,7 @@ export async function discoverByMood(env, mood, language, media = "movie") {
     ...dateRange(mood, media),
     ...languagePref(mood),
   };
-  for (let p = 1; p <= 4; p++) {
+  for (let p = 1; p <= 2; p++) {
     fetches.push(discover(env, { ...wildParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
   }
   const all = await Promise.all(fetches);

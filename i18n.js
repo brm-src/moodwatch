@@ -413,11 +413,11 @@ const STRINGS = {
     q_tod_small_hours: "The small hours.",
 
     q_garment_t: "What are you <em>wearing?</em>",
-    q_garment_trench:      "A trench coat.",
+    q_garment_trench:      "A long coat.",
     q_garment_sweater:     "An oversized sweater.",
     q_garment_leather:     "A leather jacket.",
-    q_garment_white_shirt: "A white shirt, slightly wrinkled.",
-    q_garment_robe:        "A bathrobe.",
+    q_garment_white_shirt: "A wrinkled white shirt.",
+    q_garment_robe:        "Pajamas.",
     q_garment_naked:       "Almost nothing.",
 
     q_food_t: "On the <em>plate.</em>",
@@ -900,7 +900,7 @@ const STRINGS = {
     q_garment_sweater:     "Un suéter grande.",
     q_garment_leather:     "Una chaqueta de cuero.",
     q_garment_white_shirt: "Una camisa blanca arrugada.",
-    q_garment_robe:        "Un albornoz.",
+    q_garment_robe:        "Pijama.",
     q_garment_naked:       "Casi nada.",
 
     q_food_t: "En el <em>plato.</em>",

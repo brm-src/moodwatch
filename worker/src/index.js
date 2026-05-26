@@ -201,7 +201,7 @@ async function recommend(req, env, ctx) {
     const j = Math.floor(Math.random() * (i + 1));
     [missingListIds[i], missingListIds[j]] = [missingListIds[j], missingListIds[i]];
   }
-  const extraFromLists = (await Promise.all(missingListIds.slice(0, 6).map(id =>
+  const extraFromLists = (await Promise.all(missingListIds.slice(0, 4).map(id =>
     M.details(env, id, lang).then(d => ({
       id: d.id,
       title: M.titleOf(d),
@@ -257,7 +257,7 @@ async function recommend(req, env, ctx) {
             const j = Math.floor(Math.random() * (i + 1));
             [missing[i], missing[j]] = [missing[j], missing[i]];
           }
-          const extraFromWl = (await Promise.all(missing.slice(0, 24).map(id =>
+          const extraFromWl = (await Promise.all(missing.slice(0, 8).map(id =>
             M.details(env, id, lang).then(d => ({
               id: d.id,
               title: M.titleOf(d),
@@ -292,7 +292,7 @@ async function recommend(req, env, ctx) {
   // - disliked → tally dominant genres + decade + language, build penalty profile
   const likeBoostSet = new Set();
   if (liked.length) {
-    const likeSeeds = liked.slice(-6); // last 6 likes are most relevant
+    const likeSeeds = liked.slice(-3); // last 3 likes (was 6, halved to save subrequests)
     const sims = await Promise.all(likeSeeds.flatMap(id => [
       tmdbSimilar(env, id, media).catch(() => []),
       tmdbRecommendations(env, id, media).catch(() => []),
@@ -309,7 +309,7 @@ async function recommend(req, env, ctx) {
   let dislikeGenres = new Set();
   let dislikeLangs  = new Set();
   if (disliked.length) {
-    const details = await Promise.all(disliked.slice(-10).map(id =>
+    const details = await Promise.all(disliked.slice(-5).map(id =>
       M.details(env, id, lang).catch(() => null)
     ));
     const gCount = new Map(), lCount = new Map();
@@ -373,7 +373,7 @@ async function recommend(req, env, ctx) {
   pushUnique(curatedHits.slice(0, 4), 3);
   pushUnique(listHits.slice(0, 24), matched.length ? 8 : 3);
   pushUnique(otherHits.slice(0, 40), 10);
-  const enrichedPool = await Promise.all(top.slice(0, 9).map(async (f) => {
+  const enrichedPool = await Promise.all(top.slice(0, 6).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       M.providers(env, f.id, country),
       M.credits(env, f.id),
