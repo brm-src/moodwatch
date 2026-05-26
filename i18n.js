@@ -12,7 +12,7 @@ const STRINGS = {
     footer_made: "Built with",
 
     intro_fig: "",
-    intro_title: "A film, <em>chosen by mood.</em>",
+    intro_title: "A pick, <em>chosen by mood.</em>",
     intro_lead: "Pick how I'll choose.",
     media_label: "Format",
     media_step_title: "Movie or <em>series?</em>",
@@ -433,7 +433,7 @@ const STRINGS = {
     footer_made: "Hecho con",
 
     intro_fig: "",
-    intro_title: "Una película, <em>según tu mood.</em>",
+    intro_title: "Una recomendación, <em>según tu mood.</em>",
     intro_lead: "Elige cómo busco.",
     media_label: "Formato",
     media_step_title: "¿Película o <em>serie?</em>",
