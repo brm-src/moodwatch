@@ -1188,6 +1188,10 @@
     const country = guessCountry();
     const lang = window.LANG;
     const mood = ritualToMood(state.answers);
+    // Era chip override (memphid feedback): if user clicked "Recent only",
+    // force decade=now regardless of what the quiz inferred.
+    if (state.eraOverride === "now") mood.decade = "now";
+    if (state.eraOverride === "any") delete mood.decade;
     const moodB64 = btoa(unescape(encodeURIComponent(JSON.stringify(mood))));
     const params = new URLSearchParams({ country, lang, mood: moodB64 });
     if (withUser && state.user) params.set("user", state.user);
@@ -1218,6 +1222,27 @@
   }
 
   function renderResults(data) {
+    // Wire era chips (memphid: "no quiero pelis tan antiguas").
+    const chipsEl = document.getElementById("era-chips");
+    if (chipsEl && !chipsEl.dataset.bound) {
+      chipsEl.dataset.bound = "1";
+      chipsEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".era-chip");
+        if (!btn) return;
+        const era = btn.dataset.era;
+        if (state.eraOverride === era) return; // no-op
+        state.eraOverride = era;
+        chipsEl.querySelectorAll(".era-chip").forEach(b => b.classList.toggle("is-active", b === btn));
+        // Re-run the last query with the new era filter.
+        if (state.lastMode === "recommend") {
+          recommend({ withUser: state.lastWithUser });
+        } else if (state.lastMode === "surprise") {
+          surprise({ profile: state.surpriseProfile });
+        }
+      });
+    }
+    // Hide chips on surprise mode (no quiz, era doesn't apply the same way).
+    if (chipsEl) chipsEl.style.display = state.lastMode === "surprise" ? "none" : "";
     const words = vibeWords(state.answers, window.LANG);
     const desc = $("#vibe-desc");
     if (desc) desc.textContent = data?.why?.headline || (words.length ? words.join(" · ") : "");
@@ -1294,6 +1319,10 @@
       if (next === "liked")    c.classList.add("is-liked");
       if (next === "disliked") c.classList.add("is-disliked");
       if (next === "seen")     c.classList.add("is-seen");
+      // Toast feedback so the user knows the system learned.
+      if (next === "liked")    showToast(window.t("toast_liked"));
+      if (next === "disliked") showToast(window.t("toast_disliked"));
+      if (next === "seen")     showToast(window.t("toast_seen"));
       // Like → replace with a similar one. Dislike → replace with an opposite one.
       if (next === "liked" || next === "disliked") {
         const kind = next === "liked" ? "similar" : "opposite";
@@ -1453,6 +1482,25 @@
     return String(s || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
   function showError(msg) { $("#err-msg").textContent = msg; show("error"); }
+
+  // Toast notification — bottom of viewport, auto-dismiss.
+  // Used for taste-feedback acknowledgement so user knows the system learned.
+  let _toastTimer = null;
+  function showToast(msg) {
+    let el = document.getElementById("toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "toast";
+      el.className = "toast";
+      el.setAttribute("role", "status");
+      el.setAttribute("aria-live", "polite");
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add("is-visible");
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove("is-visible"), 2200);
+  }
 
   // ────────────────────────────────────────────────────────────
   // RANDOM HERO

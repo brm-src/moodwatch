@@ -1086,3 +1086,60 @@ footer.bottom small a:hover { color: var(--accent); }
   opacity: 0;
 }
 
+
+
+/* ─── era chips (memphid feedback: filtrar antiguas) ─── */
+.era-chips {
+  display: flex;
+  gap: var(--s-1);
+  margin: 0 0 var(--s-3);
+  flex-wrap: wrap;
+}
+.era-chip {
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--paper-3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.era-chip:hover {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
+.era-chip.is-active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* ─── toast (feedback de like/dislike/seen) ─── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 9999;
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
