@@ -516,18 +516,25 @@
     return [...keys].sort(() => Math.random() - 0.5).slice(0, n);
   }
 
-  // Build a fresh quiz with a spine. Before this it was pure random, so
-  // sessions could ask six atmospheric questions and miss basic constraints
-  // like runtime/language/taste. Keep the ritual feel, but always collect the
-  // axes that materially improve recommendations.
+  // Build a fresh quiz. ONLY constraint: ink blot is always last (it triggers
+  // the "psicoanalizándote" loading state and is the visual climax). Everything
+  // else is fully random across all categories. The first step (movie/tv/any)
+  // and the last (ink) are the only fixed pieces of the ritual.
   function buildSession() {
-    const spine = ["state", "appetite", "decade", "intent"];
-    const format = takeRandom(["runtime", "language_pref"], 1);
-    const taste = takeRandom(["depth", "risk_taste", "director_vibe", "first_act", "trust", "avoid", "rewatch_taste"], 2);
-    const texture = takeRandom(["weather", "light", "texture", "place", "sound", "temperature", "memory", "want", "pace", "opening"], 2);
-    const wild = takeRandom(["scene", "door", "decade", "smell", "window", "object", "body", "phrase"], 2);
-    const keys = [...new Set([...spine, ...taste, ...format, ...texture, ...wild])].slice(0, 8);
-    return [...keys.map(k => BANK[k]), BANK.ink];
+    const all = [
+      "state","appetite","door","scene","intent","depth","weather","sound","company","pace","ending",
+      "color","light","texture","place","temperature","memory","want","decade","smell","window",
+      "object","body","risk_taste","first_act","trust","avoid","rewatch_taste","runtime","language_pref",
+      "opening","time_of_day","garment","food","drink","instrument","transport","season","fear","phrase",
+    ].filter(k => BANK[k]);
+    const N = 7;
+    const picked = [];
+    const pool = [...all];
+    while (picked.length < N && pool.length) {
+      const i = Math.floor(Math.random() * pool.length);
+      picked.push(pool.splice(i, 1)[0]);
+    }
+    return [...picked.map(k => BANK[k]), BANK.ink];
   }
 
   let QUIZ = buildSession();
@@ -1064,9 +1071,16 @@
   // ─── loader rotator: cycles caption + cinema icon every ~1.6s ─────────
   let _loaderTimer = null;
   let _loaderStarted = 0;
-  function startLoader(useLB = false) {
+  function startLoader(useLB = false, mode = "default") {
     stopLoader();
-    const msgs = (useLB && window.t("loading_msgs_lb")) || window.t("loading_msgs") || [window.t(useLB ? "loading_lb" : "loading")];
+    let msgs;
+    if (mode === "psyche") {
+      msgs = window.t("loading_msgs_psyche") || [window.t("loading_psyche")];
+    } else if (useLB) {
+      msgs = window.t("loading_msgs_lb") || [window.t("loading_lb")];
+    } else {
+      msgs = window.t("loading_msgs") || [window.t("loading")];
+    }
     const icons = document.querySelectorAll("#load-icon .lico");
     const txt = document.getElementById("load-msg");
     let i = 0;
@@ -1128,7 +1142,7 @@
 
   async function recommend({ withUser, exclude }) {
     show("loading");
-    startLoader(Boolean(withUser && state.user));
+    startLoader(Boolean(withUser && state.user), "psyche");
     const country = guessCountry();
     const lang = window.LANG;
     const mood = ritualToMood(state.answers);

@@ -103,6 +103,18 @@ const STRINGS = {
       "Tuning the projector.",
       "Almost there."
     ],
+    loading_psyche: "Psychoanalyzing you.",
+    loading_msgs_psyche: [
+      "Psychoanalyzing you.",
+      "Reading between the lines.",
+      "Decoding the blot.",
+      "Cross-checking moods.",
+      "Sifting the archive.",
+      "Tuning the projector.",
+      "Calibrating taste.",
+      "Threading the reel.",
+      "Fading in."
+    ],
     oops_label: "Trouble",
     oops: "Something <em>broke.</em>",
     err_invalid_user: "That username doesn't look right.",
@@ -573,6 +585,18 @@ const STRINGS = {
       "Filtrando el ruido.",
       "Ajustando el proyector.",
       "Casi listo."
+    ],
+    loading_psyche: "Psicoanalizándote.",
+    loading_msgs_psyche: [
+      "Psicoanalizándote.",
+      "Leyendo entre líneas.",
+      "Descifrando la mancha.",
+      "Cruzando estados de ánimo.",
+      "Revisando el archivo.",
+      "Ajustando el proyector.",
+      "Calibrando el gusto.",
+      "Cargando el rollo.",
+      "Fundiendo a entrada."
     ],
     oops_label: "Problema",
     oops: "Algo se <em>rompió.</em>",

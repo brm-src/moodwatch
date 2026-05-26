@@ -411,16 +411,20 @@ header.top {
   background: rgba(237,231,218,0.10);
   color: var(--paper-3);
   border: 1px solid rgba(237,231,218,0.30);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 12px;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
   cursor: pointer;
   padding: 0;
-  line-height: 1;
+  line-height: 22px;
+  text-align: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 22px;
+  align-self: center;
   transition: color .15s, border-color .15s, background .15s;
 }
 .lb-info-btn:hover, .lb-info-btn[aria-expanded="true"] {
