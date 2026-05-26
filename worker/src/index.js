@@ -96,6 +96,19 @@ function fitScore(film, mood = {}) {
   if (mood.runtime === "short" && film.runtime && film.runtime <= 95) s += 1.5;
   if (mood.runtime === "medium" && film.runtime && film.runtime >= 90 && film.runtime <= 125) s += 1;
   if (mood.popularity === "low") s += Math.max(0, 1.4 - Math.min((film.popularity || 0) / 70, 1.4));
+
+  // Era bias: most users skip pre-1980 films unless they explicitly ask for them.
+  // Penalize old picks when the mood doesn't actively want them.
+  const dateStr = film.release_date || film.first_air_date || "";
+  const year = dateStr ? parseInt(dateStr.slice(0, 4), 10) : 0;
+  const wantsOld = mood.decade === "old" || mood.decade === "70s" || mood.decade === "70s80s" ||
+                   mood.appetite === "vintage_love" || mood.appetite === "silent" ||
+                   mood.appetite === "prestige" || mood.appetite === "blind_watch";
+  if (year && !wantsOld) {
+    if (year < 1960) s -= 4;
+    else if (year < 1970) s -= 3;
+    else if (year < 1980) s -= 1.8;
+  }
   return s;
 }
 
