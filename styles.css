@@ -286,7 +286,7 @@ header.top {
 
 /* Letterboxd tertiary entry */
 .lb-entry {
-  margin-top: var(--s-2);
+  margin-top: 0;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -300,7 +300,6 @@ header.top {
   letter-spacing: 0.10em;
   text-transform: uppercase;
   cursor: pointer;
-  align-self: flex-start;
   transition: color .15s, border-color .15s;
 }
 .lb-entry:hover { color: var(--paper); border-color: var(--paper-3); }
@@ -399,9 +398,9 @@ header.top {
 /* LB row + info popover */
 .lb-row {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-top: var(--s-2);
   align-self: flex-start;
 }

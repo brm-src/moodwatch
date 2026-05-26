@@ -92,6 +92,10 @@
     "caption": "2001: A Space Odyssey · Kubrick · 1968"
   },
   {
+    "file": "./assets/heroes/2046-2004-00.jpg",
+    "caption": "2046 · Wong Kar-wai · 2004"
+  },
+  {
     "file": "./assets/heroes/21-h-xan-1922.jpg",
     "caption": "Häxan · 1922"
   },
@@ -108,12 +112,32 @@
     "caption": "Häxan · 1922"
   },
   {
+    "file": "./assets/heroes/8-1963-00.jpg",
+    "caption": "8½ · Fellini · 1963"
+  },
+  {
+    "file": "./assets/heroes/a-brighter-summer-day-1991-00.jpg",
+    "caption": "A Brighter Summer Day · Yang · 1991"
+  },
+  {
     "file": "./assets/heroes/aftersun-2022-00.jpg",
     "caption": "Aftersun · Wells · 2022"
   },
   {
+    "file": "./assets/heroes/aguirre-the-wrath-of-god-1972-00.jpg",
+    "caption": "Aguirre, the Wrath of God · Herzog · 1972"
+  },
+  {
     "file": "./assets/heroes/andor-2022-00.jpg",
     "caption": "Andor · Gilroy · 2022"
+  },
+  {
+    "file": "./assets/heroes/andrei-rublev-1966-00.jpg",
+    "caption": "Andrei Rublev · Tarkovsky · 1966"
+  },
+  {
+    "file": "./assets/heroes/apocalypse-now-1979-00.jpg",
+    "caption": "Apocalypse Now · Coppola · 1979"
   },
   {
     "file": "./assets/heroes/arcane-2021-00.jpg",
@@ -128,12 +152,32 @@
     "caption": "Barry Lyndon · Kubrick · 1975"
   },
   {
+    "file": "./assets/heroes/beef-2023-00.jpg",
+    "caption": "Beef · Lee Sung Jin · 2023"
+  },
+  {
     "file": "./assets/heroes/better-call-saul-2015-00.jpg",
     "caption": "Better Call Saul · Gilligan · 2015"
   },
   {
+    "file": "./assets/heroes/better-call-saul-2015-01.jpg",
+    "caption": "Better Call Saul · Gilligan · 2015"
+  },
+  {
+    "file": "./assets/heroes/black-mirror-2011-00.jpg",
+    "caption": "Black Mirror · Brooker · 2011"
+  },
+  {
     "file": "./assets/heroes/blade-runner-2049-2017-00.jpg",
     "caption": "Blade Runner 2049 · Villeneuve · 2017"
+  },
+  {
+    "file": "./assets/heroes/blow-up-1966-00.jpg",
+    "caption": "Blow-Up · Antonioni · 1966"
+  },
+  {
+    "file": "./assets/heroes/blue-velvet-1986-00.jpg",
+    "caption": "Blue Velvet · Lynch · 1986"
   },
   {
     "file": "./assets/heroes/bojack-horseman-2014-00.jpg",
@@ -144,16 +188,60 @@
     "caption": "Breaking Bad · Gilligan · 2008"
   },
   {
+    "file": "./assets/heroes/breaking-bad-2008-01.jpg",
+    "caption": "Breaking Bad · Gilligan · 2008"
+  },
+  {
+    "file": "./assets/heroes/breathless-1960-00.jpg",
+    "caption": "Breathless · Godard · 1960"
+  },
+  {
+    "file": "./assets/heroes/burning-2018-00.jpg",
+    "caption": "Burning · Lee Chang-dong · 2018"
+  },
+  {
+    "file": "./assets/heroes/casablanca-1942-00.jpg",
+    "caption": "Casablanca · Curtiz · 1942"
+  },
+  {
     "file": "./assets/heroes/chernobyl-2019-00.jpg",
     "caption": "Chernobyl · Mazin · 2019"
+  },
+  {
+    "file": "./assets/heroes/children-of-men-2006-00.jpg",
+    "caption": "Children of Men · Cuarón · 2006"
+  },
+  {
+    "file": "./assets/heroes/chinatown-1974-00.jpg",
+    "caption": "Chinatown · Polanski · 1974"
   },
   {
     "file": "./assets/heroes/chungking-express-1994-00.jpg",
     "caption": "Chungking Express · Wong Kar-wai · 1994"
   },
   {
+    "file": "./assets/heroes/citizen-kane-1941-00.jpg",
+    "caption": "Citizen Kane · Welles · 1941"
+  },
+  {
     "file": "./assets/heroes/cowboy-bebop-1998-00.jpg",
     "caption": "Cowboy Bebop · Watanabe · 1998"
+  },
+  {
+    "file": "./assets/heroes/cries-and-whispers-1972-00.jpg",
+    "caption": "Cries and Whispers · Bergman · 1972"
+  },
+  {
+    "file": "./assets/heroes/cure-1997-00.jpg",
+    "caption": "Cure · Kurosawa K. · 1997"
+  },
+  {
+    "file": "./assets/heroes/dark-2017-00.jpg",
+    "caption": "Dark · Friese · 2017"
+  },
+  {
+    "file": "./assets/heroes/dark-2017-01.jpg",
+    "caption": "Dark · Friese · 2017"
   },
   {
     "file": "./assets/heroes/days-of-heaven-1978-00.jpg",
@@ -172,6 +260,10 @@
     "caption": "Deadwood · Milch · 2004"
   },
   {
+    "file": "./assets/heroes/devs-2020-00.jpg",
+    "caption": "Devs · Garland · 2020"
+  },
+  {
     "file": "./assets/heroes/don-t-look-now-1973-00.jpg",
     "caption": "Don't Look Now · Roeg · 1973"
   },
@@ -180,12 +272,48 @@
     "caption": "Drive · Refn · 2011"
   },
   {
+    "file": "./assets/heroes/drive-my-car-2021-00.jpg",
+    "caption": "Drive My Car · Hamaguchi · 2021"
+  },
+  {
+    "file": "./assets/heroes/eraserhead-1977-00.jpg",
+    "caption": "Eraserhead · Lynch · 1977"
+  },
+  {
     "file": "./assets/heroes/fargo-2014-00.jpg",
+    "caption": "Fargo · Hawley · 2014"
+  },
+  {
+    "file": "./assets/heroes/fargo-2014-01.jpg",
     "caption": "Fargo · Hawley · 2014"
   },
   {
     "file": "./assets/heroes/fleabag-2016-00.jpg",
     "caption": "Fleabag · Waller-Bridge · 2016"
+  },
+  {
+    "file": "./assets/heroes/floating-weeds-1959-00.jpg",
+    "caption": "Floating Weeds · Ozu · 1959"
+  },
+  {
+    "file": "./assets/heroes/gomorrah-2014-00.jpg",
+    "caption": "Gomorrah · Saviano · 2014"
+  },
+  {
+    "file": "./assets/heroes/hannibal-2013-00.jpg",
+    "caption": "Hannibal · Fuller · 2013"
+  },
+  {
+    "file": "./assets/heroes/hannibal-2013-01.jpg",
+    "caption": "Hannibal · Fuller · 2013"
+  },
+  {
+    "file": "./assets/heroes/happy-together-1997-00.jpg",
+    "caption": "Happy Together · Wong Kar-wai · 1997"
+  },
+  {
+    "file": "./assets/heroes/in-a-lonely-place-1950-00.jpg",
+    "caption": "In a Lonely Place · Ray · 1950"
   },
   {
     "file": "./assets/heroes/in-the-mood-for-love-2000-00.jpg",
@@ -194,6 +322,22 @@
   {
     "file": "./assets/heroes/in-the-mood-for-love-2000-01.jpg",
     "caption": "In the Mood for Love · Wong Kar-wai · 2000"
+  },
+  {
+    "file": "./assets/heroes/inland-empire-2006-00.jpg",
+    "caption": "Inland Empire · Lynch · 2006"
+  },
+  {
+    "file": "./assets/heroes/l-avventura-1960-00.jpg",
+    "caption": "L'Avventura · Antonioni · 1960"
+  },
+  {
+    "file": "./assets/heroes/la-dolce-vita-1960-00.jpg",
+    "caption": "La Dolce Vita · Fellini · 1960"
+  },
+  {
+    "file": "./assets/heroes/lawrence-of-arabia-1962-00.jpg",
+    "caption": "Lawrence of Arabia · Lean · 1962"
   },
   {
     "file": "./assets/heroes/lost-in-translation-2003-00.jpg",
@@ -208,6 +352,18 @@
     "caption": "Mad Men · Weiner · 2007"
   },
   {
+    "file": "./assets/heroes/mad-men-2007-01.jpg",
+    "caption": "Mad Men · Weiner · 2007"
+  },
+  {
+    "file": "./assets/heroes/mare-of-easttown-2021-00.jpg",
+    "caption": "Mare of Easttown · Ingelsby · 2021"
+  },
+  {
+    "file": "./assets/heroes/memories-of-murder-2003-00.jpg",
+    "caption": "Memories of Murder · Bong · 2003"
+  },
+  {
     "file": "./assets/heroes/metropolis-1927-00.jpg",
     "caption": "Metropolis · Lang · 1927"
   },
@@ -216,16 +372,52 @@
     "caption": "Metropolis · Lang · 1927"
   },
   {
+    "file": "./assets/heroes/midnight-mass-2021-00.jpg",
+    "caption": "Midnight Mass · Flanagan · 2021"
+  },
+  {
+    "file": "./assets/heroes/mindhunter-2017-00.jpg",
+    "caption": "Mindhunter · Fincher · 2017"
+  },
+  {
+    "file": "./assets/heroes/mindhunter-2017-01.jpg",
+    "caption": "Mindhunter · Fincher · 2017"
+  },
+  {
     "file": "./assets/heroes/moonlight-2016-00.jpg",
     "caption": "Moonlight · Jenkins · 2016"
+  },
+  {
+    "file": "./assets/heroes/mr-robot-2015-00.jpg",
+    "caption": "Mr. Robot · Esmail · 2015"
+  },
+  {
+    "file": "./assets/heroes/mr-robot-2015-01.jpg",
+    "caption": "Mr. Robot · Esmail · 2015"
   },
   {
     "file": "./assets/heroes/mulholland-drive-2001-00.jpg",
     "caption": "Mulholland Drive · Lynch · 2001"
   },
   {
+    "file": "./assets/heroes/my-brilliant-friend-2018-00.jpg",
+    "caption": "My Brilliant Friend · Costanzo · 2018"
+  },
+  {
+    "file": "./assets/heroes/no-country-for-old-men-2007-00.jpg",
+    "caption": "No Country for Old Men · Coen · 2007"
+  },
+  {
+    "file": "./assets/heroes/normal-people-2020-00.jpg",
+    "caption": "Normal People · Abrahamson · 2020"
+  },
+  {
     "file": "./assets/heroes/nosferatu-1922-00.jpg",
     "caption": "Nosferatu · Murnau · 1922"
+  },
+  {
+    "file": "./assets/heroes/ozark-2017-00.jpg",
+    "caption": "Ozark · Dubuque · 2017"
   },
   {
     "file": "./assets/heroes/paris-texas-1984-00.jpg",
@@ -240,6 +432,14 @@
     "caption": "Past Lives · Song · 2023"
   },
   {
+    "file": "./assets/heroes/patriot-2015-00.jpg",
+    "caption": "Patriot · Conrad · 2015"
+  },
+  {
+    "file": "./assets/heroes/perfect-days-2023-00.jpg",
+    "caption": "Perfect Days · Wenders · 2023"
+  },
+  {
     "file": "./assets/heroes/persona-1966-00.jpg",
     "caption": "Persona · Bergman · 1966"
   },
@@ -248,8 +448,36 @@
     "caption": "Phantom Thread · P.T. Anderson · 2017"
   },
   {
+    "file": "./assets/heroes/pierrot-le-fou-1965-00.jpg",
+    "caption": "Pierrot le Fou · Godard · 1965"
+  },
+  {
     "file": "./assets/heroes/portrait-of-a-lady-on-fire-2019-00.jpg",
     "caption": "Portrait of a Lady on Fire · Sciamma · 2019"
+  },
+  {
+    "file": "./assets/heroes/psycho-1960-00.jpg",
+    "caption": "Psycho · Hitchcock · 1960"
+  },
+  {
+    "file": "./assets/heroes/raging-bull-1980-00.jpg",
+    "caption": "Raging Bull · Scorsese · 1980"
+  },
+  {
+    "file": "./assets/heroes/ran-1985-00.jpg",
+    "caption": "Ran · Kurosawa · 1985"
+  },
+  {
+    "file": "./assets/heroes/rashomon-1950-00.jpg",
+    "caption": "Rashomon · Kurosawa · 1950"
+  },
+  {
+    "file": "./assets/heroes/rear-window-1954-00.jpg",
+    "caption": "Rear Window · Hitchcock · 1954"
+  },
+  {
+    "file": "./assets/heroes/rectify-2013-00.jpg",
+    "caption": "Rectify · McKinnon · 2013"
   },
   {
     "file": "./assets/heroes/red-desert-1964-00.jpg",
@@ -260,12 +488,32 @@
     "caption": "Reservation Dogs · Harjo · 2021"
   },
   {
+    "file": "./assets/heroes/seven-samurai-1954-00.jpg",
+    "caption": "Seven Samurai · Kurosawa · 1954"
+  },
+  {
     "file": "./assets/heroes/severance-2022-00.jpg",
     "caption": "Severance · Erickson · 2022"
   },
   {
+    "file": "./assets/heroes/severance-2022-01.jpg",
+    "caption": "Severance · Erickson · 2022"
+  },
+  {
+    "file": "./assets/heroes/sharp-objects-2018-00.jpg",
+    "caption": "Sharp Objects · Vallée · 2018"
+  },
+  {
+    "file": "./assets/heroes/six-feet-under-2001-00.jpg",
+    "caption": "Six Feet Under · Ball · 2001"
+  },
+  {
     "file": "./assets/heroes/solaris-1972-00.jpg",
     "caption": "Solaris · Tarkovsky · 1972"
+  },
+  {
+    "file": "./assets/heroes/solaris-2002-00.jpg",
+    "caption": "Solaris · Soderbergh · 2002"
   },
   {
     "file": "./assets/heroes/stalker-1979-00.jpg",
@@ -276,16 +524,48 @@
     "caption": "Stalker · Tarkovsky · 1979"
   },
   {
+    "file": "./assets/heroes/station-eleven-2021-00.jpg",
+    "caption": "Station Eleven · Somerville · 2021"
+  },
+  {
     "file": "./assets/heroes/stranger-than-paradise-1984-00.jpg",
     "caption": "Stranger Than Paradise · Jarmusch · 1984"
+  },
+  {
+    "file": "./assets/heroes/stroszek-1977-00.jpg",
+    "caption": "Stroszek · Herzog · 1977"
   },
   {
     "file": "./assets/heroes/succession-2018-00.jpg",
     "caption": "Succession · Armstrong · 2018"
   },
   {
+    "file": "./assets/heroes/succession-2018-01.jpg",
+    "caption": "Succession · Armstrong · 2018"
+  },
+  {
     "file": "./assets/heroes/sunrise-a-song-of-two-humans-1927-00.jpg",
     "caption": "Sunrise: A Song of Two Humans · Murnau · 1927"
+  },
+  {
+    "file": "./assets/heroes/sunset-boulevard-1950-00.jpg",
+    "caption": "Sunset Boulevard · Wilder · 1950"
+  },
+  {
+    "file": "./assets/heroes/suspiria-1977-00.jpg",
+    "caption": "Suspiria · Argento · 1977"
+  },
+  {
+    "file": "./assets/heroes/taxi-driver-1976-00.jpg",
+    "caption": "Taxi Driver · Scorsese · 1976"
+  },
+  {
+    "file": "./assets/heroes/the-400-blows-1959-00.jpg",
+    "caption": "The 400 Blows · Truffaut · 1959"
+  },
+  {
+    "file": "./assets/heroes/the-americans-2013-00.jpg",
+    "caption": "The Americans · Weisberg · 2013"
   },
   {
     "file": "./assets/heroes/the-assassination-of-jesse-james-2007-00.jpg",
@@ -300,11 +580,35 @@
     "caption": "The Cabinet of Dr. Caligari · Wiene · 1920"
   },
   {
+    "file": "./assets/heroes/the-conformist-1970-00.jpg",
+    "caption": "The Conformist · Bertolucci · 1970"
+  },
+  {
+    "file": "./assets/heroes/the-conversation-1974-00.jpg",
+    "caption": "The Conversation · Coppola · 1974"
+  },
+  {
+    "file": "./assets/heroes/the-crown-2016-00.jpg",
+    "caption": "The Crown · Morgan · 2016"
+  },
+  {
+    "file": "./assets/heroes/the-godfather-1972-00.jpg",
+    "caption": "The Godfather · Coppola · 1972"
+  },
+  {
     "file": "./assets/heroes/the-haunting-of-hill-house-2018-00.jpg",
     "caption": "The Haunting of Hill House · Flanagan · 2018"
   },
   {
+    "file": "./assets/heroes/the-knick-2014-00.jpg",
+    "caption": "The Knick · Soderbergh · 2014"
+  },
+  {
     "file": "./assets/heroes/the-leftovers-2014-00.jpg",
+    "caption": "The Leftovers · Lindelof · 2014"
+  },
+  {
+    "file": "./assets/heroes/the-leftovers-2014-01.jpg",
     "caption": "The Leftovers · Lindelof · 2014"
   },
   {
@@ -314,6 +618,18 @@
   {
     "file": "./assets/heroes/the-mirror-1975-00.jpg",
     "caption": "The Mirror · Tarkovsky · 1975"
+  },
+  {
+    "file": "./assets/heroes/the-new-world-2005-00.jpg",
+    "caption": "The New World · Malick · 2005"
+  },
+  {
+    "file": "./assets/heroes/the-night-of-2016-00.jpg",
+    "caption": "The Night Of · Zaillian · 2016"
+  },
+  {
+    "file": "./assets/heroes/the-oa-2016-00.jpg",
+    "caption": "The OA · Marling · 2016"
   },
   {
     "file": "./assets/heroes/the-passion-of-joan-of-arc-1928-00.jpg",
@@ -328,11 +644,23 @@
     "caption": "The Sopranos · Chase · 1999"
   },
   {
+    "file": "./assets/heroes/the-sopranos-1999-01.jpg",
+    "caption": "The Sopranos · Chase · 1999"
+  },
+  {
+    "file": "./assets/heroes/the-terror-2018-00.jpg",
+    "caption": "The Terror · Kajganich · 2018"
+  },
+  {
     "file": "./assets/heroes/the-tree-of-life-2011-00.jpg",
     "caption": "The Tree of Life · Malick · 2011"
   },
   {
     "file": "./assets/heroes/the-wire-2002-00.jpg",
+    "caption": "The Wire · Simon · 2002"
+  },
+  {
+    "file": "./assets/heroes/the-wire-2002-01.jpg",
     "caption": "The Wire · Simon · 2002"
   },
   {
@@ -348,8 +676,32 @@
     "caption": "Tokyo Story · Ozu · 1953"
   },
   {
+    "file": "./assets/heroes/tokyo-vice-2022-00.jpg",
+    "caption": "Tokyo Vice · Mann · 2022"
+  },
+  {
+    "file": "./assets/heroes/top-boy-2011-00.jpg",
+    "caption": "Top Boy · Bennett · 2011"
+  },
+  {
+    "file": "./assets/heroes/touch-of-evil-1958-00.jpg",
+    "caption": "Touch of Evil · Welles · 1958"
+  },
+  {
     "file": "./assets/heroes/true-detective-2014-00.jpg",
     "caption": "True Detective · Pizzolatto · 2014"
+  },
+  {
+    "file": "./assets/heroes/true-detective-2014-01.jpg",
+    "caption": "True Detective · Pizzolatto · 2014"
+  },
+  {
+    "file": "./assets/heroes/twin-peaks-1990-00.jpg",
+    "caption": "Twin Peaks · Lynch · 1990"
+  },
+  {
+    "file": "./assets/heroes/twin-peaks-1990-01.jpg",
+    "caption": "Twin Peaks · Lynch · 1990"
   },
   {
     "file": "./assets/heroes/twin-peaks-the-return-2017-00.jpg",
@@ -360,11 +712,31 @@
     "caption": "Twin Peaks: The Return · Lynch · 2017"
   },
   {
+    "file": "./assets/heroes/vertigo-1958-00.jpg",
+    "caption": "Vertigo · Hitchcock · 1958"
+  },
+  {
+    "file": "./assets/heroes/westworld-2016-00.jpg",
+    "caption": "Westworld · Nolan · 2016"
+  },
+  {
+    "file": "./assets/heroes/wild-strawberries-1957-00.jpg",
+    "caption": "Wild Strawberries · Bergman · 1957"
+  },
+  {
     "file": "./assets/heroes/wings-of-desire-1987-00.jpg",
     "caption": "Wings of Desire · Wenders · 1987"
   },
   {
     "file": "./assets/heroes/wings-of-desire-1987-01.jpg",
     "caption": "Wings of Desire · Wenders · 1987"
+  },
+  {
+    "file": "./assets/heroes/yellowjackets-2021-00.jpg",
+    "caption": "Yellowjackets · Lyle · 2021"
+  },
+  {
+    "file": "./assets/heroes/yi-yi-2000-00.jpg",
+    "caption": "Yi Yi · Yang · 2000"
   }
 ]
