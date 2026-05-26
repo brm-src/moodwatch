@@ -40,13 +40,38 @@
     },
     scene: {
       key: "scene", kind: "real", titleKey: "q_scene_t",
+      randomize: 6,
       options: [
-        { value: "road",      labelKey: "q_scene_road"      },
-        { value: "city",      labelKey: "q_scene_city"      },
-        { value: "house",     labelKey: "q_scene_house"     },
-        { value: "dialogue",  labelKey: "q_scene_dialogue"  },
-        { value: "survival",  labelKey: "q_scene_survival"  },
-        { value: "discovery", labelKey: "q_scene_discovery" },
+        // road
+        { value: "road",      labelKey: "q_scene_road"        },
+        { value: "road",      labelKey: "q_scene_road_train"  },
+        { value: "road",      labelKey: "q_scene_road_walk"   },
+        { value: "road",      labelKey: "q_scene_road_motel"  },
+        // city
+        { value: "city",      labelKey: "q_scene_city"        },
+        { value: "city",      labelKey: "q_scene_city_neon"   },
+        { value: "city",      labelKey: "q_scene_city_window" },
+        { value: "city",      labelKey: "q_scene_city_subway" },
+        // house
+        { value: "house",     labelKey: "q_scene_house"       },
+        { value: "house",     labelKey: "q_scene_house_attic" },
+        { value: "house",     labelKey: "q_scene_house_kitchen" },
+        { value: "house",     labelKey: "q_scene_house_phone" },
+        // dialogue
+        { value: "dialogue",  labelKey: "q_scene_dialogue"    },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_bar" },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_break" },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_letter" },
+        // survival
+        { value: "survival",  labelKey: "q_scene_survival"    },
+        { value: "survival",  labelKey: "q_scene_survival_run" },
+        { value: "survival",  labelKey: "q_scene_survival_wood" },
+        { value: "survival",  labelKey: "q_scene_survival_storm" },
+        // discovery
+        { value: "discovery", labelKey: "q_scene_discovery"   },
+        { value: "discovery", labelKey: "q_scene_discovery_door" },
+        { value: "discovery", labelKey: "q_scene_discovery_box" },
+        { value: "discovery", labelKey: "q_scene_discovery_mirror" },
       ],
     },
     intent: {
@@ -904,7 +929,39 @@
     else if (q.kind === "real") {
       const list = document.createElement("div");
       list.className = "options";
-      q.options.forEach((o, i) => {
+      let pool = q.options;
+      if (q.randomize && q.options.length > q.randomize) {
+        // random subset, keep balance: try to include up to one per `value` bucket first,
+        // then fill the rest from the remainder. Shuffle final order.
+        const buckets = new Map();
+        q.options.forEach(o => {
+          if (!buckets.has(o.value)) buckets.set(o.value, []);
+          buckets.get(o.value).push(o);
+        });
+        const picked = [];
+        for (const arr of buckets.values()) {
+          picked.push(arr[Math.floor(Math.random() * arr.length)]);
+        }
+        if (picked.length > q.randomize) {
+          for (let i = picked.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [picked[i], picked[j]] = [picked[j], picked[i]];
+          }
+          pool = picked.slice(0, q.randomize);
+        } else {
+          const remaining = q.options.filter(o => !picked.includes(o));
+          while (picked.length < q.randomize && remaining.length) {
+            const idx = Math.floor(Math.random() * remaining.length);
+            picked.push(remaining.splice(idx, 1)[0]);
+          }
+          for (let i = picked.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [picked[i], picked[j]] = [picked[j], picked[i]];
+          }
+          pool = picked;
+        }
+      }
+      pool.forEach((o, i) => {
         const b = document.createElement("button");
         b.className = "opt";
         b.type = "button";
