@@ -263,6 +263,127 @@ export const LISTS = [
     signature: { trust: "weird", appetite: "weird" },
     ids: [70523, 62286, 60863, 95396, 90802, 110316, 71712, 67419, 113962, 81356, 95011, 87108, 100088],
   },
+  // ─── Curated seed buckets (Cris) ──────────────────────────────────
+  {
+    slug: "folk-horror-seed",
+    name: "Folk horror atmosférico",
+    signature: { trust: "horror", first_act: "thriller_horror", depth: ["uneasy", "ruined"], appetite: "horror" },
+    ids: [16307, 74725, 788929, 424121, 530385, 310131, 466565, 780609, 437583, 433808],
+  },
+  {
+    slug: "lost-20s-seed",
+    name: "Treintañero perdido",
+    signature: { appetite: "lost-20s", lately: ["stuck", "numb", "heartbroken"], state: "pensive", memory: ["regret", "heartbreak"] },
+    ids: [121986, 660120, 666277, 414453, 401, 814340, 2788, 47607, 75233, 76],
+  },
+  {
+    slug: "neo-noir-modern",
+    name: "Neo-noir moderno",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: "thriller", light: "neon" },
+    ids: [64690, 242582, 335984, 146233, 1430, 1847, 793, 1018, 187, 829],
+  },
+  {
+    slug: "scifi-existential",
+    name: "Sci-fi existencial",
+    signature: { first_act: "fantasy_scifi", depth: ["thoughtful", "ruined"], temperature: ["cool", "freezing"] },
+    ids: [329865, 593, 1398, 496743, 264660, 17431, 152601, 698232, 220289, 376865],
+  },
+  {
+    slug: "horror-slow-psychological",
+    name: "Horror psicológico lento",
+    signature: { trust: "horror", depth: ["uneasy", "ruined"], pace: ["slow", "steady"] },
+    ids: [242224, 270303, 21484, 503919, 575776, 36095, 27324, 11481, 1933, 10234],
+  },
+  {
+    slug: "romance-melancholic",
+    name: "Romance melancólico",
+    signature: { first_act: "drama_romance", depth: ["thoughtful", "ruined"], memory: ["heartbreak", "regret"], want: ["moved", "haunted"] },
+    ids: [843, 46705, 153, 531428, 398818, 38, 705996, 258480, 428449, 79120],
+  },
+  {
+    slug: "thriller-paranoid",
+    name: "Thriller paranoico",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: "thriller", energy: "engage" },
+    ids: [9798, 592, 1949, 156022, 11644, 11963, 2649, 345, 11324, 17365],
+  },
+  {
+    slug: "coming-of-age-weird",
+    name: "Coming of age raro",
+    signature: { appetite: "lost-20s", depth: ["thoughtful", "warm"], want: ["moved"], trust: "drama" },
+    ids: [1548, 391713, 437586, 489925, 50546, 84892, 85350, 1391, 83666, 901563],
+  },
+  {
+    slug: "action-elegant",
+    name: "Acción elegante",
+    signature: { first_act: "action_adventure", energy: "engage", trust: "thriller" },
+    ids: [245891, 75174, 76341, 949, 1538, 670, 11782, 339403, 615457, 36557],
+  },
+  {
+    slug: "dystopia-cold",
+    name: "Distopía fría",
+    signature: { first_act: "fantasy_scifi", tone: "dark", temperature: ["cool", "freezing"], depth: ["thoughtful", "uneasy"] },
+    ids: [9693, 782, 68, 110415, 9314, 636, 42188, 2666, 7299, 8072],
+  },
+  {
+    slug: "crime-drama-raw",
+    name: "Drama criminal crudo",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: ["thriller", "drama"], depth: ["uneasy", "ruined"] },
+    ids: [769, 598, 21575, 8882, 111, 6075, 2252, 44629, 473033, 25680],
+  },
+  {
+    slug: "surrealism-uncomfortable",
+    name: "Surrealismo incómodo",
+    signature: { trust: "weird", risk: "discover", depth: ["uneasy", "ruined"], appetite: "weird" },
+    ids: [985, 798286, 4960, 103328, 797, 8327, 38810, 435615, 630240, 381283],
+  },
+  {
+    slug: "samurai-honor",
+    name: "Samurai y honor",
+    signature: { language_pref: "asian", first_act: "action_adventure", quality: "high" },
+    ids: [346, 14537, 11878, 11645, 58857, 12496, 19884, 246, 27031, 11953],
+  },
+  {
+    slug: "western-twilight",
+    name: "Western crepuscular",
+    signature: { first_act: "action_adventure", tone: "dark", depth: ["thoughtful", "ruined"], temperature: ["cool", "freezing"] },
+    ids: [6977, 4512, 33, 294963, 338766, 16608, 223485, 11901, 29005, 11577],
+  },
+  {
+    slug: "animation-adult-emotional",
+    name: "Animación adulta emocional",
+    signature: { trust: "animation", depth: ["thoughtful", "ruined", "warm"] },
+    ids: [10494, 17914, 291270, 149871, 24238, 8885, 149, 586940, 9323, 4977],
+  },
+  {
+    slug: "comedy-black-nihilist",
+    name: "Comedia negra nihilista",
+    signature: { trust: "comedy", tone: "dark", depth: ["uneasy", "fun"] },
+    ids: [8321, 254320, 4944, 37495, 935, 1359, 402897, 424781, 275, 20178],
+  },
+  {
+    slug: "war-introspective",
+    name: "Guerra introspectiva",
+    signature: { tone: "dark", depth: ["thoughtful", "ruined"], first_act: "action_adventure" },
+    ids: [25237, 8741, 28, 387, 530915, 975, 31442, 12477, 600, 336050],
+  },
+  {
+    slug: "mystery-atmospheric",
+    name: "Misterio atmosférico",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: "thriller", pace: ["slow", "steady"] },
+    ids: [11423, 25376, 395834, 236735, 445, 8740, 65754, 210577, 320, 622],
+  },
+  {
+    slug: "contemplative-cinema-extra",
+    name: "Cine contemplativo",
+    signature: { depth: ["thoughtful", "ruined"], pace: ["slow"], temperature: ["cool", "freezing"], state: "pensive" },
+    ids: [370755, 758866, 965150, 581734, 976893, 25050, 30020, 655, 25538, 81401],
+  },
+  {
+    slug: "trip-drugs",
+    name: "Viaje mental y drogas",
+    signature: { trust: "weird", appetite: "weird", risk: "discover", depth: ["uneasy", "ruined"] },
+    ids: [34647, 1878, 507076, 627, 641, 460885, 241, 8327, 3509, 50037],
+  },
 ];
 
 function matchesValue(want, got) {
