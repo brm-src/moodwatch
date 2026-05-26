@@ -384,6 +384,77 @@ export const LISTS = [
     signature: { trust: "weird", appetite: "weird", risk: "discover", depth: ["uneasy", "ruined"] },
     ids: [34647, 1878, 507076, 627, 641, 460885, 241, 8327, 3509, 50037],
   },
+  // ─── Curated TV seed buckets (Cris) ───────────────────────────────
+  {
+    slug: "tv-folk-horror",
+    name: "Folk horror / culto / bosque raro",
+    media: "tv",
+    signature: { trust: "horror", first_act: "thriller_horror", depth: ["uneasy", "ruined"], appetite: "horror" },
+    ids: [46648, 70523, 90259, 112314, 88055, 97400, 75191, 70613, 113600, 117488],
+  },
+  {
+    slug: "tv-lost-30s",
+    name: "Treintañero perdido (TV)",
+    media: "tv",
+    signature: { appetite: "lost-20s", lately: ["stuck", "numb", "heartbroken"], state: "pensive", trust: "comedy" },
+    ids: [67070, 64254, 42282, 96734, 65251, 53606, 61350, 87382, 65495, 61118],
+  },
+  {
+    slug: "tv-scifi-existential",
+    name: "Sci-fi existencial (TV)",
+    media: "tv",
+    signature: { first_act: "fantasy_scifi", depth: ["thoughtful", "ruined"], temperature: ["cool", "freezing"] },
+    ids: [95396, 81349, 42009, 85723, 54344, 90972, 63247, 73411, 93784, 87104],
+  },
+  {
+    slug: "tv-thriller-paranoid",
+    name: "Thriller paranoico (TV)",
+    media: "tv",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: "thriller", energy: "engage" },
+    ids: [62560, 46511, 80335, 66276, 80307, 46533, 30892, 92137, 63646, 63867],
+  },
+  {
+    slug: "tv-horror-slow-psych",
+    name: "Horror psicológico lento (TV)",
+    media: "tv",
+    signature: { trust: "horror", depth: ["uneasy", "ruined"], pace: ["slow", "steady"] },
+    ids: [72844, 92916, 67752, 129418, 1920, 54671, 71116, 40008, 124364, 46786],
+  },
+  {
+    slug: "tv-neo-noir",
+    name: "Neo-noir moderno (TV)",
+    media: "tv",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: "thriller", light: "neon" },
+    ids: [67744, 90296, 70168, 60585, 67384, 115004, 1427, 70453, 85853, 34415],
+  },
+  {
+    slug: "tv-romance-melancholic",
+    name: "Romance melancólico (TV)",
+    media: "tv",
+    signature: { first_act: "drama_romance", depth: ["thoughtful", "ruined"], memory: ["heartbreak", "regret"], want: ["moved", "haunted"] },
+    ids: [89905, 240667, 112077, 62668, 57774, 78154, 154385, 67780, 124834, 99747],
+  },
+  {
+    slug: "tv-surrealism",
+    name: "Surrealismo incómodo (TV)",
+    media: "tv",
+    signature: { trust: "weird", risk: "discover", depth: ["uneasy", "ruined"], appetite: "weird" },
+    ids: [69061, 67195, 114655, 81241, 84977, 86340, 61871, 67773, 65495],
+  },
+  {
+    slug: "tv-crime-raw",
+    name: "Crimen crudo / mafia (TV)",
+    media: "tv",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: ["thriller", "drama"], depth: ["uneasy", "ruined"] },
+    ids: [1398, 61068, 63351, 41889, 3322, 1396, 60059, 71694, 75666, 33273],
+  },
+  {
+    slug: "tv-contemplative",
+    name: "Cine contemplativo (TV)",
+    media: "tv",
+    signature: { depth: ["thoughtful", "warm"], pace: ["slow"], state: "pensive", want: ["moved", "soothed"] },
+    ids: [46619, 64396, 79864, 61828, 65454, 79410, 106308, 67243, 111141, 95215],
+  },
 ];
 
 function matchesValue(want, got) {
