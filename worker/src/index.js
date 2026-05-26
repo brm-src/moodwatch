@@ -389,11 +389,13 @@ async function recommend(req, env, ctx) {
     return "anglo"; // en, default
   };
 
+  // Build top 6 with interleaving so editor picks don't always lead.
+  // Memphis feedback: "los editor picks no al inicio, mezcladas".
+  // Recipe: 1 wildcard (low-pop, surprise) + 1-2 editor + 3-4 normal,
+  // then shuffle their order in the final 6.
   const top = [];
   const regionCount = new Map();
   const REGION_CAP = 2; // max picks per region in final top
-  // Skip the cap entirely for region-themed presets (Cine Asiático, Latam, etc.)
-  // because the user *wants* a same-region pool there.
   const skipRegionCap = mood.language_pref === "asian" || mood.language_pref === "spanish";
   const pushUnique = (items, max, capByRegion = !skipRegionCap) => {
     for (const item of items) {
@@ -407,11 +409,33 @@ async function recommend(req, env, ctx) {
       top.push(item);
     }
   };
-  pushUnique(curatedHits.slice(0, 4), 3);
-  pushUnique(listHits.slice(0, 24), matched.length ? 8 : 3);
-  pushUnique(otherHits.slice(0, 40), 10);
-  // Safety net: if region cap left us short of 6, fill from the leftover ranked
-  // pool ignoring the cap so we never return fewer than expected.
+
+  // Wildcard: a low-popularity, decent-quality pick to inject surprise.
+  // Pulled from otherHits where popularity is in the bottom half but score is solid.
+  const wildcardPool = otherHits
+    .filter(f => (f.popularity || 0) < 25 && (f.vote_average || 0) >= 7.0)
+    .slice(0, 12);
+  const wildcard = wildcardPool.length
+    ? wildcardPool[Math.floor(Math.random() * Math.min(wildcardPool.length, 6))]
+    : null;
+
+  // Slot 1: 1 editor pick (no longer 3 stacked at the top).
+  pushUnique(curatedHits.slice(0, 3), 1);
+  // Slot 2: wildcard if we have one.
+  if (wildcard && !top.some(x => x.id === wildcard.id)) {
+    top.push(wildcard);
+    if (!skipRegionCap) {
+      const r = regionOf(wildcard);
+      regionCount.set(r, (regionCount.get(r) || 0) + 1);
+    }
+  }
+  // Slots 3-6: list and algorithm picks.
+  pushUnique(listHits.slice(0, 24), matched.length ? 5 : 4);
+  pushUnique(otherHits.slice(0, 40), 6);
+  // If we still have space and curated picks, allow a second editor pick later in the list.
+  pushUnique(curatedHits.slice(0, 6), 7);
+
+  // Safety net: never return fewer than 6 picks.
   if (top.length < 6) {
     const have = new Set(top.map(x => x.id));
     for (const item of ranked) {
@@ -421,6 +445,11 @@ async function recommend(req, env, ctx) {
       have.add(item.id);
     }
   }
+
+  // Shuffle the first 6 so editor picks don't always claim slot 1.
+  const finalSix = top.slice(0, 6);
+  shuffleInPlace(finalSix);
+  top.splice(0, 6, ...finalSix);
   const enrichedPool = await Promise.all(top.slice(0, 6).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       M.providers(env, f.id, country),
