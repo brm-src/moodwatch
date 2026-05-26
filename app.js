@@ -1463,6 +1463,9 @@
       .map(c => c._filmId).filter(Boolean);
     const exclude = (state.shownIds || []).concat(onCards);
     const params = new URLSearchParams({ country, lang, seed: String(seedId), kind });
+    // Pass current media (movie/tv) so /alt queries the right TMDb endpoint.
+    // Without this, thumb-up on a TV show 404s (worker defaults to /movie/{id}/similar).
+    params.set("media", resolveMedia(state.media));
     if (exclude.length) params.set("exclude", exclude.join(","));
     try {
       const r = await fetch(`${API_BASE}/alt?${params}`);
