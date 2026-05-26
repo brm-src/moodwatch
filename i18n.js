@@ -139,7 +139,7 @@ const STRINGS = {
     q_appetite_feel:   "Something that makes me feel.",
     q_appetite_horror: "Horror.",
     q_appetite_weird:  "Something strange. Fever-dream.",
-    q_appetite_lost:   "Lost in my 20s energy.",
+    q_appetite_lost:   "End-of-summer energy.",
     q_appetite_any:    "Surprise me.",
 
     q_scene_t: "Which scene <em>is you right now?</em>",
@@ -395,7 +395,7 @@ const STRINGS = {
     q_fear_confusion:    "Not understanding anything.",
     q_fear_predictable:  "Guessing the ending in 10 minutes.",
 
-    q_trust_t: "I trust a good <em>__.</em>",
+    q_trust_t: "Genres I <em>always trust.</em>",
     q_trust_drama:     "Small drama.",
     q_trust_thriller:  "Well-built thriller.",
     q_trust_weird:     "Weird film.",
@@ -622,7 +622,7 @@ const STRINGS = {
     q_appetite_feel:   "Algo que me haga sentir.",
     q_appetite_horror: "Terror.",
     q_appetite_weird:  "Algo raro. Sueño febril.",
-    q_appetite_lost:   "Perdido en mis 20s.",
+    q_appetite_lost:   "Energía de fin del verano.",
     q_appetite_any:    "Sorpréndeme.",
 
     q_scene_t: "¿Qué escena te <em>representa en este momento?</em>",
@@ -878,7 +878,7 @@ const STRINGS = {
     q_fear_confusion:    "No entender nada.",
     q_fear_predictable:  "Adivinar el final a los 10 minutos.",
 
-    q_trust_t: "Confío ciegamente en una buena <em>__.</em>",
+    q_trust_t: "Géneros que <em>nunca me fallan.</em>",
     q_trust_drama:     "Drama pequeño.",
     q_trust_thriller:  "Thriller bien hecho.",
     q_trust_weird:     "Película rara.",
