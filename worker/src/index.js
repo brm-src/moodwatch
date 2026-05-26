@@ -363,16 +363,51 @@ async function recommend(req, env, ctx) {
     return arr;
   }
 
+  // Region buckets used for diversification — keeps "Apuesta segura" from
+  // being 5 Kurosawa/Wong picks just because they top the curated avg.
+  const regionOf = (f) => {
+    const l = (f.original_language || "").toLowerCase();
+    if (["ja", "ko", "zh", "cn", "th", "vi", "tl", "id", "ms"].includes(l)) return "asia";
+    if (["hi", "ta", "te", "ml", "bn", "ur"].includes(l)) return "south_asia";
+    if (["es"].includes(l)) return "latam_es";
+    if (["pt"].includes(l)) return "iberolat";
+    if (["fr", "it", "de", "sv", "no", "da", "fi", "is", "nl", "pl", "cs", "hu", "ro", "el", "ru", "tr"].includes(l)) return "europe";
+    if (["fa", "ar", "he"].includes(l)) return "mena";
+    return "anglo"; // en, default
+  };
+
   const top = [];
-  const pushUnique = (items, max) => {
+  const regionCount = new Map();
+  const REGION_CAP = 2; // max picks per region in final top
+  // Skip the cap entirely for region-themed presets (Cine Asiático, Latam, etc.)
+  // because the user *wants* a same-region pool there.
+  const skipRegionCap = mood.language_pref === "asian" || mood.language_pref === "spanish";
+  const pushUnique = (items, max, capByRegion = !skipRegionCap) => {
     for (const item of items) {
       if (top.length >= max) break;
-      if (!top.some(x => x.id === item.id)) top.push(item);
+      if (top.some(x => x.id === item.id)) continue;
+      if (capByRegion) {
+        const r = regionOf(item);
+        if ((regionCount.get(r) || 0) >= REGION_CAP) continue;
+        regionCount.set(r, (regionCount.get(r) || 0) + 1);
+      }
+      top.push(item);
     }
   };
   pushUnique(curatedHits.slice(0, 4), 3);
   pushUnique(listHits.slice(0, 24), matched.length ? 8 : 3);
   pushUnique(otherHits.slice(0, 40), 10);
+  // Safety net: if region cap left us short of 6, fill from the leftover ranked
+  // pool ignoring the cap so we never return fewer than expected.
+  if (top.length < 6) {
+    const have = new Set(top.map(x => x.id));
+    for (const item of ranked) {
+      if (top.length >= 12) break;
+      if (have.has(item.id)) continue;
+      top.push(item);
+      have.add(item.id);
+    }
+  }
   const enrichedPool = await Promise.all(top.slice(0, 6).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       M.providers(env, f.id, country),
