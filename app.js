@@ -22,11 +22,27 @@
     appetite: {
       key: "appetite", kind: "real", titleKey: "q_appetite_t",
       options: [
-        { value: "feel-deep", labelKey: "q_appetite_feel" },
-        { value: "horror",    labelKey: "q_appetite_horror" },
-        { value: "weird",     labelKey: "q_appetite_weird" },
-        { value: "lost-20s",  labelKey: "q_appetite_lost" },
-        { value: "any",       labelKey: "q_appetite_any" },
+        { value: "feel-deep",     labelKey: "q_appetite_feel" },
+        { value: "horror",        labelKey: "q_appetite_horror" },
+        { value: "weird",         labelKey: "q_appetite_weird" },
+        { value: "lost-20s",      labelKey: "q_appetite_lost" },
+        { value: "comfort",       labelKey: "q_appetite_comfort" },
+        { value: "transformative",labelKey: "q_appetite_transformative" },
+        { value: "any",           labelKey: "q_appetite_any" },
+      ],
+    },
+    flavor: {
+      key: "appetite", kind: "real", titleKey: "q_flavor_t",
+      options: [
+        { value: "girly",        labelKey: "q_flavor_girly" },
+        { value: "queer",        labelKey: "q_flavor_queer" },
+        { value: "a24",          labelKey: "q_flavor_a24" },
+        { value: "reality",      labelKey: "q_flavor_reality" },
+        { value: "wtf",          labelKey: "q_flavor_wtf" },
+        { value: "vintage_love", labelKey: "q_flavor_vintage" },
+        { value: "underseen",    labelKey: "q_flavor_underseen" },
+        { value: "prestige",     labelKey: "q_flavor_prestige" },
+        { value: "",             labelKey: "q_flavor_any", sticky: true },
       ],
     },
     door: {
@@ -383,12 +399,13 @@
     trust: {
       key: "trust", kind: "real", titleKey: "q_trust_t",
       options: [
-        { value: "small_drama",  labelKey: "q_trust_drama"     },
-        { value: "good_thriller",labelKey: "q_trust_thriller"  },
-        { value: "weird_film",   labelKey: "q_trust_weird"     },
-        { value: "smart_comedy", labelKey: "q_trust_comedy"    },
-        { value: "moody_horror", labelKey: "q_trust_horror"    },
-        { value: "warm_anim",    labelKey: "q_trust_animation" },
+        { value: "small_drama",      labelKey: "q_trust_drama"     },
+        { value: "good_thriller",    labelKey: "q_trust_thriller"  },
+        { value: "weird_film",       labelKey: "q_trust_weird"     },
+        { value: "smart_comedy",     labelKey: "q_trust_comedy"    },
+        { value: "moody_horror",     labelKey: "q_trust_horror"    },
+        { value: "erotic_thriller",  labelKey: "q_trust_erotic"    },
+        { value: "warm_anim",        labelKey: "q_trust_animation" },
       ],
     },
     time_of_day: {
@@ -522,7 +539,7 @@
   // and the last (ink) are the only fixed pieces of the ritual.
   function buildSession() {
     const all = [
-      "state","appetite","door","scene","intent","depth","weather","sound","company","pace","ending",
+      "state","appetite","flavor","door","scene","intent","depth","weather","sound","company","pace","ending",
       "color","light","texture","place","temperature","memory","want","decade","smell","window",
       "object","body","risk_taste","first_act","trust","avoid","rewatch_taste","runtime","language_pref",
       "opening","time_of_day","garment","food","drink","instrument","transport","season","fear","phrase",
