@@ -133,7 +133,7 @@ export async function discoverByMood(env, mood, language, media = "movie") {
   const isTV = media === "tv";
   const dateKey = isTV ? "first_air_date" : "primary_release_date";
   const baseParams = {
-    "vote_count.gte": 800,
+    "vote_count.gte": 500,
     "vote_average.gte": 6.5,
     [`${dateKey}.lte`]: today,
     include_adult: "false",
@@ -147,20 +147,34 @@ export async function discoverByMood(env, mood, language, media = "movie") {
 
   const discover = isTV ? tmdbDiscoverTV : tmdbDiscover;
   const fetches = [];
-  // Bigger pool: 8 pages × 2 sorts = up to 16 pages. Plus a relaxed sort to pull
-  // in mid-tier picks the strict floors miss (gives the recommender variety).
-  for (let p = 1; p <= 8; p++) {
+  // Strict pool: 12 pages × 2 sorts = up to 24 pages of mood-filtered hits.
+  for (let p = 1; p <= 12; p++) {
     fetches.push(discover(env, { ...baseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
     fetches.push(discover(env, { ...baseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
   }
-  // Looser query for diversity: drop runtime + halve vote_count floor.
-  // Pulls in things the strict pool would miss (smaller indies, festival picks).
+  // Loose query for diversity: drop runtime + drop vote_count floor hard.
+  // Pulls in indies, festival picks, smaller foreign films.
   const looseParams = { ...baseParams };
   delete looseParams["with_runtime.gte"];
   delete looseParams["with_runtime.lte"];
-  looseParams["vote_count.gte"] = Math.max(80, Math.floor((baseParams["vote_count.gte"] || 800) / 3));
-  for (let p = 1; p <= 4; p++) {
+  looseParams["vote_count.gte"] = Math.max(60, Math.floor((baseParams["vote_count.gte"] || 500) / 4));
+  for (let p = 1; p <= 8; p++) {
     fetches.push(discover(env, { ...looseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
+    fetches.push(discover(env, { ...looseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
+  }
+  // Wildcard: ignore mood genres entirely, just chase quality. Adds ~50 more
+  // candidates that would never surface from the strict path. The scorer
+  // filters them by mood fit anyway.
+  const wildParams = {
+    "vote_count.gte": 200,
+    "vote_average.gte": 7.0,
+    [`${dateKey}.lte`]: today,
+    include_adult: "false",
+    ...dateRange(mood, media),
+    ...languagePref(mood),
+  };
+  for (let p = 1; p <= 4; p++) {
+    fetches.push(discover(env, { ...wildParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
   }
   const all = await Promise.all(fetches);
   const results = all.flatMap(r => r.results || []);
