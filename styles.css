@@ -821,6 +821,15 @@ header.top {
   color: var(--ink-soft);
   overflow-wrap: anywhere;
 }
+.card .alt-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.85em;
+  color: var(--muted);
+  margin-top: 2px;
+  letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
+}
 .card .specs {
   font-family: var(--font-body);
   font-size: var(--t-mono);

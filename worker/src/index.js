@@ -377,16 +377,31 @@ async function recommend(req, env, ctx) {
     const [providers, credits, details] = await Promise.all([
       M.providers(env, f.id, country),
       M.credits(env, f.id),
-      M.details(env, f.id, lang),
+      // Force English for the title so Cris sees "Seven Samurai" instead of "Los siete samuráis".
+      // Overview falls back to f.overview (from discover, which uses requested lang).
+      M.details(env, f.id, "en-US"),
     ]);
-    const title = f.title || M.titleOf(details);
-    const date = f.release_date || M.dateOf(details);
+    const title = M.titleOf(details) || f.title;
+    const date = M.dateOf(details) || f.release_date;
     const runtime = (media === "tv")
       ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
       : (details.runtime || f.runtime || null);
+    // Original title (in source language) and English title for non-English films.
+    const originalTitle = media === "tv" ? (details.original_name || null) : (details.original_title || null);
+    const originalLang = details.original_language || f.original_language || null;
+    // Country of origin: TV uses origin_country (array of ISO codes), movies use production_countries.
+    let originCountry = null;
+    if (media === "tv" && Array.isArray(details.origin_country) && details.origin_country.length) {
+      originCountry = details.origin_country[0];
+    } else if (Array.isArray(details.production_countries) && details.production_countries.length) {
+      originCountry = details.production_countries[0].iso_3166_1 || null;
+    }
     return {
       id: f.id,
       title,
+      original_title: originalTitle && originalTitle !== title ? originalTitle : null,
+      original_language: originalLang,
+      country: originCountry,
       year: (date || "").slice(0, 4),
       director: credits.director || null,
       runtime,

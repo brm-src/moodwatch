@@ -1272,11 +1272,24 @@
 
     const meta = document.createElement("div");
     meta.className = "meta";
+    // Country code → flag emoji + label
+    const countryLabel = (cc) => {
+      if (!cc || cc.length !== 2) return "";
+      const flag = String.fromCodePoint(...[...cc.toUpperCase()].map(c => 0x1F1A5 + c.charCodeAt(0)));
+      return `${flag} ${cc.toUpperCase()}`;
+    };
+    const showOriginal = f.original_title && f.original_title !== f.title;
+    const specsParts = [
+      f.runtime ? `${f.runtime} min` : "",
+      countryLabel(f.country),
+      (f.genres || []).slice(0, 2).join(" · "),
+    ].filter(Boolean);
     meta.innerHTML = `
       <span class="card-rank">${window.t("pick_n").replace("{n}", String(rank).padStart(2, "0"))}</span>
       <h3>${escapeHtml(f.title || "")} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
+      ${showOriginal ? `<div class="alt-title">${escapeHtml(f.original_title)}</div>` : ""}
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
-      <div class="specs">${[f.runtime ? `${f.runtime} min` : "", (f.genres || []).slice(0,2).join(" · ")].filter(Boolean).join(" — ")}</div>
+      <div class="specs">${specsParts.join(" — ")}</div>
       ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span>` : ""}
       ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}
       ${f.from_feedback ? `<span class="taste-badge">${window.t("from_feedback")}</span>` : ""}`;
