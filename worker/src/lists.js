@@ -455,6 +455,31 @@ export const LISTS = [
     signature: { depth: ["thoughtful", "warm"], pace: ["slow"], state: "pensive", want: ["moved", "soothed"] },
     ids: [46619, 64396, 79864, 61828, 65454, 79410, 106308, 67243, 111141, 95215],
   },
+  // ─── Curated seed buckets v2 (Cris) ───────────────────────────────
+  {
+    slug: "cosmic-horror-strange",
+    name: "Horror cósmico / extraño",
+    signature: { trust: "horror", appetite: "horror", depth: ["uneasy", "ruined"], first_act: ["thriller_horror", "fantasy_scifi"] },
+    ids: [548473,300668,378018,144312,430231,8413,8852,21506,2291,2654,1091,21484,5876,50037,460885,698232,939914,267852,516632,19898,1272,348,679,10153,174772,395992,503919,458305,435615,505063,220289,19204,8843,27324,41428,472269,11542,301365,65899,242095,14510,109463,795518,207774,496743,376865,593,1398,985,2667],
+  },
+  {
+    slug: "urban-depression",
+    name: "Depresión urbana / vacío moderno",
+    signature: { depth: ["thoughtful", "ruined"], state: ["pensive", "low"], lately: ["heartbroken", "stuck", "numb"], memory: ["heartbreak", "regret", "loss"] },
+    ids: [334541,86829,458737,76025,451,2593,62215,12163,308,103,152601,153,428449,758866,370755,965150,976893,655,75233,4960,121986,660120,666277,46705,4148,14,1600,108,38,80,50546,401,9428,4538,291270,24238,152603,156022,340666,254320,500840,129670,414453,30020,25538,25050,81401,581734,376867,169813,8942],
+  },
+  {
+    slug: "scifi-cerebral",
+    name: "Sci-fi cerebral",
+    signature: { first_act: "fantasy_scifi", depth: ["thoughtful", "ruined"], temperature: ["cool", "freezing"], trust: "weird" },
+    ids: [14337,206487,145197,837,1946,17431,264660,329865,782,78,335984,9323,149,180,2666,9693,636,68,3509,45612,141,1954,157336,62,593,1398,496743,376865,435615,500664,59967,152795,549294,14139,431,619264,8072,473,667216,819876,1381,75612,244267,606234,152601,42188,301875,419704,406759,686],
+  },
+  {
+    slug: "thriller-paranoid-extra",
+    name: "Thriller paranoico / conspiración",
+    signature: { tone: "dark", first_act: "thriller_horror", trust: "thriller", energy: "engage", depth: ["thoughtful", "uneasy"] },
+    ids: [592,11644,9798,11963,17365,891,1949,156022,345,2649,11324,9008,4566,32042,1073,622764,11439,612,622,37233,9944,11935,982,14462,10518,582,445,146233,210577,65754,320,77,11660,399057,670,488623,11423,13855,36095,705996,340666,489999,486947,6145,273481,949,1538,11507,8740,395834],
+  },
 ];
 
 function matchesValue(want, got) {
