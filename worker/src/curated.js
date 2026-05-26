@@ -305,6 +305,34 @@ export const CURATED_TV = [
   { id: 62127  , note: "Atypical. Comedia familiar sobre autismo. Liviana pero con corazón." },
   { id: 94997  , note: "House of the Dragon. Game of Thrones precuela, dragones y crisis sucesoria." },
 
+
+  // ── EXTRAS · expansión catálogo TV ─────────────────────────
+  { id: 1398    , note: "The Sopranos. Chase escribió el padre del prestige drama. Tony Soprano sigue siendo el personaje más complejo de la TV." },
+  { id: 1418    , note: "The Big Bang Theory. Sitcom mainstream que decae pero los primeros años funcionan como comedia confort." },
+  { id: 4614    , note: "NYPD Blue. Bochco y Milch redefinieron el procedural policial en los 90s. Sciorra al frente." },
+  { id: 1416    , note: "Grey's Anatomy. Rhimes inventó el drama médico moderno. Vio mejor en sus primeras seis temporadas." },
+  { id: 1622    , note: "Supernatural. Hermanos Winchester como folclor americano. Las primeras cinco son canon." },
+  { id: 60572   , note: "The Knick. Soderbergh dirige medicina del 1900 como horror corporal. Olvidada injustamente." },
+  { id: 87917   , note: "The Underground Railroad. Barry Jenkins filma el dolor con dignidad poética imposible." },
+  { id: 94954   , note: "Hacks. Jean Smart como comediante en decadencia. Ritmo y química perfectos." },
+  { id: 110492  , note: "Peacemaker. James Gunn divirtiéndose como nadie en TV de superhéroes." },
+  { id: 135138  , note: "Slow Horses. Gary Oldman en MI5 como espía caído. Una sorpresa por temporada." },
+  { id: 124364  , note: "From. Pueblo donde no se puede salir. Misterio sin fin pero te atrapa." },
+  { id: 152040  , note: "Beef. Lee Sung Jin convierte road rage en arqueología emocional. Wong y Yeun en la cumbre." },
+  { id: 105248  , note: "Cobra Kai. Karate Kid 30 años después como dramedy adolescente. Funciona mejor de lo que debería." },
+  { id: 114472  , note: "The Last of Us. Mazin adaptó el videojuego sin perder cine. Episodio 3 es televisión seminal." },
+  { id: 61888   , note: "Master of None. Aziz Ansari y Alan Yang. Episodios sueltos como cortos perfectos." },
+  { id: 84773   , note: "Ted Lasso. Sudeikis como entrenador yanqui en Inglaterra. Optimismo sin azúcar." },
+  { id: 138670  , note: "Tokyo Vice. Periodismo y yakuza en los 90. Adam Wingard al ritmo." },
+  { id: 71712   , note: "Babylon Berlin. Berlín 1929 filmado como ciudad enferma. Producción europea más grande de la historia." },
+  { id: 153312  , note: "Severance. Stiller dirige el capitalismo como horror corporativo. Ritmo, diseño y desconcierto." },
+  { id: 153406  , note: "The Bear. Cocina de Chicago como purgatorio. Episodio Fishes es televisión seminal." },
+  { id: 104389  , note: "Yellowjackets. Adolescencia + canibalismo + 90s. Ritmo deliberado, recompensa lenta." },
+  { id: 203857  , note: "Shrinking. Bill Lawrence + Jason Segel. Comedia sobre duelo sin ser empalagosa." },
+  { id: 114502  , note: "The Bear. Carmy. Fuegos. Ya está dicho." },
+  { id: 220937  , note: "The Curse. Nathan Fielder en bucle de incomodidad sostenida. No para todos." },
+  { id: 215103  , note: "Poker Face. Rian Johnson + Natasha Lyonne. Howdunit semanal con química perfecta." },
+
 ];
 
 const _tvById = new Map(CURATED_TV.map(c => [c.id, c]));
