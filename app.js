@@ -1095,14 +1095,12 @@
   function renderWhy(data) {
     const panel = $("#why-panel");
     if (!panel) return;
-    const chips = data?.why?.chips || [];
     const lists = data?.matched_lists || [];
-    if (!chips.length && !lists.length) { panel.hidden = true; panel.innerHTML = ""; return; }
+    if (!lists.length) { panel.hidden = true; panel.innerHTML = ""; return; }
     panel.hidden = false;
     panel.innerHTML = `
       <div class="why-title">${window.t("why_title")}</div>
-      ${chips.length ? `<div class="why-chips">${chips.map(c => `<span>${escapeHtml(c)}</span>`).join("")}</div>` : ""}
-      ${lists.length ? `<p>${window.t("why_lists")} ${lists.map(escapeHtml).join(" · ")}</p>` : ""}
+      <p>${window.t("why_lists")} ${lists.map(escapeHtml).join(" · ")}</p>
     `;
   }
 

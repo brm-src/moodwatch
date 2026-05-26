@@ -5,7 +5,7 @@
 // in KV (binding `CACHE`) for 30d to keep this fast.
 
 const UA = "moodwatch-bot/0.1 (+https://brm-src.github.io/moodwatch/)";
-const MAX_PAGES = 5;          // up to 140 films
+const MAX_PAGES = 20;         // up to ~560 films
 const PER_PAGE = 28;          // LB default
 
 async function fetchHtml(url) {

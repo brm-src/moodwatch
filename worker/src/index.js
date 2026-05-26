@@ -233,26 +233,55 @@ async function recommend(req, env, ctx) {
     ...extraFromLists,
   ];
 
-  // 2. If LB user provided, intersect with their watchlist TMDb IDs.
+  // 2. If LB user provided, fetch their watchlist as TMDb IDs.
   // Letterboxd is movies only — skip for TV requests.
+  // Strategy: never use as a hard filter (intersection can be empty for niche moods).
+  // Instead: (a) prefer pool items that are in the watchlist, (b) inject high-fit
+  // watchlist items the discover pool didn't surface, (c) fall through gracefully.
   let pool = allCandidates;
   let lbUsed = false;
+  let watchlistIds = null;
   if (user && media === "movie") {
     if (/^[a-z0-9_-]{1,30}$/.test(user)) {
       try {
         const wlIds = await fetchWatchlistTmdbIds(env, user);
         if (wlIds && wlIds.size > 0) {
-          const filtered = allCandidates.filter(f => wlIds.has(f.id));
-          if (filtered.length >= 3) { pool = filtered; lbUsed = true; }
-          // If filter is too narrow (<3), fall through to full pool — never break.
+          watchlistIds = wlIds;
+          lbUsed = true;
+          // Inject watchlist items not already in the pool (cap to 24 random
+          // picks so we don't blow up TMDb details calls). They'll be scored
+          // alongside everything else; if they fit the mood they'll surface.
+          const have = new Set(allCandidates.map(c => c.id));
+          const missing = [...wlIds].filter(id => !have.has(id) && !excludeSet.has(id));
+          for (let i = missing.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [missing[i], missing[j]] = [missing[j], missing[i]];
+          }
+          const extraFromWl = (await Promise.all(missing.slice(0, 24).map(id =>
+            M.details(env, id, lang).then(d => ({
+              id: d.id,
+              title: M.titleOf(d),
+              release_date: M.dateOf(d),
+              vote_average: d.vote_average,
+              vote_count: d.vote_count,
+              popularity: d.popularity,
+              genre_ids: (d.genres || []).map(g => g.id),
+              genres: (d.genres || []).map(g => g.name?.toLowerCase()),
+              poster_path: d.poster_path,
+              overview: d.overview,
+              runtime: d.runtime || null,
+              original_language: d.original_language,
+              _list: null,
+              _listOnly: true,
+              _media: media,
+            })).catch(() => null)
+          ))).filter(Boolean);
+          pool = [...allCandidates, ...extraFromWl];
         }
-        // Empty watchlist or LB scraping returned nothing: silently fall through.
-        // (Letterboxd's HTML changed; slug extraction can fail. Don't break the user.)
       } catch (e) {
         console.log("LB fail:", e?.message);
       }
     }
-    // Invalid handle format: ignore silently. Bad chars shouldn't block recs.
   }
 
   // Drop excluded ids (re-roll case) and future releases
@@ -303,6 +332,7 @@ async function recommend(req, env, ctx) {
     const cur = M.curatedFor(f.id);
     const listName = f._list;
     const likeBoost = likeBoostSet.has(f.id) ? 4 : 0;
+    const wlBoost = (watchlistIds && watchlistIds.has(f.id)) ? 5 : 0;
     const genreOverlap = (f.genre_ids || []).some(g => dislikeGenres.has(g)) ? -3 : 0;
     const langPenalty  = f.original_language && dislikeLangs.has(f.original_language) ? -2 : 0;
     const score =
@@ -312,11 +342,12 @@ async function recommend(req, env, ctx) {
       (cur ? 6 : 0) +
       (listName ? 3 : 0) +
       likeBoost +
+      wlBoost +
       genreOverlap +
       langPenalty -
       (mood.popularity === "low" ? Math.min((f.popularity || 0) / 42, 3) : 0) +
       (Math.random() * 0.9);
-    return { ...f, _score: score, _curated: cur || null, _list: listName, _likeBoost: likeBoost > 0 };
+    return { ...f, _score: score, _curated: cur || null, _list: listName, _likeBoost: likeBoost > 0, _fromWatchlist: wlBoost > 0 };
   }).sort((a, b) => b._score - a._score);
 
   // Prefer editorial list hits when a mood clearly matches a list; TMDb discover fills gaps.
@@ -380,7 +411,13 @@ async function recommend(req, env, ctx) {
     return true;
   }).slice(0, 4);
 
-  return { films: enriched, lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matched.map(m => m.list.name), media };
+  const matchedLists = matched.map(m => m.list.name);
+  if (lbUsed) {
+    const wlLabel = lang === "es-ES" ? "tu watchlist de Letterboxd" : "your Letterboxd watchlist";
+    matchedLists.unshift(wlLabel);
+  }
+
+  return { films: enriched, lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matchedLists, media };
 }
 
 async function surprise(req, env, ctx) {
