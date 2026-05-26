@@ -40,38 +40,71 @@
     },
     scene: {
       key: "scene", kind: "real", titleKey: "q_scene_t",
-      randomize: 6,
+      randomize: 4,
       options: [
         // road
-        { value: "road",      labelKey: "q_scene_road"        },
-        { value: "road",      labelKey: "q_scene_road_train"  },
-        { value: "road",      labelKey: "q_scene_road_walk"   },
-        { value: "road",      labelKey: "q_scene_road_motel"  },
+        { value: "road",      labelKey: "q_scene_road"           },
+        { value: "road",      labelKey: "q_scene_road_train"     },
+        { value: "road",      labelKey: "q_scene_road_walk"      },
+        { value: "road",      labelKey: "q_scene_road_motel"     },
+        { value: "road",      labelKey: "q_scene_road_gas"       },
+        { value: "road",      labelKey: "q_scene_road_bus"       },
+        { value: "road",      labelKey: "q_scene_road_ferry"     },
+        { value: "road",      labelKey: "q_scene_road_airport"   },
+        { value: "road",      labelKey: "q_scene_road_bridge"    },
         // city
-        { value: "city",      labelKey: "q_scene_city"        },
-        { value: "city",      labelKey: "q_scene_city_neon"   },
-        { value: "city",      labelKey: "q_scene_city_window" },
-        { value: "city",      labelKey: "q_scene_city_subway" },
+        { value: "city",      labelKey: "q_scene_city"           },
+        { value: "city",      labelKey: "q_scene_city_neon"      },
+        { value: "city",      labelKey: "q_scene_city_window"    },
+        { value: "city",      labelKey: "q_scene_city_subway"    },
+        { value: "city",      labelKey: "q_scene_city_sidewalk"  },
+        { value: "city",      labelKey: "q_scene_city_rooftop"   },
+        { value: "city",      labelKey: "q_scene_city_cafe"      },
+        { value: "city",      labelKey: "q_scene_city_elevator"  },
+        { value: "city",      labelKey: "q_scene_city_busstop"   },
         // house
-        { value: "house",     labelKey: "q_scene_house"       },
-        { value: "house",     labelKey: "q_scene_house_attic" },
-        { value: "house",     labelKey: "q_scene_house_kitchen" },
-        { value: "house",     labelKey: "q_scene_house_phone" },
+        { value: "house",     labelKey: "q_scene_house"          },
+        { value: "house",     labelKey: "q_scene_house_attic"    },
+        { value: "house",     labelKey: "q_scene_house_kitchen"  },
+        { value: "house",     labelKey: "q_scene_house_phone"    },
+        { value: "house",     labelKey: "q_scene_house_pool"     },
+        { value: "house",     labelKey: "q_scene_house_door"     },
+        { value: "house",     labelKey: "q_scene_house_mirror"   },
+        { value: "house",     labelKey: "q_scene_house_basement" },
+        { value: "house",     labelKey: "q_scene_house_window"   },
         // dialogue
-        { value: "dialogue",  labelKey: "q_scene_dialogue"    },
-        { value: "dialogue",  labelKey: "q_scene_dialogue_bar" },
-        { value: "dialogue",  labelKey: "q_scene_dialogue_break" },
-        { value: "dialogue",  labelKey: "q_scene_dialogue_letter" },
+        { value: "dialogue",  labelKey: "q_scene_dialogue"          },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_bar"      },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_break"    },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_letter"   },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_dinner"   },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_car"      },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_voicemail"},
+        { value: "dialogue",  labelKey: "q_scene_dialogue_park"     },
+        { value: "dialogue",  labelKey: "q_scene_dialogue_friend"   },
         // survival
-        { value: "survival",  labelKey: "q_scene_survival"    },
-        { value: "survival",  labelKey: "q_scene_survival_run" },
-        { value: "survival",  labelKey: "q_scene_survival_wood" },
-        { value: "survival",  labelKey: "q_scene_survival_storm" },
+        { value: "survival",  labelKey: "q_scene_survival"          },
+        { value: "survival",  labelKey: "q_scene_survival_run"      },
+        { value: "survival",  labelKey: "q_scene_survival_wood"     },
+        { value: "survival",  labelKey: "q_scene_survival_storm"    },
+        { value: "survival",  labelKey: "q_scene_survival_food"     },
+        { value: "survival",  labelKey: "q_scene_survival_sound"    },
+        { value: "survival",  labelKey: "q_scene_survival_door"     },
+        { value: "survival",  labelKey: "q_scene_survival_dark"     },
+        { value: "survival",  labelKey: "q_scene_survival_steps"    },
         // discovery
-        { value: "discovery", labelKey: "q_scene_discovery"   },
-        { value: "discovery", labelKey: "q_scene_discovery_door" },
-        { value: "discovery", labelKey: "q_scene_discovery_box" },
-        { value: "discovery", labelKey: "q_scene_discovery_mirror" },
+        { value: "discovery", labelKey: "q_scene_discovery"          },
+        { value: "discovery", labelKey: "q_scene_discovery_door"     },
+        { value: "discovery", labelKey: "q_scene_discovery_box"      },
+        { value: "discovery", labelKey: "q_scene_discovery_mirror"   },
+        { value: "discovery", labelKey: "q_scene_discovery_photo"    },
+        { value: "discovery", labelKey: "q_scene_discovery_letter"   },
+        { value: "discovery", labelKey: "q_scene_discovery_drawer"   },
+        { value: "discovery", labelKey: "q_scene_discovery_name"     },
+        { value: "discovery", labelKey: "q_scene_discovery_recording"},
+        { value: "discovery", labelKey: "q_scene_discovery_key"      },
+        // sticky "any" — always appended last, never shuffled out
+        { value: "",          labelKey: "q_scene_any", sticky: true },
       ],
     },
     intent: {
@@ -930,40 +963,43 @@
       const list = document.createElement("div");
       list.className = "options";
       let pool = q.options;
-      if (q.randomize && q.options.length > q.randomize) {
-        // random subset, keep balance: try to include up to one per `value` bucket first,
-        // then fill the rest from the remainder. Shuffle final order.
-        const buckets = new Map();
-        q.options.forEach(o => {
-          if (!buckets.has(o.value)) buckets.set(o.value, []);
-          buckets.get(o.value).push(o);
-        });
-        const picked = [];
-        for (const arr of buckets.values()) {
-          picked.push(arr[Math.floor(Math.random() * arr.length)]);
-        }
-        if (picked.length > q.randomize) {
+      if (q.randomize) {
+        const sticky = q.options.filter(o => o.sticky);
+        const pickable = q.options.filter(o => !o.sticky);
+        if (pickable.length > q.randomize) {
+          // balance: one per bucket first, then random fill, then shuffle
+          const buckets = new Map();
+          pickable.forEach(o => {
+            if (!buckets.has(o.value)) buckets.set(o.value, []);
+            buckets.get(o.value).push(o);
+          });
+          let picked = [];
+          for (const arr of buckets.values()) {
+            picked.push(arr[Math.floor(Math.random() * arr.length)]);
+          }
+          if (picked.length > q.randomize) {
+            for (let i = picked.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [picked[i], picked[j]] = [picked[j], picked[i]];
+            }
+            picked = picked.slice(0, q.randomize);
+          } else {
+            const remaining = pickable.filter(o => !picked.includes(o));
+            while (picked.length < q.randomize && remaining.length) {
+              const idx = Math.floor(Math.random() * remaining.length);
+              picked.push(remaining.splice(idx, 1)[0]);
+            }
+          }
           for (let i = picked.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [picked[i], picked[j]] = [picked[j], picked[i]];
           }
-          pool = picked.slice(0, q.randomize);
-        } else {
-          const remaining = q.options.filter(o => !picked.includes(o));
-          while (picked.length < q.randomize && remaining.length) {
-            const idx = Math.floor(Math.random() * remaining.length);
-            picked.push(remaining.splice(idx, 1)[0]);
-          }
-          for (let i = picked.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [picked[i], picked[j]] = [picked[j], picked[i]];
-          }
-          pool = picked;
+          pool = [...picked, ...sticky];
         }
       }
       pool.forEach((o, i) => {
         const b = document.createElement("button");
-        b.className = "opt";
+        b.className = "opt" + (o.sticky ? " opt-any" : "");
         b.type = "button";
         b.innerHTML = `
           <span class="opt-key">${String(i+1).padStart(2, "0")}</span>
