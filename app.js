@@ -34,15 +34,25 @@
     flavor: {
       key: "appetite", kind: "real", titleKey: "q_flavor_t",
       options: [
-        { value: "girly",        labelKey: "q_flavor_girly" },
-        { value: "queer",        labelKey: "q_flavor_queer" },
-        { value: "a24",          labelKey: "q_flavor_a24" },
-        { value: "reality",      labelKey: "q_flavor_reality" },
-        { value: "wtf",          labelKey: "q_flavor_wtf" },
-        { value: "vintage_love", labelKey: "q_flavor_vintage" },
-        { value: "underseen",    labelKey: "q_flavor_underseen" },
-        { value: "prestige",     labelKey: "q_flavor_prestige" },
-        { value: "",             labelKey: "q_flavor_any", sticky: true },
+        { value: "girly",         labelKey: "q_flavor_girly" },
+        { value: "queer",         labelKey: "q_flavor_queer" },
+        { value: "a24",           labelKey: "q_flavor_a24" },
+        { value: "reality",       labelKey: "q_flavor_reality" },
+        { value: "wtf",           labelKey: "q_flavor_wtf" },
+        { value: "vintage_love",  labelKey: "q_flavor_vintage" },
+        { value: "underseen",     labelKey: "q_flavor_underseen" },
+        { value: "prestige",      labelKey: "q_flavor_prestige" },
+        { value: "catharsis",     labelKey: "q_flavor_catharsis" },
+        { value: "anthropocene",  labelKey: "q_flavor_anthropocene" },
+        { value: "doc",           labelKey: "q_flavor_doc" },
+        { value: "anime",         labelKey: "q_flavor_anime" },
+        { value: "blind_watch",   labelKey: "q_flavor_blind" },
+        { value: "sleepover",     labelKey: "q_flavor_sleepover" },
+        { value: "good_for_her",  labelKey: "q_flavor_good_for_her" },
+        { value: "hidden_gem",    labelKey: "q_flavor_hidden_gem" },
+        { value: "silent",        labelKey: "q_flavor_silent" },
+        { value: "romcom",        labelKey: "q_flavor_romcom" },
+        { value: "",              labelKey: "q_flavor_any", sticky: true },
       ],
     },
     door: {
@@ -149,6 +159,7 @@
         { value: "fog",    labelKey: "q_weather_fog"    },
         { value: "sun",    labelKey: "q_weather_sun"    },
         { value: "storm",  labelKey: "q_weather_storm"  },
+        { value: "snow",   labelKey: "q_weather_snow"   },
         { value: "winter", labelKey: "q_weather_winter" },
       ],
     },
@@ -164,9 +175,20 @@
     company: {
       key: "company", kind: "real", titleKey: "q_company_t",
       options: [
-        { value: "alone",  labelKey: "q_company_alone"  },
-        { value: "shared", labelKey: "q_company_shared" },
-        { value: "stray",  labelKey: "q_company_stray"  },
+        { value: "alone",   labelKey: "q_company_alone"   },
+        { value: "partner", labelKey: "q_company_partner" },
+        { value: "friends", labelKey: "q_company_friends" },
+        { value: "family",  labelKey: "q_company_family"  },
+        { value: "shared",  labelKey: "q_company_shared"  },
+        { value: "stray",   labelKey: "q_company_stray"   },
+      ],
+    },
+    attention: {
+      key: "attention", kind: "real", titleKey: "q_attention_t",
+      options: [
+        { value: "no_phone",   labelKey: "q_attention_full"   },
+        { value: "relaxed",    labelKey: "q_attention_relaxed"},
+        { value: "background", labelKey: "q_attention_bg"     },
       ],
     },
     pace: {
@@ -221,8 +243,10 @@
       key: "decade", kind: "real", titleKey: "q_decade_t",
       options: [
         { value: "old",   labelKey: "q_decade_old"   },
-        { value: "70s80s",labelKey: "q_decade_70s80s"},
-        { value: "90s00s",labelKey: "q_decade_90s00s"},
+        { value: "70s",   labelKey: "q_decade_70s"   },
+        { value: "80s",   labelKey: "q_decade_80s"   },
+        { value: "90s",   labelKey: "q_decade_90s"   },
+        { value: "00s",   labelKey: "q_decade_00s"   },
         { value: "now",   labelKey: "q_decade_now"   },
         { value: "any",   labelKey: "q_decade_any"   },
       ],
@@ -333,6 +357,7 @@
     runtime: {
       key: "runtime", kind: "real", titleKey: "q_runtime_t",
       options: [
+        { value: "tiny",   labelKey: "q_runtime_tiny"   },
         { value: "short",  labelKey: "q_runtime_short"  },
         { value: "medium", labelKey: "q_runtime_medium" },
         { value: "long",   labelKey: "q_runtime_long"   },
@@ -539,7 +564,7 @@
   // and the last (ink) are the only fixed pieces of the ritual.
   function buildSession() {
     const all = [
-      "state","appetite","flavor","door","scene","intent","depth","weather","sound","company","pace","ending",
+      "state","appetite","flavor","door","scene","intent","depth","weather","sound","company","attention","pace","ending",
       "color","light","texture","place","temperature","memory","want","decade","smell","window",
       "object","body","risk_taste","first_act","trust","avoid","rewatch_taste","runtime","language_pref",
       "opening","time_of_day","garment","food","drink","instrument","transport","season","fear","phrase",

@@ -65,7 +65,8 @@ function genreSet(mood, media = "movie") {
 function runtimeRange(mood) {
   const m = mood.runtime;
   // user-asked runtime overrides default min of 75
-  if (m === "short")  return { "with_runtime.gte": 75, "with_runtime.lte": 90 };
+  if (m === "tiny")   return { "with_runtime.lte": 40 };
+  if (m === "short")  return { "with_runtime.gte": 60, "with_runtime.lte": 100 };
   if (m === "medium") return { "with_runtime.gte": 90, "with_runtime.lte": 120 };
   if (m === "long")   return { "with_runtime.gte": 120, "with_runtime.lte": 180 };
   if (m === "epic")   return { "with_runtime.gte": 150 };
@@ -79,8 +80,8 @@ function dateRange(mood, media = "movie") {
   if (d === "70s80s") return { [`${k}.gte`]: "1970-01-01", [`${k}.lte`]: "1989-12-31" };
   if (d === "90s00s") return { [`${k}.gte`]: "1990-01-01", [`${k}.lte`]: "2009-12-31" };
   if (d === "now")    return { [`${k}.gte`]: "2010-01-01" };
-  // legacy values still supported
   if (d === "70s")    return { [`${k}.gte`]: "1970-01-01", [`${k}.lte`]: "1979-12-31" };
+  if (d === "80s")    return { [`${k}.gte`]: "1980-01-01", [`${k}.lte`]: "1989-12-31" };
   if (d === "90s")    return { [`${k}.gte`]: "1990-01-01", [`${k}.lte`]: "1999-12-31" };
   if (d === "00s")    return { [`${k}.gte`]: "2000-01-01", [`${k}.lte`]: "2009-12-31" };
   return {};
