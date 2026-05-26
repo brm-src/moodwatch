@@ -10,6 +10,7 @@ import {
 } from "./tmdb.js";
 import { fetchWatchlistTmdbIds } from "./letterboxd.js";
 import { CURATED, curatedFor, CURATED_TV, curatedTvFor } from "./curated.js";
+import { TRAKT_WATCHED_TV, TRAKT_WATCHED_MOVIES } from "./trakt-cache.js";
 import { matchLists } from "./lists.js";
 
 // Per-media TMDb helper bundle. Keeps movie path identical when media === "movie".
@@ -324,6 +325,10 @@ async function recommend(req, env, ctx) {
     // Always exclude already-disliked
     for (const id of disliked) excludeSet.add(id);
   }
+  // Trakt-watched: exclude already-watched titles from recommendations.
+  // Reasoning: if they tracked it they've already seen it; don't re-rec.
+  const traktSet = media === "tv" ? TRAKT_WATCHED_TV : TRAKT_WATCHED_MOVIES;
+  for (const id of traktSet) excludeSet.add(id);
   // Re-apply exclude after taste signals
   pool = pool.filter(f => !excludeSet.has(f.id));
 
