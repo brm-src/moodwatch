@@ -84,12 +84,32 @@ function fitScore(film, mood = {}) {
   let s = 0;
   const has = (...xs) => xs.some(x => genres.has(String(x).toLowerCase()));
   if (mood.tone === "dark" && has("27", "53", "9648", "80", "horror", "thriller", "mystery", "crime")) s += 2;
-  if (mood.tone === "light" && has("35", "10749", "12", "16", "14", "comedy", "romance", "adventure", "animation", "fantasy")) s += 2;
+  // Animation/family removed from generic light/unwind boosts — must be opt-in
+  if (mood.tone === "light" && has("35", "10749", "12", "14", "comedy", "romance", "adventure", "fantasy")) s += 2;
   if (mood.energy === "engage" && has("28", "53", "9648", "12", "action", "thriller", "mystery", "adventure")) s += 1.5;
-  if (mood.energy === "unwind" && has("35", "10749", "18", "16", "comedy", "romance", "drama", "animation")) s += 1;
+  if (mood.energy === "unwind" && has("35", "10749", "18", "comedy", "romance", "drama")) s += 1;
   if (mood.first_act === "thriller_horror" && has("27", "53", "9648", "horror", "thriller", "mystery")) s += 2;
   if ((mood.trust === "horror" || mood.first_act === "thriller_horror") && !has("27", "53", "9648", "horror", "thriller", "mystery")) s -= 4;
   if ((mood.trust === "horror" || mood.tone === "dark") && has("10751", "16", "family", "animation")) s -= 2.5;
+
+  // Horror dual-intensity: split based on energy axis.
+  //   trust=horror + energy=engage  -> "hard" horror (Flanagan, slasher, dread real)
+  //   trust=horror + energy=unwind  -> "soft" suspense (Wednesday-tier, mystery, gothic atmosphere)
+  if (mood.trust === "horror") {
+    const isHardHorror = has("27", "horror");
+    const isSoftSuspense = has("9648", "53", "mystery", "thriller") && !has("27", "horror");
+    if (mood.energy === "engage" && isHardHorror) s += 2.5;
+    if (mood.energy === "engage" && isSoftSuspense) s -= 1.2;
+    if (mood.energy === "unwind" && isHardHorror) s -= 1.5;
+    if (mood.energy === "unwind" && isSoftSuspense) s += 2.5;
+  }
+  // Animation opt-in: only boost when user explicitly asks via trust=animation.
+  // Otherwise penalize so it doesn't dominate generic light/unwind moods.
+  const isAnimation = has("16", "animation");
+  if (isAnimation) {
+    if (mood.trust === "animation") s += 3;
+    else s -= 1.8;
+  }
   if (mood.first_act === "drama_romance" && has("18", "10749", "drama", "romance")) s += 2;
   if (mood.first_act === "action_adventure" && has("28", "12", "action", "adventure")) s += 2;
   if (mood.first_act === "fantasy_scifi" && has("14", "878", "fantasy", "scifi", "science fiction")) s += 2;
@@ -109,6 +129,29 @@ function fitScore(film, mood = {}) {
     else if (year < 1970) s -= 3;
     else if (year < 1980) s -= 1.8;
   }
+
+  // Popularity floor — penalize items with too few votes (untested by audience).
+  // KinnPorsche / Weak Hero / nicho-only get pushed down. Curated picks are exempt
+  // (they're vetted by hand). TV is stricter because TMDB TV vote counts run lower.
+  const vc = film.vote_count || 0;
+  const isTV = film._media === "tv" || !!film.first_air_date;
+  if (!film._curated && !film._list) {
+    if (isTV) {
+      if (vc < 200)  s -= 3.0;
+      else if (vc < 800)  s -= 1.5;
+      else if (vc < 2000) s -= 0.5;
+    } else {
+      if (vc < 500)   s -= 2.5;
+      else if (vc < 2000)  s -= 1.0;
+    }
+  }
+
+  // IMDB-tier champion boost — well-loved AND widely-watched.
+  // For TV: ≥5k votes + ≥7.8 avg. For movies: ≥10k votes + ≥7.8 avg.
+  const va = film.vote_average || 0;
+  if (isTV && vc >= 5000 && va >= 7.8) s += 2.5;
+  if (!isTV && vc >= 10000 && va >= 7.8) s += 1.5;
+
   return s;
 }
 
@@ -540,7 +583,10 @@ async function surprise(req, env, ctx) {
 
   const dateKey = media === "tv" ? "first_air_date" : "primary_release_date";
   const baseParams = {
-    "vote_count.gte": profile === "weird" ? 80 : 800,
+    // TMDB TV vote counts run much lower than movies. Lower the floor on TV
+    // discovery, then let the scorer's popularity_floor + IMDB-tier boost
+    // promote serious shows and demote nicho-only ones.
+    "vote_count.gte": profile === "weird" ? 80 : (media === "tv" ? 300 : 800),
     "vote_average.gte": profile === "pace" ? 6.3 : 6.8,
     [`${dateKey}.lte`]: today,
     include_adult: "false",
