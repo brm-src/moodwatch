@@ -11,6 +11,8 @@ import {
 import { fetchWatchlistTmdbIds } from "./letterboxd.js";
 import { CURATED, curatedFor, CURATED_TV, curatedTvFor } from "./curated.js";
 import { matchLists } from "./lists.js";
+import { imdbTierBoost, imdbTierTier, selectTierForMood, IMDB_TIER_COUNTS } from "./imdb_tier.js";
+import { fitScore } from "./scorer.js";
 
 // Per-media TMDb helper bundle. Keeps movie path identical when media === "movie".
 function mediaApi(media) {
@@ -79,81 +81,7 @@ function watchUrl({ providersLink, mediaType, tmdbId, country }) {
   return `https://www.themoviedb.org/${path}/${tmdbId}/watch?locale=${c}`;
 }
 
-function fitScore(film, mood = {}) {
-  const genres = new Set([...(film.genres || []), ...(film.genre_ids || [])].map(x => String(x).toLowerCase()));
-  let s = 0;
-  const has = (...xs) => xs.some(x => genres.has(String(x).toLowerCase()));
-  if (mood.tone === "dark" && has("27", "53", "9648", "80", "horror", "thriller", "mystery", "crime")) s += 2;
-  // Animation/family removed from generic light/unwind boosts — must be opt-in
-  if (mood.tone === "light" && has("35", "10749", "12", "14", "comedy", "romance", "adventure", "fantasy")) s += 2;
-  if (mood.energy === "engage" && has("28", "53", "9648", "12", "action", "thriller", "mystery", "adventure")) s += 1.5;
-  if (mood.energy === "unwind" && has("35", "10749", "18", "comedy", "romance", "drama")) s += 1;
-  if (mood.first_act === "thriller_horror" && has("27", "53", "9648", "horror", "thriller", "mystery")) s += 2;
-  if ((mood.trust === "horror" || mood.first_act === "thriller_horror") && !has("27", "53", "9648", "horror", "thriller", "mystery")) s -= 4;
-  if ((mood.trust === "horror" || mood.tone === "dark") && has("10751", "16", "family", "animation")) s -= 2.5;
-
-  // Horror dual-intensity: split based on energy axis.
-  //   trust=horror + energy=engage  -> "hard" horror (Flanagan, slasher, dread real)
-  //   trust=horror + energy=unwind  -> "soft" suspense (Wednesday-tier, mystery, gothic atmosphere)
-  if (mood.trust === "horror") {
-    const isHardHorror = has("27", "horror");
-    const isSoftSuspense = has("9648", "53", "mystery", "thriller") && !has("27", "horror");
-    if (mood.energy === "engage" && isHardHorror) s += 2.5;
-    if (mood.energy === "engage" && isSoftSuspense) s -= 1.2;
-    if (mood.energy === "unwind" && isHardHorror) s -= 1.5;
-    if (mood.energy === "unwind" && isSoftSuspense) s += 2.5;
-  }
-  // Animation opt-in: only boost when user explicitly asks via trust=animation.
-  // Otherwise penalize so it doesn't dominate generic light/unwind moods.
-  const isAnimation = has("16", "animation");
-  if (isAnimation) {
-    if (mood.trust === "animation") s += 3;
-    else s -= 1.8;
-  }
-  if (mood.first_act === "drama_romance" && has("18", "10749", "drama", "romance")) s += 2;
-  if (mood.first_act === "action_adventure" && has("28", "12", "action", "adventure")) s += 2;
-  if (mood.first_act === "fantasy_scifi" && has("14", "878", "fantasy", "scifi", "science fiction")) s += 2;
-  if (mood.runtime === "short" && film.runtime && film.runtime <= 95) s += 1.5;
-  if (mood.runtime === "medium" && film.runtime && film.runtime >= 90 && film.runtime <= 125) s += 1;
-  if (mood.popularity === "low") s += Math.max(0, 1.4 - Math.min((film.popularity || 0) / 70, 1.4));
-
-  // Era bias: most users skip pre-1980 films unless they explicitly ask for them.
-  // Penalize old picks when the mood doesn't actively want them.
-  const dateStr = film.release_date || film.first_air_date || "";
-  const year = dateStr ? parseInt(dateStr.slice(0, 4), 10) : 0;
-  const wantsOld = mood.decade === "old" || mood.decade === "70s" || mood.decade === "70s80s" ||
-                   mood.appetite === "vintage_love" || mood.appetite === "silent" ||
-                   mood.appetite === "prestige" || mood.appetite === "blind_watch";
-  if (year && !wantsOld) {
-    if (year < 1960) s -= 4;
-    else if (year < 1970) s -= 3;
-    else if (year < 1980) s -= 1.8;
-  }
-
-  // Popularity floor — penalize items with too few votes (untested by audience).
-  // KinnPorsche / Weak Hero / nicho-only get pushed down. Curated picks are exempt
-  // (they're vetted by hand). TV is stricter because TMDB TV vote counts run lower.
-  const vc = film.vote_count || 0;
-  const isTV = film._media === "tv" || !!film.first_air_date;
-  if (!film._curated && !film._list) {
-    if (isTV) {
-      if (vc < 200)  s -= 3.0;
-      else if (vc < 800)  s -= 1.5;
-      else if (vc < 2000) s -= 0.5;
-    } else {
-      if (vc < 500)   s -= 2.5;
-      else if (vc < 2000)  s -= 1.0;
-    }
-  }
-
-  // IMDB-tier champion boost — well-loved AND widely-watched.
-  // For TV: ≥5k votes + ≥7.8 avg. For movies: ≥10k votes + ≥7.8 avg.
-  const va = film.vote_average || 0;
-  if (isTV && vc >= 5000 && va >= 7.8) s += 2.5;
-  if (!isTV && vc >= 10000 && va >= 7.8) s += 1.5;
-
-  return s;
-}
+// fitScore moved to scorer.js for testability.
 
 function moodSummary(mood, lang = "en") {
   const es = String(lang || "").startsWith("es");
@@ -288,6 +216,57 @@ async function recommend(req, env, ctx) {
     ...candidates.map(c => ({ ...c, _list: listIds.get(c.id) || null })),
     ...extraFromLists,
   ];
+
+  // 1c. Inject IMDB-tier (top-voted, top-rated) titles when mood permits.
+  // Scorer already boosts them; injection ensures they exist in the pool even
+  // when /discover ranks them low or filters them out (e.g. genre boundaries).
+  // TV gets stricter injection (foco series). Movies inject lighter — Letterboxd
+  // already feeds the movie pool heavily for users with watchlist.
+  const tierGenreFilter = new Set();
+  // Build a genre filter from mood: if mood asks for specific genres, only inject overlap.
+  // Genre IDs come from the candidates pool (post-genreSet expansion).
+  if (allCandidates.length) {
+    const genreCount = new Map();
+    for (const c of allCandidates.slice(0, 60)) {
+      for (const g of (c.genre_ids || [])) genreCount.set(g, (genreCount.get(g) || 0) + 1);
+    }
+    // Top 4 most-frequent genres in the discover pool define what the mood actually wants
+    const topGenres = [...genreCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([g]) => g);
+    for (const g of topGenres) tierGenreFilter.add(g);
+  }
+  const haveIds = new Set(allCandidates.map(c => c.id));
+  // TV: 5 inject (foco series). Movie: 2 (Letterboxd ya alimenta).
+  // Subrequest budget: ~18 discover + 4 list + watchlist + 6 like-seeds + 5 dislike + 18 enrich = ~50.
+  const tierCap = media === "tv" ? 5 : 2;
+  const tierInjectIds = selectTierForMood(media === "tv", tierGenreFilter, haveIds, tierCap);
+  const tierExtras = (await Promise.all(tierInjectIds.map(id =>
+    M.details(env, id, lang).then(d => ({
+      id: d.id,
+      title: M.titleOf(d),
+      release_date: M.dateOf(d),
+      vote_average: d.vote_average,
+      vote_count: d.vote_count,
+      popularity: d.popularity,
+      genre_ids: (d.genres || []).map(g => g.id),
+      genres: (d.genres || []).map(g => g.name?.toLowerCase()),
+      poster_path: d.poster_path,
+      overview: d.overview,
+      runtime: d.runtime || (d.episode_run_time && d.episode_run_time[0]) || null,
+      original_language: d.original_language,
+      _list: null,
+      _imdbTier: imdbTierTier(d.id, media === "tv"),
+      _media: media,
+    })).catch(() => null)
+  ))).filter(f => {
+    if (!f) return false;
+    if (f.release_date && f.release_date > today) return false;
+    if (media === "movie") {
+      if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
+      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+    }
+    return true;
+  });
+  allCandidates.push(...tierExtras);
 
   // 2. If LB user provided, fetch their watchlist as TMDb IDs.
   // Letterboxd is movies only — skip for TV requests.
