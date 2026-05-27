@@ -1263,3 +1263,20 @@ footer.bottom small a:hover { color: var(--accent); }
   border-radius: 50%;
   display: inline-block;
 }
+
+/* FAQ technical answers — code + strong */
+.faq-item p code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-style: normal;
+  font-size: 0.85em;
+  background: var(--paper-3);
+  color: var(--ink);
+  padding: 2px 6px;
+  border-radius: 4px;
+  word-break: break-word;
+}
+.faq-item p strong {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ink);
+}
