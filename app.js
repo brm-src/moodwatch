@@ -1184,7 +1184,10 @@
 
   async function recommend({ withUser, exclude }) {
     show("loading");
-    startLoader(Boolean(withUser && state.user), "psyche");
+    // When a Letterboxd watchlist is in play, show watchlist-themed copy.
+    // Otherwise, fall back to the psicoanálisis flavor.
+    const useLB = Boolean(withUser && state.user);
+    startLoader(useLB, useLB ? "lb" : "psyche");
     const country = guessCountry();
     const lang = window.LANG;
     const mood = ritualToMood(state.answers);

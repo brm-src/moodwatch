@@ -292,7 +292,11 @@ async function recommend(req, env, ctx) {
             const j = Math.floor(Math.random() * (i + 1));
             [missing[i], missing[j]] = [missing[j], missing[i]];
           }
-          const extraFromWl = (await Promise.all(missing.slice(0, 8).map(id =>
+          // Inject only 3 missing watchlist titles (was 8). Subrequest budget
+          // is tight — discover + enrichment alone consumes ~40 of the 50 cap.
+          // The wlBoost score (+5) still surfaces any pool item already in
+          // the watchlist, so we don't need a big injection here.
+          const extraFromWl = (await Promise.all(missing.slice(0, 3).map(id =>
             M.details(env, id, lang).then(d => ({
               id: d.id,
               title: M.titleOf(d),

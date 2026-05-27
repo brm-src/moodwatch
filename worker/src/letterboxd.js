@@ -1,12 +1,25 @@
 // Letterboxd watchlist scraper.
-// Walks letterboxd.com/{user}/watchlist/page/N/, extracts TMDb IDs from film pages.
-// LB doesn't expose TMDb IDs in the watchlist HTML directly, so we scrape film
-// slugs and then fetch each film page to get the TMDb link. We cache slug->id
-// in KV (binding `CACHE`) for 30d to keep this fast.
+//
+// Cloudflare Workers free plan caps subrequests at 50 per invocation —
+// AND every KV read/write counts. So we use ONE KV entry per user that
+// stores the resolved TMDb-id union, and grow it gradually:
+//
+//   - 1 KV get  (load whatever we cached for this user)
+//   - 1-2 page scrapes (skip when union is already healthy)
+//   - up to 4 fresh slug→id resolves (subrequests)
+//   - 1 KV put  (persist the new union)
+//
+// Worst case: ~8 subrequests, leaving plenty of room for the rest of the
+// recommend pipeline. After a few reloads the union grows to cover the
+// whole watchlist with zero scraping cost.
 
 const UA = "moodwatch-bot/0.1 (+https://brm-src.github.io/moodwatch/)";
-const MAX_PAGES = 20;         // up to ~560 films
-const PER_PAGE = 28;          // LB default
+const PER_PAGE = 28;
+const USER_TTL = 60 * 60 * 24 * 7;     // 7d for the per-user union
+const SLUG_TTL = 60 * 60 * 24 * 30;    // 30d for slug→id (kept for compat)
+const HEALTHY_UNION = 40;              // skip scraping once we have ≥40 ids
+const MAX_SCRAPE_PAGES = 1;            // ≤28 slugs per call when scraping
+const RESOLVE_BUDGET = 3;              // fresh slug resolves per call
 
 async function fetchHtml(url) {
   const r = await fetch(url, {
@@ -18,48 +31,32 @@ async function fetchHtml(url) {
 }
 
 function extractSlugs(html) {
-  // Watchlist HTML uses <li class="poster-container"> with <div data-film-slug="..."> or
-  // <a href="/film/SLUG/"> inside posters. Be permissive.
   const slugs = new Set();
   const reA = /\/film\/([a-z0-9][a-z0-9-]+)\/?/gi;
   let m;
   while ((m = reA.exec(html))) slugs.add(m[1]);
-  // Filter out non-film paths
   return [...slugs].filter(s => !["a","is","of","the","this","new","top"].includes(s));
 }
 
 function extractTmdbId(html) {
-  // film page contains a link to themoviedb.org/movie/<id>
   const m = html.match(/themoviedb\.org\/movie\/(\d+)/);
   return m ? Number(m[1]) : null;
 }
 
-async function slugToTmdbId(env, slug) {
-  // KV cache
-  if (env.CACHE) {
-    const cached = await env.CACHE.get(`slug:${slug}`);
-    if (cached) return cached === "null" ? null : Number(cached);
-  }
-  let id = null;
+async function slugToTmdbId(slug) {
   try {
     const html = await fetchHtml(`https://letterboxd.com/film/${slug}/`);
-    id = extractTmdbId(html);
-  } catch {}
-  if (env.CACHE) {
-    await env.CACHE.put(`slug:${slug}`, id == null ? "null" : String(id), {
-      expirationTtl: 60 * 60 * 24 * 30,
-    });
-  }
-  return id;
+    return extractTmdbId(html);
+  } catch { return null; }
 }
 
-// Resolve a batch of LB film slugs to TMDb IDs (uses KV cache).
+// Kept for backwards compatibility (older callers used this directly).
 export async function slugsToTmdbIds(env, slugs) {
   const ids = new Set();
-  const BATCH = 8;
+  const BATCH = 4;
   for (let i = 0; i < slugs.length; i += BATCH) {
     const batch = slugs.slice(i, i + BATCH);
-    const resolved = await Promise.all(batch.map(s => slugToTmdbId(env, s).catch(() => null)));
+    const resolved = await Promise.all(batch.map(s => slugToTmdbId(s).catch(() => null)));
     resolved.forEach(id => { if (id) ids.add(id); });
   }
   return ids;
@@ -67,32 +64,72 @@ export async function slugsToTmdbIds(env, slugs) {
 
 export async function fetchWatchlistTmdbIds(env, user) {
   // user already validated upstream as ^[a-z0-9_-]{1,30}$
-  const allSlugs = new Set();
+  const userKey = `wl:${user}`;
+  const seenSlugsKey = `wl:${user}:slugs`;
 
-  for (let page = 1; page <= MAX_PAGES; page++) {
+  // 1. Load per-user union (1 KV read).
+  let union = new Set();
+  let resolvedSlugs = new Set(); // slugs we've already attempted (success or null)
+  if (env.CACHE) {
+    try {
+      const raw = await env.CACHE.get(userKey, { type: "json" });
+      if (raw && Array.isArray(raw.ids)) {
+        union = new Set(raw.ids.filter(Number.isFinite));
+        if (Array.isArray(raw.slugs)) resolvedSlugs = new Set(raw.slugs);
+      }
+    } catch {}
+  }
+
+  // 2. If union is healthy, return it without scraping at all (0 extra subrequests).
+  if (union.size >= HEALTHY_UNION) return union;
+
+  // 3. Scrape a small page slice — usually just page 1.
+  const newSlugs = [];
+  for (let page = 1; page <= MAX_SCRAPE_PAGES; page++) {
     let html;
     try {
       html = await fetchHtml(`https://letterboxd.com/${user}/watchlist/page/${page}/`);
     } catch (e) {
-      if (page === 1) throw e; // first page must work
+      if (page === 1 && union.size === 0) throw e;
       break;
     }
     const slugs = extractSlugs(html);
     if (slugs.length === 0) break;
-    slugs.forEach(s => allSlugs.add(s));
-    if (slugs.length < PER_PAGE) break; // last page
+    for (const s of slugs) if (!resolvedSlugs.has(s)) newSlugs.push(s);
+    if (slugs.length < PER_PAGE) break;
   }
 
-  if (allSlugs.size === 0) return new Set();
-
-  // Resolve slugs -> TMDb IDs in parallel batches of 8
-  const slugList = [...allSlugs];
-  const ids = new Set();
-  const BATCH = 8;
-  for (let i = 0; i < slugList.length; i += BATCH) {
-    const batch = slugList.slice(i, i + BATCH);
-    const resolved = await Promise.all(batch.map(s => slugToTmdbId(env, s).catch(() => null)));
-    resolved.forEach(id => { if (id) ids.add(id); });
+  // 4. Resolve a small budget of fresh slugs. Shuffle so we eventually cover
+  // the whole watchlist over multiple reloads instead of always the same N.
+  for (let i = newSlugs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newSlugs[i], newSlugs[j]] = [newSlugs[j], newSlugs[i]];
   }
-  return ids;
+  const toResolve = newSlugs.slice(0, RESOLVE_BUDGET);
+  if (toResolve.length) {
+    const resolved = await Promise.all(
+      toResolve.map(s => slugToTmdbId(s).catch(() => null))
+    );
+    for (let i = 0; i < toResolve.length; i++) {
+      resolvedSlugs.add(toResolve[i]);
+      const id = resolved[i];
+      if (id) union.add(id);
+    }
+  }
+
+  // 5. Persist (1 KV write). Cap slug-set at 800 to avoid runaway value size.
+  if (env.CACHE && (union.size > 0 || resolvedSlugs.size > 0)) {
+    try {
+      const slugArr = [...resolvedSlugs].slice(-800);
+      await env.CACHE.put(
+        userKey,
+        JSON.stringify({ ids: [...union], slugs: slugArr }),
+        { expirationTtl: USER_TTL }
+      );
+    } catch {}
+  }
+  // Suppress unused-var warning for the legacy slug key (reserved for future use).
+  void seenSlugsKey;
+
+  return union;
 }
