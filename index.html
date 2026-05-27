@@ -7,7 +7,7 @@
 <title>moodwatch — a film for tonight</title>
 <meta name="description" content="A small ritual to find a film for tonight. Free, no signup. Optional Letterboxd watchlist.">
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2314160f'/><text x='32' y='44' font-size='40' text-anchor='middle' fill='%23c43b2a' font-family='serif' font-style='italic'>m</text></svg>">
-<link rel="stylesheet" href="./styles.css?v=readmore3-20260524">
+<link rel="stylesheet" href="./styles.css?v=faq-20260527">
 </head>
 <body>
 
@@ -199,6 +199,49 @@
   </section>
 </main>
 
+<!-- ─── FAQ (always visible, below the app) ─── -->
+<section class="faq-section">
+  <div class="faq-inner">
+    <div class="fig"><span data-i18n="faq_label">Questions</span><span class="bar"></span></div>
+    <h2 class="faq-title" data-i18n="faq_title">Everything you <em>need to know.</em></h2>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q1">How is this different from asking ChatGPT?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a1">Moodwatch is built around how you feel right now, not a generic prompt. It reads your Letterboxd watchlist, takes mood and runtime into account, and surfaces films from a curated catalogue of 1,500+ titles plus TMDb. ChatGPT doesn't know what you saved, what you've already watched, or where to actually stream it tonight.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q2">Are the streaming suggestions accurate?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a2">We pull streaming data from JustWatch via TMDb. Availability changes weekly and varies by country. The "Where to watch" link always opens the right page, but if a service just dropped a title, you might catch it before our cache refreshes. When in doubt, click through.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q3">What does the Letterboxd integration do?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a3">If you give us your @, we read your public watchlist and prioritize films you already saved. We never recommend something you've already logged as watched. Your username isn't stored — we resolve it on each call and cache the resolved film IDs anonymously.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q4">Why is the watchlist slow the first time?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a4">Letterboxd doesn't expose film IDs directly, so we resolve them in small batches and cache the result. The first call covers part of your watchlist; the next two or three reloads cover the rest. After that it's instant for a week.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q5">Do you save my data?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a5">No accounts, no tracking, no email. Liked and disliked picks live in your browser's localStorage — clear them with "Reset my taste" at the bottom. The Letterboxd cache holds anonymized film IDs only, never your username.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q6">Is it really free?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a6">Yes. No paywall, no ads, no upsell. If you want to keep it alive, there's a Ko-fi link at the bottom. That's it.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q7">How are the picks generated?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a7">A short ritual asks about your mood, energy, runtime and risk appetite. Those answers map to TMDb genre filters and a curated list of editor picks. The scorer mixes ratings, mood fit, watchlist overlap and a small surprise factor so you don't get the same six films twice.</p>
+    </details>
+  </div>
+</section>
+
 <footer class="bottom">
   <div class="row">
     <a class="kofi" href="https://ko-fi.com/brmcl" target="_blank" rel="noopener">
@@ -218,7 +261,7 @@
 <script>
   window.MOODWATCH_API = "https://moodwatch-api.brmcl.workers.dev";
 </script>
-<script src="./i18n.js?v=readmore3-20260524"></script>
-<script src="./app.js?v=readmore3-20260524"></script>
+<script src="./i18n.js?v=faq-20260527"></script>
+<script src="./app.js?v=faq-20260527"></script>
 </body>
 </html>
