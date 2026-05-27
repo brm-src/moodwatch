@@ -334,7 +334,7 @@ export const CURATED_TV = [
   { id: 215103  , note: "Poker Face. Rian Johnson + Natasha Lyonne. Howdunit semanal con química perfecta." },
 
 
-  // ── EXTRAS · series del taste de autor (Trakt) ────────────
+  // ── EXTRAS · series del taste del autor (Trakt) ────────────
   { id: 1973    , note: "24. Kiefer Sutherland en tiempo real. Tensión sostenida que define la tele post-9/11. Las primeras 5 temporadas son canon." },
   { id: 48891   , note: "Brooklyn Nine-Nine. Schur entiende que la sitcom workplace funciona cuando el cast se quiere de verdad. Andy Samberg sin sobre-actuar." },
   { id: 4087    , note: "The X-Files. Mulder y Scully inventaron la dinámica creyente/escéptico que copió la TV entera. Episodios MOTW siguen siendo top." },
