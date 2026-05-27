@@ -7,7 +7,7 @@
 <title>moodwatch — a film for tonight</title>
 <meta name="description" content="A small ritual to find a film for tonight. Free, no signup. Optional Letterboxd watchlist.">
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2314160f'/><text x='32' y='44' font-size='40' text-anchor='middle' fill='%23c43b2a' font-family='serif' font-style='italic'>m</text></svg>">
-<link rel="stylesheet" href="./styles.css?v=faq-20260527">
+<link rel="stylesheet" href="./styles.css?v=faq-collapse-20260527">
 </head>
 <body>
 
@@ -199,12 +199,13 @@
   </section>
 </main>
 
-<!-- ─── FAQ (always visible, below the app) ─── -->
-<section class="faq-section">
+<!-- ─── FAQ (collapsed under a single button) ─── -->
+<details class="faq-section" id="faq">
+  <summary class="faq-toggle">
+    <span data-i18n="faq_toggle">Frequently asked questions</span>
+    <span class="faq-toggle-mark">+</span>
+  </summary>
   <div class="faq-inner">
-    <div class="fig"><span data-i18n="faq_label">Questions</span><span class="bar"></span></div>
-    <h2 class="faq-title" data-i18n="faq_title">Everything you <em>need to know.</em></h2>
-
     <details class="faq-item">
       <summary><span data-i18n="faq_q1">How is this different from asking ChatGPT?</span><span class="faq-mark">+</span></summary>
       <p data-i18n="faq_a1">Moodwatch is built around how you feel right now, not a generic prompt. It reads your Letterboxd watchlist, takes mood and runtime into account, and surfaces films from a curated catalogue of 1,500+ titles plus TMDb. ChatGPT doesn't know what you saved, what you've already watched, or where to actually stream it tonight.</p>
@@ -240,7 +241,7 @@
       <p data-i18n="faq_a7">A short ritual asks about your mood, energy, runtime and risk appetite. Those answers map to TMDb genre filters and a curated list of editor picks. The scorer mixes ratings, mood fit, watchlist overlap and a small surprise factor so you don't get the same six films twice.</p>
     </details>
   </div>
-</section>
+</details>
 
 <footer class="bottom">
   <div class="row">
@@ -261,7 +262,7 @@
 <script>
   window.MOODWATCH_API = "https://moodwatch-api.brmcl.workers.dev";
 </script>
-<script src="./i18n.js?v=faq-20260527"></script>
-<script src="./app.js?v=faq-20260527"></script>
+<script src="./i18n.js?v=faq-collapse-20260527"></script>
+<script src="./app.js?v=faq-collapse-20260527"></script>
 </body>
 </html>

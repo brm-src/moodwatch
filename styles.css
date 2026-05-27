@@ -1153,30 +1153,45 @@ footer.bottom small a:hover { color: var(--accent); }
   transform: translateX(-50%) translateY(0);
 }
 
-/* ─── FAQ section ─── */
+/* ─── FAQ (collapsed by default, single button) ─── */
 .faq-section {
   background: var(--paper-2);
   border-top: 1px solid var(--rule);
-  padding: var(--s-5) var(--s-3) var(--s-5);
 }
+.faq-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: var(--t-mono);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding: var(--s-3) var(--s-3);
+  max-width: 760px;
+  margin: 0 auto;
+  transition: color .15s ease;
+}
+.faq-toggle::-webkit-details-marker { display: none; }
+.faq-toggle:hover { color: var(--accent); }
+.faq-toggle-mark {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 1.3rem;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform .2s ease;
+  line-height: 1;
+}
+.faq-section[open] > .faq-toggle .faq-toggle-mark { transform: rotate(45deg); }
 .faq-inner {
   max-width: 760px;
   margin: 0 auto;
-}
-.faq-title {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(2rem, 5vw, 3rem);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  margin: var(--s-2) 0 var(--s-4);
-  color: var(--ink);
-  text-wrap: balance;
-}
-.faq-title em {
-  font-style: italic;
-  font-weight: 400;
-  color: var(--accent);
+  padding: 0 var(--s-3) var(--s-4);
 }
 .faq-item {
   border-top: 1px solid var(--rule);
@@ -1203,7 +1218,7 @@ footer.bottom small a:hover { color: var(--accent); }
 .faq-mark {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   color: var(--accent);
   flex-shrink: 0;
   transition: transform .2s ease;
@@ -1222,7 +1237,29 @@ footer.bottom small a:hover { color: var(--accent); }
   text-wrap: pretty;
 }
 @media (max-width: 480px) {
-  .faq-section { padding: var(--s-4) var(--s-3); }
-  .faq-item summary { font-size: 1.1rem; }
+  .faq-toggle { padding: var(--s-2) var(--s-3); }
+  .faq-item summary { font-size: 1.05rem; }
   .faq-item p { font-size: 1rem; }
+}
+
+/* Letterboxd action button on cards (green LB pill) */
+.action.lb {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+.action.lb:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.action.lb .lb-dots {
+  display: inline-flex;
+  gap: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.action.lb .lb-dots span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
 }

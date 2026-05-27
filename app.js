@@ -1385,6 +1385,14 @@
       a.textContent = window.t("on_tmdb");
       actions.appendChild(a);
     }
+    if (f.id) {
+      const a = document.createElement("a");
+      a.href = `https://letterboxd.com/tmdb/${f.id}/`;
+      a.target = "_blank"; a.rel = "noopener";
+      a.className = "action lb";
+      a.innerHTML = `<span class="lb-dots" aria-hidden="true"><span style="background:#00e054"></span><span style="background:#40bcf4"></span><span style="background:#ff8000"></span></span><span>${window.t("on_letterboxd")}</span>`;
+      actions.appendChild(a);
+    }
     meta.appendChild(actions);
     c.appendChild(meta);
     return c;
