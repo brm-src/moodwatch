@@ -481,17 +481,20 @@ async function recommend(req, env, ctx) {
     const [providers, credits, details] = await Promise.all([
       M.providers(env, f.id, country),
       M.credits(env, f.id),
-      // Force English for the title so Cris sees "Seven Samurai" instead of "Los siete samuráis".
-      // Overview falls back to f.overview (from discover, which uses requested lang).
-      M.details(env, f.id, "en-US"),
+      // Fetch in user lang for overview, but we override title with original_title below.
+      M.details(env, f.id, lang),
     ]);
-    const title = M.titleOf(details) || f.title;
+    // Always show title in its ORIGINAL language: "Sinners" not "Los pecadores",
+    // "기생충" not "Parasite". Falls back to localized/discover title if missing.
+    const originalTitleField = media === "tv" ? details.original_name : details.original_title;
+    const localizedTitle = M.titleOf(details) || f.title;
+    const title = originalTitleField || localizedTitle;
     const date = M.dateOf(details) || f.release_date;
     const runtime = (media === "tv")
       ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
       : (details.runtime || f.runtime || null);
     // Original title (in source language) and English title for non-English films.
-    const originalTitle = media === "tv" ? (details.original_name || null) : (details.original_title || null);
+    const originalTitle = originalTitleField || null;
     const originalLang = details.original_language || f.original_language || null;
     // Country of origin: TV uses origin_country (array of ISO codes), movies use production_countries.
     let originCountry = null;
@@ -665,7 +668,9 @@ async function surprise(req, env, ctx) {
       M.details(env, f.id, lang),
     ]);
     const cur = M.curatedFor(f.id);
-    const title = f.title || M.titleOf(details);
+    // Title in ORIGINAL language (matches main recommend path).
+    const originalTitleField = media === "tv" ? details.original_name : details.original_title;
+    const title = originalTitleField || f.title || M.titleOf(details);
     const date = f.release_date || M.dateOf(details);
     const runtime = media === "tv"
       ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
@@ -766,7 +771,9 @@ async function alt(req, env) {
       const today = new Date().toISOString().slice(0, 10);
       const date = M.dateOf(details);
       if (date && date > today) continue;
-      const title = M.titleOf(details);
+      // Title in ORIGINAL language (matches main recommend path).
+      const originalTitleField = media === "tv" ? details.original_name : details.original_title;
+      const title = originalTitleField || M.titleOf(details);
       const runtime = media === "tv"
         ? (details.episode_run_time && details.episode_run_time[0]) || null
         : (details.runtime || null);
