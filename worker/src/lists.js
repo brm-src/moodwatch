@@ -126,7 +126,7 @@ export const LISTS = [
   // ─── Letterboxd-curated buckets (scraped from public lists, dedup'd) ───
   {
     slug: "lb-sad",
-    name: "SAD (Letterboxd · coopx2)",
+    name: "Sad",
     source: "letterboxd",
     source_url: "https://letterboxd.com/coopx2/list/sad/",
     signature: { memory: ["heartbreak", "regret", "loss"], want: ["moved", "haunted"], depth: ["thoughtful", "ruined"], state: ["pensive", "low"], lately: ["heartbroken", "stuck", "numb"] },
@@ -134,7 +134,7 @@ export const LISTS = [
   },
   {
     slug: "lb-happy",
-    name: "happy (Letterboxd · laurengiblin)",
+    name: "Happy",
     source: "letterboxd",
     source_url: "https://letterboxd.com/laurengiblin/list/happy/",
     signature: { tone: "light", energy: "unwind", want: ["entertained", "soothed"], depth: ["fun", "warm"], lately: ["restored", "buoyant"] },
@@ -142,7 +142,7 @@ export const LISTS = [
   },
   {
     slug: "lb-melancholy",
-    name: "Melancholy (Letterboxd · themoviearchive)",
+    name: "Melancholy",
     source: "letterboxd",
     source_url: "https://letterboxd.com/themoviearchive/list/melancholy/",
     signature: { depth: ["thoughtful", "ruined"], want: ["moved", "haunted"], state: ["pensive", "low"], pace: ["slow", "steady"], temperature: ["cool", "freezing"] },
@@ -150,7 +150,7 @@ export const LISTS = [
   },
   {
     slug: "lb-feel-something",
-    name: "for when you want to feel something (Letterboxd · ellefnning)",
+    name: "For when you want to feel something",
     source: "letterboxd",
     source_url: "https://letterboxd.com/ellefnning/list/for-when-you-want-to-feel-something/",
     signature: { appetite: "feel-deep", want: ["moved", "haunted"], depth: ["thoughtful", "ruined"], intent: ["feel"] },
@@ -158,7 +158,7 @@ export const LISTS = [
   },
   {
     slug: "lb-horror-250",
-    name: "Top 250 Horror (Letterboxd · official)",
+    name: "Top 250 Horror",
     source: "letterboxd",
     source_url: "https://letterboxd.com/official/list/top-250-horror-films/",
     signature: { appetite: "horror", trust: "horror", first_act: "thriller_horror" },
@@ -166,7 +166,7 @@ export const LISTS = [
   },
   {
     slug: "lb-fever-dreams",
-    name: "Psychosexual / fever dreams (Letterboxd · magrosleau)",
+    name: "Psychosexual / fever dreams",
     source: "letterboxd",
     source_url: "https://letterboxd.com/magrosleau/list/psychosexual-dramas-nihilistic-fever-dreams/",
     signature: { appetite: "weird", trust: ["weird", "horror"], depth: ["uneasy", "ruined"], risk: "discover" },
@@ -174,7 +174,7 @@ export const LISTS = [
   },
   {
     slug: "lb-lost-20s",
-    name: "Lost in your 20s (Letterboxd · adaydreaming)",
+    name: "Lost in your 20s",
     source: "letterboxd",
     source_url: "https://letterboxd.com/adaydreaming/list/feeling-lost-in-your-20s/",
     signature: { appetite: "lost-20s", memory: ["regret", "heartbreak"], lately: ["stuck", "numb", "heartbroken"], state: "pensive" },

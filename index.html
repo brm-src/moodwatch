@@ -31,7 +31,7 @@
 <meta name="twitter:image" content="https://brm-src.github.io/moodwatch/assets/og-cover.jpg">
 
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2314160f'/><text x='32' y='44' font-size='40' text-anchor='middle' fill='%23c43b2a' font-family='serif' font-style='italic'>m</text></svg>">
-<link rel="stylesheet" href="./styles.css?v=launch-eve-3">
+<link rel="stylesheet" href="./styles.css?v=qa-pass-20260528">
 </head>
 <body>
 
@@ -130,9 +130,8 @@
   </section>
 
   <!-- ─── quiz ─── -->
-  <section class="step section" data-step="quiz">
+  <section class="step section quiz-step" data-step="quiz">
     <div class="dots" id="dots"></div>
-    <div class="fig" id="q-num"><span></span><span class="bar"></span></div>
     <h2 class="q-title" id="q-title"></h2>
     <div id="q-options"></div>
     <div class="qnav">
@@ -202,13 +201,24 @@
     <div class="fig"><span data-i18n="picks_label">Picks</span><span class="bar"></span></div>
     <h2 class="q-title" id="vibe-title" data-i18n="picks_title">For your <em>mood.</em></h2>
     <div id="why-panel" class="why-panel" hidden></div>
-    <div class="era-chips" id="era-chips" role="group" aria-label="Filter by era">
-      <button type="button" class="era-chip" data-era="now" data-i18n="chip_recent">Recent only</button>
-      <button type="button" class="era-chip is-active" data-era="any" data-i18n="chip_any_era">Any era</button>
+    <div class="era-chips-row">
+      <div class="era-chips" id="era-chips" role="group" aria-label="Filter by era">
+        <button type="button" class="era-chip is-active" data-era="any" data-i18n="chip_any_era">Any era</button>
+        <button type="button" class="era-chip" data-era="now" data-i18n="chip_recent">Recent only</button>
+      </div>
+      <button type="button" class="era-refresh" id="era-refresh" aria-label="Refresh picks"
+              data-i18n-attr="title:reroll" title="Refresh picks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="21 4 21 10 15 10"/>
+          <path d="M3.5 13a8.5 8.5 0 0 0 14.9 4.5L21 14"/>
+          <polyline points="3 20 3 14 9 14"/>
+          <path d="M20.5 11a8.5 8.5 0 0 0-14.9-4.5L3 10"/>
+        </svg>
+        <span data-i18n="reroll_short">Refresh</span>
+      </button>
     </div>
     <div id="cards"></div>
     <div class="results-actions">
-      <button class="pill" id="reroll" data-i18n="reroll">Show 4 more</button>
       <button class="restart" id="restart" data-i18n="restart">Start over</button>
     </div>
   </section>
@@ -269,6 +279,11 @@
       <summary><span data-i18n="faq_q8">OK, how does the algorithm actually work?</span><span class="faq-mark">+</span></summary>
       <p data-i18n="faq_a8">Technical breakdown of the pipeline.</p>
     </details>
+
+    <details class="faq-item">
+      <summary><span data-i18n="faq_q9">Is the psychoanalysis serious?</span><span class="faq-mark">+</span></summary>
+      <p data-i18n="faq_a9">It's a game.</p>
+    </details>
     </div>
   </div>
 </dialog>
@@ -293,7 +308,7 @@
 <script>
   window.MOODWATCH_API = "https://moodwatch-api.brmcl.workers.dev";
 </script>
-<script src="./i18n.js?v=launch-eve-5"></script>
-<script src="./app.js?v=fetch-retry-20260528"></script>
+<script src="./i18n.js?v=qa-pass-20260528"></script>
+<script src="./app.js?v=qa-pass-20260528"></script>
 </body>
 </html>

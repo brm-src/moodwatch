@@ -856,49 +856,113 @@
     const ES = lang === "es";
     const sentences = [];
 
-    // ── Sentence 1: where they're standing right now (state + depth + intent)
+    // ── Sentence 1: where they're standing right now (state × depth)
+    //    Slightly longer, interpretive — should read as a diagnosis, not a tag.
     const opener = (() => {
       if (a.state === "drained" && a.depth === "warm") {
-        return ES ? "Llegas cansado y necesitas que algo te abrace, no que te exija."
-                  : "You're arriving tired and you need something to hold you, not demand from you.";
+        return ES ? "Llegas con la batería baja y algo dentro tuyo pide una mano tendida, no un desafío. Hoy vienes a recostarte, no a demostrar nada."
+                  : "You're arriving low on fuel, and something in you is asking for a hand to hold, not a test. Tonight you came to lean back, not to prove anything.";
       }
       if (a.state === "drained" && a.depth === "ruined") {
-        return ES ? "Vienes con poca energía pero quieres que algo te toque hondo, aunque te deje peor."
-                  : "You come in with low energy but you want something to land deep, even if it leaves you worse.";
+        return ES ? "Vienes sin energía pero con un hambre que el descanso no calma. Quieres que algo te toque hondo, aunque te deje peor: no buscas alivio, buscas confirmación."
+                  : "You arrive empty but hungry in a way rest can't fix. You want something that lands deep, even if it leaves you worse — you're not after relief, you're after confirmation.";
+      }
+      if (a.state === "drained" && a.depth === "thoughtful") {
+        return ES ? "Llegas cansado pero con la cabeza encendida. Hoy la película tiene que pensar contigo, sostenerte el pensamiento sin pedirte que cargues con ella."
+                  : "You're tired but your head is still on. Tonight the film has to think with you, hold the thought without making you carry it.";
       }
       if (a.state === "drained") {
-        return ES ? "Llegas sin batería, así que la cosa tiene que sostenerse sola sin pedirte demasiado."
-                  : "You're running on empty, so this needs to carry itself without asking much from you.";
+        return ES ? "Vienes con la cuerda corta. Lo que veas tiene que sostenerse solo, sin pedirte casi nada a cambio."
+                  : "You're running on a short rope. Whatever you watch has to carry itself, with almost nothing asked of you.";
       }
       if (a.state === "restless" && a.depth === "ruined") {
-        return ES ? "Estás inquieto y buscas algo que te golpee de verdad, no algo que te entretenga."
-                  : "You're restless and you're after something that actually hits, not something that just entertains.";
+        return ES ? "Estás inquieto y ya pasaste la línea de los pasatiempos. Buscas algo que golpee, no algo que entretenga: quieres salir distinto a como entraste."
+                  : "You're restless and you've already crossed the line of pastimes. You're after something that hits, not something that entertains — you want to walk out different from how you walked in.";
+      }
+      if (a.state === "restless" && a.depth === "uneasy") {
+        return ES ? "Hay algo agitado adentro que todavía no encuentra forma. Vienes a que una imagen lo nombre por ti, aunque sea por un rato."
+                  : "Something agitated inside you hasn't found a shape yet. You came so that an image could name it for you, even for a little while.";
       }
       if (a.state === "restless") {
-        return ES ? "Estás inquieto: necesitas movimiento, tensión, algo que no te deje quieto."
-                  : "You're restless: you need movement, tension, something that won't let you sit still.";
+        return ES ? "Vienes inquieto: la quietud no te alcanza. Necesitas movimiento, presión, algo que no te deje sentarte del todo."
+                  : "You arrive restless: stillness isn't enough. You need movement, pressure, something that won't quite let you sit down.";
       }
       if (a.state === "pensive" && a.depth === "thoughtful") {
-        return ES ? "Vienes pensando y quieres algo que acompañe ese pensamiento, no que lo interrumpa."
-                  : "You're already thinking, and you want something that walks alongside that, not something that breaks it.";
+        return ES ? "Llegas pensando, y ese pensamiento no quiere que lo interrumpan. Quieres una película que camine al lado, no una que te tape la voz."
+                  : "You arrive already thinking, and that thought doesn't want to be interrupted. You want a film that walks beside you, not one that talks over you.";
+      }
+      if (a.state === "pensive" && a.depth === "ruined") {
+        return ES ? "Llegas en modo reflexivo pero con un fondo que no termina de decantar. Hay algo que quieres mover, y necesitas la película para destrabarlo."
+                  : "You arrive reflective but something underneath hasn't settled. There's something you want to move, and you need the film to unstick it.";
       }
       if (a.state === "pensive") {
-        return ES ? "Vienes en modo reflexivo: hay espacio para que la película respire."
-                  : "You're in a reflective mood: there's room for the film to breathe.";
+        return ES ? "Llegas en modo reflexivo, con espacio para que la película respire. No tienes apuro: quieres que la imagen elija el tiempo."
+                  : "You arrive reflective, with room for the film to breathe. You're in no hurry — you want the image to set the pace.";
       }
       if (a.depth === "fun") {
-        return ES ? "Buscas algo liviano: nada de pesadez, nada de doblez."
-                  : "You want something light: no heaviness, no double meaning.";
+        return ES ? "Hoy vienes liviano. Nada de pesadez, nada de doblez: la noche pide algo que se quede en la superficie y haga su trabajo bien."
+                  : "Tonight you come light. Nothing heavy, nothing layered — the night calls for something that stays on the surface and does its job well.";
       }
       if (a.depth === "ruined") {
-        return ES ? "Estás listo para algo que duela. Quieres salir distinto a como entraste."
-                  : "You're ready for something that hurts. You want to walk out different from how you walked in.";
+        return ES ? "Estás listo para algo que duela. Quieres salir distinto a como entraste, y ya hiciste las paces con eso."
+                  : "You're ready for something that hurts. You want to walk out different from how you walked in, and you've already made peace with that.";
+      }
+      if (a.depth === "warm") {
+        return ES ? "Vienes con ganas de que algo te abrace. Que la imagen sea cálida, que la voz se acerque, que nadie te pida demostrar nada."
+                  : "You came wanting something to wrap around you. A warm image, a voice that comes close, no one asking you to prove anything.";
       }
       return "";
     })();
     if (opener) sentences.push(opener);
 
-    // ── Sentence 2: texture — pace, runtime, sound, door, ending
+    // ── Sentence 2: what you're moving TOWARD (tone × door × energy)
+    //    Reads as a psychological direction. Less list, more interpretation.
+    const direction = (() => {
+      if (a.tone === "dark" && a.door === "mystery") {
+        return ES ? "Lo que persigues está más cerca de la pregunta que de la respuesta: una imagen que no se cierre del todo, que te deje un cabo suelto en la mano."
+                  : "What you're chasing is closer to the question than the answer: an image that won't quite close, that leaves a loose thread in your hand.";
+      }
+      if (a.tone === "dark" && a.door === "intensity") {
+        return ES ? "Vas a buscar la corriente, no la orilla. La intensidad es la única forma que te suena honesta esta noche."
+                  : "You're heading for the current, not the shore. Intensity is the only register that sounds honest to you tonight.";
+      }
+      if (a.tone === "dark" && a.door === "intimacy") {
+        return ES ? "Quieres bajar la voz, no apagarla. Algo cercano, en sombra, que no necesite hacer ruido para existir."
+                  : "You want to lower the voice, not turn it off. Something close, in shadow, that doesn't need to make noise to exist.";
+      }
+      if (a.tone === "light" && a.door === "fantasy") {
+        return ES ? "Te tira lo que se desprende de lo real. Una lógica que no se compromete a ser verosímil, una habitación con la puerta abierta a otro lado."
+                  : "You're drawn to what unhooks from the real. A logic that won't promise to be plausible, a room with a door open to somewhere else.";
+      }
+      if (a.tone === "light" && a.door === "intimacy") {
+        return ES ? "Pides cercanía, no espectáculo. Cámara cerca, voces bajas, lo que importa cabe en una mesa."
+                  : "You're asking for closeness, not spectacle. Camera close, voices low — what matters fits on a table.";
+      }
+      if (a.tone === "light" && a.door === "mystery") {
+        return ES ? "Buscas preguntas suaves, sin garra. Algo que se quede dando vueltas pero que no llegue a lastimarte."
+                  : "You're after soft questions, no claws. Something that lingers but doesn't quite cut.";
+      }
+      if (a.tone === "dark" && a.energy === "engage") {
+        return ES ? "Estás dispuesto a entrar. Si la película te pide algo, lo vas a entregar; tienes paciencia para el descenso."
+                  : "You're willing to step in. If the film asks something of you, you'll give it — you have patience for the descent.";
+      }
+      if (a.tone === "light" && a.energy === "unwind") {
+        return ES ? "Vienes a soltar, no a apretar. Que la película respire por ti un rato, sin que tengas que poner el hombro."
+                  : "You came to let go, not to grip. Let the film breathe on your behalf for a while; no shoulder required.";
+      }
+      if (a.door === "fantasy") {
+        return ES ? "Te llama lo que se aleja de lo real, donde la lógica del sueño manda y nadie pide explicaciones."
+                  : "You're drawn to what drifts from the real, where dream logic rules and no one demands explanations.";
+      }
+      if (a.tone === "dark") {
+        return ES ? "Buscas algo que diga lo que tú no estás diciendo, aunque sea en un idioma que tampoco sabes hablar entero."
+                  : "You're looking for something to say what you aren't saying, even if it speaks a language you don't quite know either.";
+      }
+      return "";
+    })();
+    if (direction) sentences.push(direction);
+
+    // ── Sentence 3: texture — pace, runtime, sound, weather, ending, aftertaste
     const tex = [];
     if (a.runtime === "short" || a.appetite === "snack") {
       tex.push(ES ? "algo corto, que no se enrede" : "something short, no detours");
@@ -909,10 +973,6 @@
     if (a.pace === "fast") tex.push(ES ? "ritmo nervioso" : "nervous pace");
     if (a.sound === "silence") tex.push(ES ? "silencios largos" : "long silences");
     if (a.sound === "music")   tex.push(ES ? "música que pesa" : "music that carries weight");
-    if (a.door === "mystery")  tex.push(ES ? "una puerta que no termina de cerrar" : "a door that won't quite close");
-    if (a.door === "intimacy") tex.push(ES ? "la cámara cerca de la cara" : "the camera close to the face");
-    if (a.door === "intensity")tex.push(ES ? "tensión en cada plano" : "tension in every shot");
-    if (a.door === "fantasy")  tex.push(ES ? "una lógica de sueño" : "a dream logic");
     if (a.weather === "rain")  tex.push(ES ? "lluvia de fondo" : "rain in the background");
     if (a.weather === "fog")   tex.push(ES ? "niebla, contornos blandos" : "fog, soft edges");
     if (a.weather === "winter")tex.push(ES ? "frío en la imagen" : "cold in the image");
@@ -926,23 +986,26 @@
       tex.push(ES ? "algo que se quede pegado después" : "something that stays with you after");
     }
     if (tex.length) {
-      const pick = tex.slice(0, 3).join(ES ? ", " : ", ");
-      sentences.push(ES ? `Te calza: ${pick}.` : `What fits: ${pick}.`);
+      const pick = tex.slice(0, 3).join(", ");
+      sentences.push(ES ? `La forma que pides es esta: ${pick}.`
+                        : `The shape you're asking for is this: ${pick}.`);
     }
 
-    // ── Sentence 3: what they're avoiding (only if explicit)
+    // ── Sentence 4: what they're avoiding (only if explicit)
     if (a.avoid === "slow") {
-      sentences.push(ES ? "Nada de tedio ni autoindulgencia."
-                        : "Nothing tedious, nothing self-indulgent.");
+      sentences.push(ES ? "Y dejas afuera el tedio: nada de autoindulgencia esta vez."
+                        : "And you're leaving tedium out: no self-indulgence this time.");
     } else if (a.avoid === "violence") {
-      sentences.push(ES ? "Sin violencia gratuita."
-                        : "No gratuitous violence.");
+      sentences.push(ES ? "Y dejas afuera la violencia gratuita: hay otras formas de que algo duela."
+                        : "And you're leaving gratuitous violence out: there are other ways for something to hurt.");
     } else if (a.avoid === "sad") {
-      sentences.push(ES ? "Hoy no toca ponerse triste."
-                        : "Not in the mood to feel sad tonight.");
+      sentences.push(ES ? "Y dejas afuera la tristeza: hoy no toca cargar con eso."
+                        : "And you're leaving sadness out: not the night to carry that.");
     }
 
-    // ── Sentence 4: ink blot reading (always last — it's the climax of the ritual)
+    // ── Sentence 5: ink blot reading — the climax. Always last.
+    //    The procedural blot the user picked is read as a closing diagnosis,
+    //    framed as the subconscious confirming what the answers already said.
     const inkLine = inkReading(a.ink, ES);
     if (inkLine) sentences.push(inkLine);
 
@@ -1121,8 +1184,6 @@
 
   function renderQuestion() {
     const q = QUIZ[state.qIdx];
-    $("#q-num").firstElementChild.textContent =
-      window.t("q_num").replace("{n}", String(state.qIdx + 1)).replace("{tot}", String(QUIZ.length));
     $("#q-title").innerHTML = window.t(q.titleKey);
     opts.innerHTML = "";
     opts.className = `q-body kind-${q.kind}`;
@@ -1394,8 +1455,28 @@
         }
       });
     }
+    // Wire refresh button (replaces the old "Show 4 more" pill).
+    const refreshBtn = document.getElementById("era-refresh");
+    if (refreshBtn && !refreshBtn.dataset.bound) {
+      refreshBtn.dataset.bound = "1";
+      refreshBtn.addEventListener("click", () => {
+        refreshBtn.classList.remove("spinning");
+        // force reflow so the animation restarts on each click
+        void refreshBtn.offsetWidth;
+        refreshBtn.classList.add("spinning");
+        if (state.lastMode === "surprise") {
+          surpriseFlow({ exclude: state.shownIds || [], profile: state.surpriseProfile });
+        } else {
+          recommend({ withUser: state.lastWithUser, exclude: state.shownIds || [] });
+        }
+      });
+    }
     // Hide chips on surprise mode (no quiz, era doesn't apply the same way).
-    if (chipsEl) chipsEl.style.display = state.lastMode === "surprise" ? "none" : "";
+    const eraRow = document.querySelector(".era-chips-row");
+    if (eraRow) {
+      // Refresh button stays available in surprise; only the era chips themselves hide.
+      if (chipsEl) chipsEl.style.display = state.lastMode === "surprise" ? "none" : "";
+    }
     const reading = vibeReading(state.answers, window.LANG);
     const moodLine = reading || data?.why?.headline || "";
     renderWhy(data, moodLine);
@@ -1699,6 +1780,10 @@
         img.onload = () => {
           hero.style.backgroundImage =
             `linear-gradient(180deg, rgba(20,22,15,0.4) 0%, rgba(20,22,15,0.65) 60%, rgba(20,22,15,0.85) 100%), url("${pick.file}")`;
+          // Also expose the same file for the rest of the journey (quiz/loading/results)
+          // so the page never falls onto a flat bone-white background.
+          document.documentElement.style.setProperty("--journey-hero", `url("${pick.file}")`);
+          document.body.classList.add("has-journey-hero");
         };
         img.src = pick.file;
       }
@@ -1810,7 +1895,7 @@
       const inp = $("#user"); if (inp) { inp.value = ""; }
       show("intro");
     });
-    $("#reroll").addEventListener("click", () => {
+    $("#reroll")?.addEventListener("click", () => {
       if (state.path === "surprise") {
         surpriseFlow({ exclude: state.shownIds || [], profile: state.surpriseProfile });
       } else {
