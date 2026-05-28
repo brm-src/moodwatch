@@ -260,7 +260,7 @@ const STRINGS = {
     q_intent_company: "Warmth. Like someone sitting next to me.",
 
     q_depth_t: "How <em>much depth can you handle?</em>",
-    q_depth_fun:        "Light, but not stupid.",
+    q_depth_fun:        "Light, with a brain.",
     q_depth_warm:       "Human emotion, no cheap shots.",
     q_depth_thoughtful: "Leaves questions, not lectures.",
     q_depth_uneasy:     "Fine discomfort, the kind that stays under the skin.",
@@ -621,6 +621,8 @@ const STRINGS = {
     q_fear_any: "Nothing major. I’m flexible.",
     q_risktaste_any: "No risk preference.",
 
+    q_door_any: "Open. Surprise me with the door.",
+
   },
 
   es: {
@@ -883,7 +885,7 @@ const STRINGS = {
     q_intent_company: "Calor. Como alguien sentado al lado.",
 
     q_depth_t: "¿Cuánta <em>profundidad toleras hoy?</em>",
-    q_depth_fun:        "Ligera, pero no tonta.",
+    q_depth_fun:        "Ligera, con cabeza.",
     q_depth_warm:       "Emoción humana sin golpe bajo.",
     q_depth_thoughtful: "Que deje preguntas, no discursos.",
     q_depth_uneasy:     "Incomodidad fina, de la que queda bajo la piel.",
@@ -1242,6 +1244,8 @@ const STRINGS = {
     q_trust_any: "No necesito una zona segura.",
     q_fear_any: "Nada grave. Estoy flexible.",
     q_risktaste_any: "Sin preferencia de riesgo.",
+
+    q_door_any: "Abierto. Sorpréndeme con la puerta.",
 
   },
 };

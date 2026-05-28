@@ -256,6 +256,7 @@
         { value: "mystery",   labelKey: "q_door_mystery",   svg: "door-old" },
         { value: "fantasy",   labelKey: "q_door_fantasy",   svg: "door-sky" },
         { value: "intimacy",  labelKey: "q_door_intimacy",  svg: "door-warm" },
+        { value: "any", labelKey: "q_door_any" },
       ],
     },
     scene: {
