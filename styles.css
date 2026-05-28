@@ -280,6 +280,14 @@ header.top {
   transition: transform .35s ease, color .15s ease, border-color .15s ease;
   display: inline-flex; align-items: center; justify-content: center;
   line-height: 1;
+  position: relative;
+}
+/* Larger invisible hit area for touch (WCAG AA) */
+.shuffle::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
 }
 .shuffle:hover { color: var(--accent); border-color: var(--accent); }
 .shuffle.spinning { transform: rotate(360deg); }
@@ -425,6 +433,14 @@ header.top {
   flex: 0 0 22px;
   align-self: center;
   transition: color .15s, border-color .15s, background .15s;
+  position: relative;
+}
+/* Larger invisible hit area for touch (WCAG AA: 44x44 min) */
+.lb-info-btn::after {
+  content: "";
+  position: absolute;
+  inset: -11px;
+  border-radius: 50%;
 }
 .lb-info-btn:hover, .lb-info-btn[aria-expanded="true"] {
   color: var(--accent);
