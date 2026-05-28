@@ -33,11 +33,11 @@ export async function tmdbDiscoverTV(env, params, language, opts = {}) {
 }
 
 export async function tmdbDetails(env, id, language) {
-  return tmdbFetch(env, `/movie/${id}`, { language });
+  return tmdbFetch(env, `/movie/${id}`, { language, append_to_response: "external_ids" });
 }
 
 export async function tmdbDetailsTV(env, id, language) {
-  return tmdbFetch(env, `/tv/${id}`, { language });
+  return tmdbFetch(env, `/tv/${id}`, { language, append_to_response: "external_ids" });
 }
 
 export async function tmdbProviders(env, id, country) {

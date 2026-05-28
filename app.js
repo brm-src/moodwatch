@@ -1385,6 +1385,13 @@
       a.textContent = window.t("on_tmdb");
       actions.appendChild(a);
     }
+    if (f.imdb) {
+      const a = document.createElement("a");
+      a.href = f.imdb; a.target = "_blank"; a.rel = "noopener";
+      a.className = "action";
+      a.textContent = window.t("on_imdb");
+      actions.appendChild(a);
+    }
     if (f.id) {
       const a = document.createElement("a");
       a.href = `https://letterboxd.com/tmdb/${f.id}/`;

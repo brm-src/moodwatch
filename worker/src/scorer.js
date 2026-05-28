@@ -54,6 +54,15 @@ export function fitScore(film, mood = {}) {
     else if (year < 1980) s -= 1.8;
   }
 
+  // Recency preference: prioritize 2010+ unless mood explicitly wants vintage/prestige.
+  // Smaller bumps for 2000s and 90s so they're not totally buried.
+  if (year && !wantsOld) {
+    if (year >= 2015)      s += 1.4;
+    else if (year >= 2010) s += 1.0;
+    else if (year >= 2000) s += 0.4;
+    else if (year >= 1990) s += 0.1;
+  }
+
   // Popularity floor — penalize items with too few votes (untested by audience).
   // KinnPorsche / Weak Hero / nicho-only get pushed down. Curated, list-matched, and
   // IMDB-tier picks are exempt (they're vetted by hand or by global popularity).
