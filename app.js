@@ -490,8 +490,15 @@
     const fragments = Math.random() < 0.55;
     const spatter   = Math.random() < 0.85;
 
+    // Density signals — populated as we generate so the caller can read
+    // a real psychological reading of the blot, not just the seed mood.
+    let densityScore = 0;  // 0..~50, drives depth signal
+    let chaos = 0;          // 0..~10, drives trust:weird + risk:discover
+
     // 1–3 main blobs of different sizes/positions
     const nBlobs = 1 + Math.floor(Math.random() * 3);
+    densityScore += nBlobs * 2;
+    if (!symmetry) chaos += 4;
     let blobs = "";
     for (let b = 0; b < nBlobs; b++) {
       const cy = rand(60, H - 60);
@@ -508,6 +515,8 @@
     let frags = "";
     if (fragments) {
       const nFrag = 2 + Math.floor(Math.random() * 5);
+      densityScore += nFrag;
+      chaos += nFrag * 0.5;
       for (let i = 0; i < nFrag; i++) {
         const cy = rand(40, H - 40);
         const r = rand(4, 14);
@@ -526,6 +535,8 @@
     let dots = "";
     if (spatter) {
       const nDot = 8 + Math.floor(Math.random() * 30);
+      densityScore += nDot * 0.3;
+      chaos += nDot * 0.1;
       for (let i = 0; i < nDot; i++) {
         const xOff = rand(2, 90);
         const y = rand(20, H - 20);
@@ -545,8 +556,14 @@
     const inkColors = ["#ede7da","#ede7da","#ede7da","#e8d8b8","#dce4d8","#e6dbc4"];
     const fill = pick(inkColors);
 
+    // Derived signals — clamped categories for the scorer
+    const dense    = densityScore > 18;
+    const sparse   = densityScore < 8;
+    const chaotic  = chaos > 6;
+    const broken   = !symmetry;
+
     return {
-      mood: seedMood,
+      mood: { ...seedMood, dense, sparse, chaotic, broken, symmetry, fragments, spatter },
       svg: `
         <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
@@ -757,13 +774,29 @@
     if (a.body === "soft")   { m.energy = m.energy || "unwind"; m.tone = m.tone || "light"; }
     if (a.body === "buzzed") { m.energy = m.energy || "engage"; m.risk = m.risk || "discover"; }
 
-    // ink — kept for visual climax
+    // ink — closing ritual signal. The Rorschach has the last word
+    // on tone, and contributes depth/risk based on the chosen blot's
+    // procedural density and symmetry.
     if (a.ink) {
       try {
         const blot = JSON.parse(a.ink);
-        if (blot.tone)   m.tone = m.tone || blot.tone;
+        // tone: ink overrides because it's the closing decision
+        if (blot.tone)   m.tone = blot.tone;
         if (blot.energy) m.energy = m.energy || blot.energy;
         if (blot.door && !m.tone) m.tone = blot.door === "fantasy" || blot.door === "intimacy" ? "light" : "dark";
+        // dense + dark blot → uneasy depth
+        if (blot.dense && blot.tone === "dark")  m.depth = m.depth || "uneasy";
+        // sparse + light blot → warm depth
+        if (blot.sparse && blot.tone === "light") m.depth = m.depth || "warm";
+        // chaotic or asymmetric → discover risk + weird trust
+        if (blot.chaotic || blot.broken) {
+          m.risk  = m.risk  || "discover";
+          m.trust = m.trust || "weird";
+        }
+        // perfectly symmetric + spare → safe risk
+        if (blot.symmetry && blot.sparse && !blot.chaotic) {
+          m.risk = m.risk || "safe";
+        }
       } catch {}
     }
 
