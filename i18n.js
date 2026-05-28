@@ -163,7 +163,7 @@ const STRINGS = {
     q_state_pensive:  "Heavy. Ruminating.",
     q_state_good:     "Good. Up for whatever.",
 
-    q_appetite_t: "What are you <em>in the mood for?</em>",
+    q_appetite_t: "What are you <em>in the mood for {time}?</em>",
     q_appetite_feel:           "Something that makes me feel.",
     q_appetite_horror:         "Horror.",
     q_appetite_weird:          "Something strange. Fever-dream.",
@@ -709,7 +709,7 @@ const STRINGS = {
     q_state_pensive:  "Con pesadez, rumiando mis pensamientos.",
     q_state_good:     "Bien. Con disposición a lo que sea.",
 
-    q_appetite_t: "¿Qué te <em>provoca esta noche?</em>",
+    q_appetite_t: "¿Qué te <em>provoca {time}?</em>",
     q_appetite_feel:           "Algo que me haga sentir.",
     q_appetite_horror:         "Terror.",
     q_appetite_weird:          "Algo raro. Sueño febril.",
@@ -1100,7 +1100,31 @@ function detectLang() {
 const LANG = detectLang();
 const T = STRINGS[LANG];
 window.LANG = LANG;
-window.t = (key) => (T[key] !== undefined ? T[key] : (STRINGS.en[key] !== undefined ? STRINGS.en[key] : key));
+
+// Time-of-day phrase based on local hour. Used to interpolate {time}
+// in question titles so the quiz doesn't always say "esta noche".
+function timePhrase(lang) {
+  const h = new Date().getHours();
+  if (lang === "es") {
+    if (h >= 5  && h < 12) return "esta mañana";
+    if (h >= 12 && h < 18) return "esta tarde";
+    if (h >= 18 && h < 23) return "esta noche";
+    return "a esta hora";
+  }
+  if (h >= 5  && h < 12) return "this morning";
+  if (h >= 12 && h < 18) return "this afternoon";
+  if (h >= 18 && h < 23) return "tonight";
+  return "right now";
+}
+window.timePhrase = timePhrase;
+
+window.t = (key) => {
+  let v = (T[key] !== undefined ? T[key] : (STRINGS.en[key] !== undefined ? STRINGS.en[key] : key));
+  if (typeof v === "string" && v.indexOf("{time}") !== -1) {
+    v = v.split("{time}").join(timePhrase(LANG));
+  }
+  return v;
+};
 document.documentElement.lang = LANG;
 
 document.addEventListener("DOMContentLoaded", () => {
