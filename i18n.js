@@ -1257,10 +1257,22 @@ const STRINGS = {
 };
 
 function detectLang() {
+  // 1. URL param wins (so hreflang links and explicit picks work)
+  try {
+    const q = new URLSearchParams(location.search).get("lang");
+    if (q === "es" || q === "en") return q;
+  } catch {}
+  // 2. localStorage from previous visit
+  try {
+    const stored = localStorage.getItem("mw_lang");
+    if (stored === "es" || stored === "en") return stored;
+  } catch {}
+  // 3. browser preference
   const raw = (navigator.language || "en").toLowerCase();
   return raw.startsWith("es") ? "es" : "en";
 }
 const LANG = detectLang();
+try { localStorage.setItem("mw_lang", LANG); } catch {}
 const T = STRINGS[LANG];
 window.LANG = LANG;
 
