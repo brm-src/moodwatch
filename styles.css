@@ -908,6 +908,19 @@ header.top {
 .card a.action:hover { background: var(--ink); color: var(--paper); }
 .card a.action.primary { background: var(--ink); color: var(--paper); }
 .card a.action.primary:hover { background: var(--accent); border-color: var(--accent); }
+/* Hidden but kept in DOM (per request: hide for now, don't delete). */
+.card a.action.action-imdb-hidden { display: none; }
+/* Title links to IMDb/TMDb — keep title styling but hint it's clickable. */
+.card h3 a.title-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed transparent;
+  transition: color .15s ease, border-color .15s ease;
+}
+.card h3 a.title-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
 
 .restart {
   margin-top: var(--s-5);

@@ -1358,9 +1358,14 @@
       countryLabel(f.country),
       (f.genres || []).slice(0, 2).join(" · "),
     ].filter(Boolean);
+    // Title links to IMDb (preferred) or TMDb as fallback. Replaces the old "Detalles" button.
+    const titleHref = f.imdb || f.tmdb || null;
+    const titleHtml = titleHref
+      ? `<a href="${escapeHtml(titleHref)}" target="_blank" rel="noopener" class="title-link">${escapeHtml(f.title || "")}</a>`
+      : escapeHtml(f.title || "");
     meta.innerHTML = `
       <span class="card-rank">${window.t("pick_n").replace("{n}", String(rank).padStart(2, "0"))}</span>
-      <h3>${escapeHtml(f.title || "")} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
+      <h3>${titleHtml} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
       ${showOriginal ? `<div class="alt-title">${escapeHtml(f.original_title)}</div>` : ""}
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
       <div class="specs">${specsParts.join(" — ")}</div>
@@ -1378,17 +1383,12 @@
       a.textContent = window.t("where_to_watch");
       actions.appendChild(a);
     }
-    if (f.tmdb) {
-      const a = document.createElement("a");
-      a.href = f.tmdb; a.target = "_blank"; a.rel = "noopener";
-      a.className = "action";
-      a.textContent = window.t("on_tmdb");
-      actions.appendChild(a);
-    }
+    // "Detalles" (TMDb) button removed — the film title now links to IMDb/TMDb.
+    // "Ver" (IMDb) button is hidden via CSS for now (kept in code, set display:none).
     if (f.imdb) {
       const a = document.createElement("a");
       a.href = f.imdb; a.target = "_blank"; a.rel = "noopener";
-      a.className = "action";
+      a.className = "action action-imdb-hidden";
       a.textContent = window.t("on_imdb");
       actions.appendChild(a);
     }
