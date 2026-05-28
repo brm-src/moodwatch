@@ -33,6 +33,7 @@
     },
     flavor: {
       key: "appetite", kind: "real", titleKey: "q_flavor_t",
+      randomize: 6,
       options: [
         { value: "girly",         labelKey: "q_flavor_girly" },
         { value: "queer",         labelKey: "q_flavor_queer" },
@@ -742,6 +743,25 @@
     if (a.appetite === "horror")    { m.tone = "dark"; m.trust = "horror"; m.first_act = m.first_act || "thriller_horror"; }
     if (a.appetite === "weird")     { m.tone = "dark"; m.trust = "weird"; m.risk = "discover"; }
     if (a.appetite === "lost-20s")  { m.depth = m.depth || "thoughtful"; m.tone = m.tone || "dark"; }
+    // New flavor mappings (added when expanding the flavor pool from 9 → 19 options).
+    if (a.appetite === "girly")        { m.tone = m.tone || "light"; m.depth = m.depth || "warm"; m.first_act = m.first_act || "drama_romance"; }
+    if (a.appetite === "queer")        { m.depth = m.depth || "thoughtful"; }
+    if (a.appetite === "a24")          { m.quality = "high"; m.popularity = m.popularity || "mid"; m.risk = m.risk || "discover"; }
+    if (a.appetite === "reality")      { m.trust = m.trust || "weird"; m.depth = m.depth || "thoughtful"; }
+    if (a.appetite === "wtf")          { m.trust = "weird"; m.risk = "discover"; m.energy = "engage"; }
+    if (a.appetite === "vintage_love") { m.first_act = m.first_act || "drama_romance"; m.tone = m.tone || "light"; m.decade = m.decade || "old"; }
+    if (a.appetite === "underseen")    { m.popularity = "low"; m.risk = "discover"; }
+    if (a.appetite === "prestige")     { m.quality = "high"; m.popularity = m.popularity || "high"; }
+    if (a.appetite === "catharsis")    { m.energy = "engage"; m.depth = m.depth || "uneasy"; m.tone = m.tone || "dark"; }
+    if (a.appetite === "anthropocene") { m.trust = m.trust || "doc"; m.depth = m.depth || "thoughtful"; }
+    if (a.appetite === "doc")          { m.trust = "doc"; m.depth = m.depth || "thoughtful"; }
+    if (a.appetite === "anime")        { m.trust = "animation"; }
+    if (a.appetite === "blind_watch")  { m.risk = "discover"; m.popularity = m.popularity || "low"; }
+    if (a.appetite === "sleepover")    { m.tone = "light"; m.energy = "unwind"; m.depth = "fun"; m.company = m.company || "shared"; }
+    if (a.appetite === "good_for_her") { m.tone = "dark"; m.depth = m.depth || "uneasy"; m.energy = m.energy || "engage"; }
+    if (a.appetite === "hidden_gem")   { m.popularity = "low"; m.quality = "high"; m.risk = "discover"; }
+    if (a.appetite === "silent")       { m.decade = m.decade || "old"; }
+    if (a.appetite === "romcom")       { m.tone = "light"; m.first_act = "drama_romance"; m.depth = m.depth || "warm"; }
     if (a.scene === "survival" || a.scene === "discovery") m.energy = "engage";
     if (a.scene === "dialogue" || a.scene === "house")     m.company = m.company || "alone";
     if (a.intent === "escape")  { m.energy = "unwind"; m.tone = m.tone || "light"; }
