@@ -415,13 +415,13 @@ async function recommend(req, env, ctx) {
     return "anglo"; // en, default
   };
 
-  // Build top 6 with interleaving so editor picks don't always lead.
-  // Memphis feedback: "los editor picks no al inicio, mezcladas".
+  // Build a pool of 6 candidates with interleaving so editor picks don't
+  // always lead. Memphis feedback: "los editor picks no al inicio, mezcladas".
   // Recipe: 1 wildcard (low-pop, surprise) + 1-2 editor + 3-4 normal,
-  // then shuffle their order in the final 6.
+  // then shuffle their order. Final response trims to 4 picks (slice below).
   const top = [];
   const regionCount = new Map();
-  const REGION_CAP = 2; // max picks per region in final top
+  const REGION_CAP = 2; // max picks per region in the candidate pool, except "anglo" (English-language is exempt)
   const skipRegionCap = mood.language_pref === "asian" || mood.language_pref === "spanish";
   const pushUnique = (items, max, capByRegion = !skipRegionCap) => {
     for (const item of items) {
@@ -429,7 +429,8 @@ async function recommend(req, env, ctx) {
       if (top.some(x => x.id === item.id)) continue;
       if (capByRegion) {
         const r = regionOf(item);
-        if ((regionCount.get(r) || 0) >= REGION_CAP) continue;
+        // English-language films are exempt from the cap.
+        if (r !== "anglo" && (regionCount.get(r) || 0) >= REGION_CAP) continue;
         regionCount.set(r, (regionCount.get(r) || 0) + 1);
       }
       top.push(item);
