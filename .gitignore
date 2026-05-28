@@ -23,3 +23,4 @@ enrich_cache.json
 node_modules/
 .netlify/
 scripts/out/*.log
+.qa-reports/

@@ -1623,7 +1623,7 @@
     });
     $("#retry").addEventListener("click", () => recommend({ withUser: state.path === "lb" }));
     $("#clear-taste")?.addEventListener("click", () => {
-      if (confirm(window.LANG === "es" ? "¿Borrar tu historial de Vista/Me gustó/No me gustó?" : "Clear your Watched/Liked/Disliked history?")) {
+      if (confirm(t("feedback_clear_confirm"))) {
         clearTaste();
         document.querySelectorAll(".card.is-seen,.card.is-liked,.card.is-disliked").forEach(c =>
           c.classList.remove("is-seen", "is-liked", "is-disliked"));

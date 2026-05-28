@@ -424,7 +424,7 @@ const STRINGS = {
     q_lang_spanish:  "Spanish-speaking, with its own accent.",
     q_lang_english:  "English, no problem.",
     q_lang_asian:    "Asian cinema (Japanese, Korean, Mandarin).",
-    q_lang_european: "Non-English Europe: French, Italian, German, Nordic.",
+    q_lang_european: "Any non-English European cinema (French, Italian, German, Portuguese, Nordic, Slavic).",
 
     q_opening_t: "How do you <em>want it to start?</em>",
     q_opening_burst:     "A dry hit before you settle in.",
@@ -623,6 +623,8 @@ const STRINGS = {
 
     q_door_any: "Open. Surprise me with the door.",
 
+    feedback_clear_confirm: "Clear your Watched/Liked/Disliked history?",
+    era_recent_only: "Recent only",
   },
 
   es: {
@@ -1049,7 +1051,7 @@ const STRINGS = {
     q_lang_spanish:  "En español, con acento propio.",
     q_lang_english:  "En inglés, sin problema.",
     q_lang_asian:    "Cine asiático (japonés, coreano, mandarín).",
-    q_lang_european: "Europa no inglesa: francés, italiano, alemán, nórdico.",
+    q_lang_european: "Cualquier cine europeo no anglo (francés, italiano, alemán, portugués, nórdico, eslavo).",
 
     q_opening_t: "¿Cómo quieres que <em>arranque?</em>",
     q_opening_burst:     "Con un golpe seco antes de que te acomodes.",
@@ -1247,6 +1249,8 @@ const STRINGS = {
 
     q_door_any: "Abierto. Sorpréndeme con la puerta.",
 
+    feedback_clear_confirm: "¿Borrar tu historial de Vista/Me gustó/No me gustó?",
+    era_recent_only: "Solo reciente",
   },
 };
 

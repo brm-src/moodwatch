@@ -45,10 +45,19 @@ function genreSet(mood, media = "movie") {
   };
   if (mood.trust && trustMap[mood.trust]) inc.add(trustMap[mood.trust]);
 
-  // avoid (without_genres)
-  if (mood.avoid === "violence")  { exc.add(G.horror); exc.add(G.war); }
+  // avoid → hard without_genres + scoring penalty downstream.
+  // violence: action, war, horror, crime, thriller out — hard exclusion.
+  // romance: romance + family-romance fluff out.
+  // slow: documentary + slower drama out (heuristic).
+  // cliche: action blockbusters + popular genre tropes out.
+  // weird: keep mainstream, drop horror/scifi-leaning weirdness.
+  if (mood.avoid === "violence") {
+    exc.add(G.horror); exc.add(G.war); exc.add(G.action); exc.add(G.crime); exc.add(G.thriller);
+  }
   if (mood.avoid === "romance")   { exc.add(G.romance); }
-  if (mood.avoid === "slow")      { exc.add(G.documentary); }
+  if (mood.avoid === "slow")      { exc.add(G.documentary); exc.add(G.history); }
+  if (mood.avoid === "cliche")    { exc.add(G.action); }
+  if (mood.avoid === "weird")     { exc.add(G.horror); exc.add(G.scifi); }
 
   // explicit exclude bucket from frontend
   if (Array.isArray(mood.exclude)) {

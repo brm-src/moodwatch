@@ -209,6 +209,15 @@ async function recommend(req, env, ctx) {
       if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
       if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
     }
+    // Respect avoid for tier injections too. Genres on tier extras come from TMDb details.
+    const fg = new Set((f.genres || []).map(g => String(g).toLowerCase()));
+    const fid = new Set((f.genre_ids || []).map(x => String(x)));
+    const has = (...xs) => xs.some(x => fg.has(String(x).toLowerCase()) || fid.has(String(x)));
+    if (mood.avoid === "violence" && has("27","53","28","80","10752","horror","thriller","action","crime","war")) return false;
+    if (mood.avoid === "romance" && has("10749","romance")) return false;
+    if (mood.avoid === "slow" && has("99","36","documentary","history")) return false;
+    if (mood.avoid === "cliche" && has("28","action")) return false;
+    if (mood.avoid === "weird" && has("27","878","horror","scifi","science fiction")) return false;
     return true;
   });
 
@@ -237,8 +246,18 @@ async function recommend(req, env, ctx) {
   const haveIds = new Set(allCandidates.map(c => c.id));
   // TV: 5 inject (foco series). Movie: 2 (Letterboxd ya alimenta).
   // Subrequest budget: ~18 discover + 4 list + watchlist + 6 like-seeds + 5 dislike + 18 enrich = ~50.
-  const tierCap = media === "tv" ? 5 : 2;
-  const tierInjectIds = selectTierForMood(media === "tv", tierGenreFilter, haveIds, tierCap);
+  // Density-aware: drop tier injection completely when mood is specific OR avoid is set,
+  // so we don't keep injecting Shawshank into a "dark thriller, avoid violence" mood.
+  const moodAxes = ["tone","energy","depth","trust","first_act","appetite","decade",
+                    "language_pref","runtime","quality","popularity","company","risk","fear"];
+  const moodSpecificity = moodAxes.reduce((n, k) => n + (mood[k] && mood[k] !== "any" ? 1 : 0), 0);
+  let tierCap = media === "tv" ? 5 : 2;
+  if (mood.avoid && mood.avoid !== "any" && mood.avoid !== "nothing") tierCap = 0;
+  if (moodSpecificity >= 5) tierCap = 0;
+  if (moodSpecificity >= 3) tierCap = Math.min(tierCap, 1);
+  const tierInjectIds = tierCap > 0
+    ? selectTierForMood(media === "tv", tierGenreFilter, haveIds, tierCap)
+    : [];
   const tierExtras = (await Promise.all(tierInjectIds.map(id =>
     M.details(env, id, lang).then(d => ({
       id: d.id,
@@ -264,6 +283,15 @@ async function recommend(req, env, ctx) {
       if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
       if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
     }
+    // Respect avoid for tier injections too. Genres on tier extras come from TMDb details.
+    const fg = new Set((f.genres || []).map(g => String(g).toLowerCase()));
+    const fid = new Set((f.genre_ids || []).map(x => String(x)));
+    const has = (...xs) => xs.some(x => fg.has(String(x).toLowerCase()) || fid.has(String(x)));
+    if (mood.avoid === "violence" && has("27","53","28","80","10752","horror","thriller","action","crime","war")) return false;
+    if (mood.avoid === "romance" && has("10749","romance")) return false;
+    if (mood.avoid === "slow" && has("99","36","documentary","history")) return false;
+    if (mood.avoid === "cliche" && has("28","action")) return false;
+    if (mood.avoid === "weird" && has("27","878","horror","scifi","science fiction")) return false;
     return true;
   });
   allCandidates.push(...tierExtras);
@@ -366,7 +394,31 @@ async function recommend(req, env, ctx) {
   // Re-apply exclude after taste signals
   pool = pool.filter(f => !excludeSet.has(f.id));
 
-  // 3. Score with curated + list boost + taste signals
+  // 3. Score with curated + list boost + taste signals.
+  // Density-aware base scoring: when mood is empty, use full vote_average baseline
+  // (people without preference want canon). When mood is specific, dampen baseline so
+  // mood signals dominate — fixes "Shawshank in everything" bug.
+  const moodAxesAll = ["tone","energy","depth","trust","first_act","appetite","decade",
+                       "language_pref","runtime","quality","popularity","company","risk","fear","avoid"];
+  const moodSpec = moodAxesAll.reduce((n, k) => n + (mood[k] && mood[k] !== "any" ? 1 : 0), 0);
+  // baseDamp: 1.0 for empty mood, 0.4 for 5+ axes set
+  const baseDamp = Math.max(0.4, 1.0 - 0.12 * Math.max(0, moodSpec - 1));
+
+  // Hard avoid filter — runs on the entire pool, regardless of source
+  // (curated, list, tier, watchlist). avoid is a contract.
+  const avoidFilter = (f) => {
+    if (!mood.avoid || mood.avoid === "any" || mood.avoid === "nothing") return true;
+    const fg = new Set([...(f.genres || []), ...(f.genre_ids || [])].map(x => String(x).toLowerCase()));
+    const has = (...xs) => xs.some(x => fg.has(String(x).toLowerCase()));
+    if (mood.avoid === "violence" && has("27","53","28","80","10752","horror","thriller","action","crime","war")) return false;
+    if (mood.avoid === "romance"  && has("10749","romance")) return false;
+    if (mood.avoid === "slow"     && has("99","36","documentary","history")) return false;
+    if (mood.avoid === "cliche"   && has("28","action")) return false;
+    if (mood.avoid === "weird"    && has("27","878","horror","scifi","science fiction")) return false;
+    return true;
+  };
+  pool = pool.filter(avoidFilter);
+
   const ranked = pool.map(f => {
     const cur = M.curatedFor(f.id);
     const listName = f._list;
@@ -375,8 +427,8 @@ async function recommend(req, env, ctx) {
     const genreOverlap = (f.genre_ids || []).some(g => dislikeGenres.has(g)) ? -3 : 0;
     const langPenalty  = f.original_language && dislikeLangs.has(f.original_language) ? -2 : 0;
     const score =
-      (f.vote_average || (f._listOnly ? 7 : 0)) * 1.5 +
-      Math.min((f.popularity || 0) / 35, 3.2) +
+      (f.vote_average || (f._listOnly ? 7 : 0)) * 1.5 * baseDamp +
+      Math.min((f.popularity || 0) / 35, 3.2) * baseDamp +
       fitScore(f, mood) +
       (cur ? 6 : 0) +
       (listName ? 3 : 0) +
