@@ -1220,14 +1220,8 @@
     // Hide chips on surprise mode (no quiz, era doesn't apply the same way).
     if (chipsEl) chipsEl.style.display = state.lastMode === "surprise" ? "none" : "";
     const words = vibeWords(state.answers, window.LANG);
-    const desc = $("#vibe-desc");
-    if (desc) desc.textContent = data?.why?.headline || (words.length ? words.join(" · ") : "");
-    if (state.lastMode === "surprise") {
-      const panel = $("#why-panel");
-      if (panel) { panel.hidden = true; panel.innerHTML = ""; }
-    } else {
-      renderWhy(data);
-    }
+    const moodLine = data?.why?.headline || (words.length ? words.join(" · ") : "");
+    renderWhy(data, moodLine);
     const cards = $("#cards");
     cards.innerHTML = "";
     if (!data.films || !data.films.length) {
@@ -1242,16 +1236,23 @@
     }
     show("results");
   }
-  function renderWhy(data) {
+  function renderWhy(data, moodLine) {
     const panel = $("#why-panel");
     if (!panel) return;
     const lists = data?.matched_lists || [];
-    if (!lists.length) { panel.hidden = true; panel.innerHTML = ""; return; }
+    const hasMood = !!(moodLine && moodLine.trim());
+    const hasLists = lists.length > 0;
+    if (!hasMood && !hasLists) { panel.hidden = true; panel.innerHTML = ""; return; }
     panel.hidden = false;
-    panel.innerHTML = `
-      <div class="why-title">${window.t("why_title")}</div>
-      <p>${window.t("why_lists")} ${lists.map(escapeHtml).join(" · ")}</p>
-    `;
+    const moodLabel = window.t("mood_label") || window.t("why_title");
+    const parts = [`<div class="why-title">${escapeHtml(moodLabel)}</div>`];
+    if (hasMood) {
+      parts.push(`<p class="why-mood">${escapeHtml(moodLine)}</p>`);
+    }
+    if (hasLists) {
+      parts.push(`<p class="why-lists">${window.t("why_lists")} ${lists.map(escapeHtml).join(" · ")}</p>`);
+    }
+    panel.innerHTML = parts.join("");
   }
 
   function filmCard(f, rank) {

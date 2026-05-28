@@ -692,17 +692,13 @@ async function recommend(req, env, ctx) {
       // (Korean, Japanese, Chinese, etc.). For Latin-script originals, we use original_title directly.
       M.details(env, f.id, "en-US"),
     ]);
-    // Title resolution rules:
-    // - Latin-script original (es, en, fr, it, etc.) → primary = original_title (e.g. "Sinners")
-    // - Non-Latin (ko, ja, zh, ar, he, hi, etc.)    → primary = English title, alt = original (e.g. "Parasite" / "기생충")
-    const NON_LATIN_LANGS = new Set(["ko", "ja", "zh", "cn", "th", "hi", "ta", "te", "ml", "bn", "ur", "fa", "ar", "he", "el", "ru", "uk", "bg", "sr", "mk", "ka", "hy", "yi", "vi"]);
+    // Title rule: always prefer English, except Spanish-language films use original.
     const originalTitleField = media === "tv" ? details.original_name : details.original_title;
-    const englishTitle = M.titleOf(details) || f.title; // details fetched in en-US
+    const englishTitle = M.titleOf(details) || f.title;
     const origLang = (details.original_language || f.original_language || "").toLowerCase();
-    const isNonLatin = NON_LATIN_LANGS.has(origLang);
-    const title = isNonLatin
-      ? (englishTitle || originalTitleField)
-      : (originalTitleField || englishTitle);
+    const title = origLang === "es"
+      ? (originalTitleField || englishTitle)
+      : (englishTitle || originalTitleField);
     const date = M.dateOf(details) || f.release_date;
     const runtime = (media === "tv")
       ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
@@ -895,15 +891,13 @@ async function surprise(req, env, ctx) {
       M.details(env, f.id, "en-US"),
     ]);
     const cur = M.curatedFor(f.id);
-    // Title rules: Latin-script → original_title; non-Latin → English with original as alt.
-    const NON_LATIN_LANGS = new Set(["ko", "ja", "zh", "cn", "th", "hi", "ta", "te", "ml", "bn", "ur", "fa", "ar", "he", "el", "ru", "uk", "bg", "sr", "mk", "ka", "hy", "yi", "vi"]);
+    // Title rule: always prefer English, except Spanish-language films use original.
     const originalTitleField = media === "tv" ? details.original_name : details.original_title;
     const englishTitle = f.title || M.titleOf(details);
     const origLang = (details.original_language || f.original_language || "").toLowerCase();
-    const isNonLatin = NON_LATIN_LANGS.has(origLang);
-    const title = isNonLatin
-      ? (englishTitle || originalTitleField)
-      : (originalTitleField || englishTitle);
+    const title = origLang === "es"
+      ? (originalTitleField || englishTitle)
+      : (englishTitle || originalTitleField);
     const date = f.release_date || M.dateOf(details);
     const runtime = media === "tv"
       ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
@@ -911,6 +905,7 @@ async function surprise(req, env, ctx) {
     return {
       id: f.id,
       title,
+      original_title: originalTitleField && originalTitleField !== title ? originalTitleField : null,
       year: (date || "").slice(0, 4),
       director: credits.director || null,
       runtime,
@@ -1004,21 +999,20 @@ async function alt(req, env) {
       const today = new Date().toISOString().slice(0, 10);
       const date = M.dateOf(details);
       if (date && date > today) continue;
-      // Title rules: Latin-script → original_title; non-Latin → English with original as alt.
-      const NON_LATIN_LANGS = new Set(["ko", "ja", "zh", "cn", "th", "hi", "ta", "te", "ml", "bn", "ur", "fa", "ar", "he", "el", "ru", "uk", "bg", "sr", "mk", "ka", "hy", "yi", "vi"]);
+      // Title rule: always prefer English, except Spanish-language films use original.
       const originalTitleField = media === "tv" ? details.original_name : details.original_title;
       const englishTitle = M.titleOf(details);
       const origLang = (details.original_language || "").toLowerCase();
-      const isNonLatin = NON_LATIN_LANGS.has(origLang);
-      const title = isNonLatin
-        ? (englishTitle || originalTitleField)
-        : (originalTitleField || englishTitle);
+      const title = origLang === "es"
+        ? (originalTitleField || englishTitle)
+        : (englishTitle || originalTitleField);
       const runtime = media === "tv"
         ? (details.episode_run_time && details.episode_run_time[0]) || null
         : (details.runtime || null);
       const film = {
         id: details.id,
         title,
+        original_title: originalTitleField && originalTitleField !== title ? originalTitleField : null,
         year: (date || "").slice(0, 4),
         director: credits.director || null,
         runtime,
