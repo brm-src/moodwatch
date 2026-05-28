@@ -585,7 +585,9 @@ async function recommend(req, env, ctx) {
       (Math.random() * Math.min(5, 0.9 + Math.max(0, 4 - moodSpec) * 0.9)) -
       // Light dampening of over-exposed canon when mood is generic. Doesn't kick in
       // for specific moods (mood drives the scorer instead).
-      (OVEREXPOSED_CANON.has(f.id) ? (moodSpec <= 2 ? 3.5 : moodSpec <= 4 ? 1.5 : 0) : 0);
+      (OVEREXPOSED_CANON.has(f.id)
+        ? (moodSpec <= 1 ? 1.2 : moodSpec <= 3 ? 0.5 : 0)
+        : 0);
     return { ...f, _score: score, _curated: cur || null, _list: listName, _likeBoost: likeBoost > 0, _fromWatchlist: wlBoost > 0 };
   }).sort((a, b) => b._score - a._score);
 
@@ -743,6 +745,14 @@ async function recommend(req, env, ctx) {
       if (mood.runtime === "short" && f.runtime && f.runtime > 100) return false;
       if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 135)) return false;
       if (mood.runtime === "long" && f.runtime && f.runtime < 110) return false;
+    }
+    // Final language safety net: curated items don't carry original_language until
+    // enrichment, so they slip past the pool filter. QA #4 found Mr. Robot/Bodyguard
+    // leaking into asian/spanish TV requests via CURATED_TV. Re-check post-enrichment.
+    if (LANG_GROUPS[mood.language_pref]) {
+      const allowed = LANG_GROUPS[mood.language_pref];
+      const ol = (f.original_language || "").toLowerCase();
+      if (ol && !allowed.has(ol)) return false;
     }
     return true;
   }).slice(0, 4);

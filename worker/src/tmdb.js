@@ -127,11 +127,11 @@ export const TV_GENRES = {
   talk: 10767,
   war: 10768,           // War & Politics
   western: 37,
-  // No native TV genres for: horror, thriller, romance, history, music
-  // Mood logic that asks for these will fall back to drama/mystery on TV.
-  horror: 9648,         // best-effort: mystery
+  // No native TV genres for: horror, thriller, romance, history, music.
+  // QA #3: when these aliases collided (drama=romance=history=music=18) and
+  // /discover results were reverse-looked-up by ID, the LAST key set won and
+  // tagged dramas as "music". So we DON'T alias collisions here; instead the
+  // mood layer handles soft mapping (e.g. trust=horror on TV → mystery + drama).
+  horror: 9648,         // best-effort: mystery (kept; QA shows results still relevant)
   thriller: 9648,
-  romance: 18,
-  history: 18,
-  music: 18,
 };

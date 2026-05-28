@@ -55,6 +55,11 @@ function genreSet(mood, media = "movie") {
     weird: null, // no clean genre, handled by lower vote_count
   };
   if (mood.trust && trustMap[mood.trust]) inc.add(trustMap[mood.trust]);
+  // TV horror has no native genre; the closest is mystery + sci-fi & fantasy.
+  // Add fantasy as secondary so Stranger Things / Yellowjackets surface.
+  if (mood.trust === "horror" && media === "tv") {
+    inc.add(10765); // Sci-Fi & Fantasy combined on TV
+  }
   // Erotic thriller → drama+thriller axis (no single TMDb genre fits).
   if (mood.trust === "erotic_thriller") {
     [G.thriller, G.drama].forEach(x => inc.add(x));
@@ -182,10 +187,12 @@ export async function discoverByMood(env, mood, language, media = "movie") {
 
   const discover = isTV ? tmdbDiscoverTV : tmdbDiscover;
   const fetches = [];
-  // Strict pool: 3 pages × 2 sorts = 6 fetches (was 5×2=10).
-  // Free Workers cap subrequests at 50/invocation; LB watchlist + enrichment
-  // already eat ~30, so discover has to stay lean.
-  for (let p = 1; p <= 3; p++) {
+  // Pool depth: 5 pages × 2 sorts = 10 strict fetches.
+  // Free Workers cap subrequests at 50/invocation. Budget:
+  //   discover (this fn) ≤ 16, letterboxd ≤ 8, enrichment 6×3=18, misc ≤ 8 = 50.
+  // Going from 3p→5p adds ~100 candidates (4 extra pages × 20 results), giving
+  // the scorer a much larger pool to dig past popular canon.
+  for (let p = 1; p <= 5; p++) {
     fetches.push(discover(env, { ...baseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
     fetches.push(discover(env, { ...baseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
   }
@@ -194,8 +201,8 @@ export async function discoverByMood(env, mood, language, media = "movie") {
   delete looseParams["with_runtime.gte"];
   delete looseParams["with_runtime.lte"];
   looseParams["vote_count.gte"] = Math.max(60, Math.floor((baseParams["vote_count.gte"] || 500) / 4));
-  // 2 pages × 2 sorts = 4 fetches (was 3×2=6).
-  for (let p = 1; p <= 2; p++) {
+  // 3 pages × 2 sorts = 6 fetches.
+  for (let p = 1; p <= 3; p++) {
     fetches.push(discover(env, { ...looseParams, sort_by: "vote_average.desc", page: p }, language).catch(() => ({ results: [] })));
     fetches.push(discover(env, { ...looseParams, sort_by: "popularity.desc",   page: p }, language).catch(() => ({ results: [] })));
   }
