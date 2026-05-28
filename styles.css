@@ -147,6 +147,49 @@ header.top {
   font-weight: 400;
   color: var(--accent);
 }
+
+/* ─── persistent site header (logo always clickable) ─── */
+.site-top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-2) clamp(16px, 4vw, 36px);
+  background: rgba(20, 18, 16, 0.72);
+  backdrop-filter: blur(14px) saturate(1.05);
+  -webkit-backdrop-filter: blur(14px) saturate(1.05);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+body.on-hero .site-top {
+  background: transparent;
+  border-bottom-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.brand-home {
+  background: none;
+  border: 0;
+  padding: 4px 6px;
+  margin-left: -6px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+  border-radius: 6px;
+  transition: opacity .15s ease, transform .15s ease;
+}
+.brand-home em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+.brand-home:hover { opacity: 0.85; transform: translateY(-1px); }
+.brand-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .kicker {
   font-family: var(--font-body);
   font-size: var(--t-mono);
@@ -1189,18 +1232,20 @@ footer.bottom small a:hover { color: var(--accent); }
   align-self: flex-start;
   max-width: 100%;
   font-family: var(--font-body);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  border: 1px solid var(--rule);
-  padding: 3px 8px 4px;
-  border-radius: 999px;
-  margin: 6px 0 4px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  margin: 4px 0 2px;
   white-space: normal;
   word-break: keep-all;
   line-height: 1.3;
+  opacity: 0.62;
 }
 .pill.ghost {
   background: transparent;
@@ -1290,17 +1335,13 @@ footer.bottom small a:hover { color: var(--accent); }
   display: flex;
   align-items: center;
   gap: var(--s-2);
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   margin: 0 0 var(--s-3);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
 }
-.era-chips-row::-webkit-scrollbar { display: none; }
 .era-chips {
   display: flex;
   gap: var(--s-1);
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   min-width: 0;
 }
 .era-chip {

@@ -1500,7 +1500,11 @@
     const lists = data?.matched_lists || [];
     const hasMood = !!(moodLine && moodLine.trim());
     const hasLists = lists.length > 0;
-    if (!hasMood && !hasLists) { panel.hidden = true; panel.innerHTML = ""; return; }
+    // In surprise mode (no quiz answers) there's nothing meaningful to show here.
+    // Hide the panel altogether instead of rendering an empty box with just a title.
+    if (state.lastMode === "surprise" || (!hasMood && !hasLists)) {
+      panel.hidden = true; panel.innerHTML = ""; return;
+    }
     panel.hidden = false;
     const moodLabel = window.t("mood_label") || window.t("why_title");
     const parts = [`<div class="why-title">${escapeHtml(moodLabel)}</div>`];
@@ -1888,6 +1892,13 @@
     // Surprise chips: render 4 random + wire shuffle
     renderChips();
     $("#shuffle-chips")?.addEventListener("click", shuffleChipsAnimated);
+
+    $("#brand-home")?.addEventListener("click", () => {
+      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality";
+      state.shownIds = []; state.lastMode = null;
+      const inp = $("#user"); if (inp) { inp.value = ""; }
+      show("intro");
+    });
 
     $("#restart").addEventListener("click", () => {
       state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality";
