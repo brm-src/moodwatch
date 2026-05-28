@@ -101,7 +101,6 @@ header.top {
   min-height: 100dvh;
   background-color: var(--charcoal);
   color: var(--paper);
-  display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: var(--s-5) var(--s-3) var(--s-3);
@@ -111,6 +110,7 @@ header.top {
   transition: background-image .4s ease;
   overflow: hidden;
 }
+.hero.active { display: flex; }
 .hero::before {
   content: "";
   position: absolute;
