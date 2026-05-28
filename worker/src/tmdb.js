@@ -5,6 +5,122 @@ const IMG  = "https://image.tmdb.org/t/p/";
 
 export function tmdbImageBase() { return IMG; }
 
+// ─── Overview sanitizer ─────────────────────────────────────────────────────
+// TMDb's overview field is community-edited and occasionally contains injected
+// opinion or vandalism in the localized version (e.g. "Es una mierda de
+// película!!" appended to The Devil Wears Prada). This is a defensive trim
+// for the most common shapes; if it strips a legitimate ending, the worst case
+// is a slightly shorter synopsis.
+//   - Drops a trailing "Es una mierda…" / "es una basura…" / "horrible peli"
+//     style opinion that some user appended.
+//   - Drops a trailing exclamation-burst with subjective adjectives.
+//   - Collapses repeated spaces left behind.
+const VANDAL_TAIL_RE = new RegExp(
+  // sentence boundary, then opinion noun phrase to end of string
+  "(\\s+(?:es|está|son|fue|esto es|esta es|este es)\\s+(?:una?\\s+)?" +
+  "(?:mierda|basura|porquería|horrible|patética|cagada|asco|caca|porqueria|" +
+  "the worst|garbage|trash|awful|terrible|crap)" +
+  "[^.!?]*[.!?]*\\s*)$",
+  "i"
+);
+const STRAY_BURST_RE = /\s*[!]{2,}\s*$/;
+const REVIEW_TAIL_RE = / \s*(?:1\/10|0\/10|10\/10|⭐+|👎+|👍+)\s*$/i;
+
+export function sanitizeOverview(text) {
+  if (!text || typeof text !== "string") return text;
+  let out = text;
+  // Run vandal tail up to 3 times to catch stacked appends
+  for (let i = 0; i < 3; i++) {
+    const before = out;
+    out = out.replace(VANDAL_TAIL_RE, "");
+    out = out.replace(STRAY_BURST_RE, ".");
+    out = out.replace(REVIEW_TAIL_RE, "");
+    if (out === before) break;
+  }
+  return out.replace(/\s{2,}/g, " ").trim();
+}
+
+// ─── Genre name localization ────────────────────────────────────────────────
+// TMDb returns genres on /details in the language of that fetch. Surprise + alt
+// fetch details with "en-US" (for title rules) so genres come back in English
+// while the recommend path uses the user's lang. Result: mixed-language genre
+// chips on the same screen. Fix: derive genre names from a static ID map keyed
+// by user's lang. IDs are stable across TMDb. Movie + TV unified here.
+const GENRE_NAMES = {
+  // Movie genres
+  28:    { en: "action",          es: "acción" },
+  12:    { en: "adventure",       es: "aventura" },
+  16:    { en: "animation",       es: "animación" },
+  35:    { en: "comedy",          es: "comedia" },
+  80:    { en: "crime",           es: "crimen" },
+  99:    { en: "documentary",     es: "documental" },
+  18:    { en: "drama",           es: "drama" },
+  10751: { en: "family",          es: "familia" },
+  14:    { en: "fantasy",         es: "fantasía" },
+  36:    { en: "history",         es: "historia" },
+  27:    { en: "horror",          es: "terror" },
+  10402: { en: "music",           es: "música" },
+  9648:  { en: "mystery",         es: "misterio" },
+  10749: { en: "romance",         es: "romance" },
+  878:   { en: "science fiction", es: "ciencia ficción" },
+  10770: { en: "tv movie",        es: "telefilme" },
+  53:    { en: "thriller",        es: "suspenso" },
+  10752: { en: "war",             es: "bélico" },
+  37:    { en: "western",          es: "western" },
+  // TV genres (overlap with movie where ID matches)
+  10759: { en: "action & adventure", es: "acción y aventura" },
+  10762: { en: "kids",            es: "infantil" },
+  10763: { en: "news",            es: "noticias" },
+  10764: { en: "reality",         es: "reality" },
+  10765: { en: "sci-fi & fantasy",es: "ciencia ficción y fantasía" },
+  10766: { en: "soap",            es: "telenovela" },
+  10767: { en: "talk",            es: "talk show" },
+  10768: { en: "war & politics",  es: "guerra y política" },
+};
+
+export function localizeGenres(input, lang) {
+  // Accept either array of {id,name}, array of ids, or array of strings.
+  const out = [];
+  const target = lang === "es" ? "es" : "en";
+  for (const g of (input || [])) {
+    if (g == null) continue;
+    if (typeof g === "number") {
+      const m = GENRE_NAMES[g];
+      if (m) out.push(m[target]);
+    } else if (typeof g === "string") {
+      // already a name — try to localize via reverse lookup; fall back to lower-case
+      const lc = g.toLowerCase().trim();
+      if (target === "en") { out.push(lc); continue; }
+      let mapped = null;
+      for (const m of Object.values(GENRE_NAMES)) {
+        if (m.en === lc || m.es === lc) { mapped = m[target]; break; }
+      }
+      out.push(mapped || lc);
+    } else if (g && typeof g === "object") {
+      const id = g.id;
+      const m = id != null ? GENRE_NAMES[id] : null;
+      if (m) { out.push(m[target]); continue; }
+      const name = g.name;
+      if (typeof name === "string") {
+        const lc = name.toLowerCase().trim();
+        if (target === "en") { out.push(lc); continue; }
+        let mapped = null;
+        for (const mm of Object.values(GENRE_NAMES)) {
+          if (mm.en === lc || mm.es === lc) { mapped = mm[target]; break; }
+        }
+        out.push(mapped || lc);
+      }
+    }
+  }
+  // Final pass: alias short forms TMDb sometimes returns or our own internal tags use.
+  const ALIASES = {
+    en: { "scifi": "science fiction", "sci-fi": "science fiction" },
+    es: { "scifi": "ciencia ficción", "sci-fi": "ciencia ficción", "ficción": "ciencia ficción" },
+  };
+  const al = ALIASES[target];
+  return [...new Set(out.map(g => al[g] || g))];
+}
+
 async function tmdbFetch(env, path, params = {}, opts = {}) {
   const url = new URL(BASE + path);
   url.searchParams.set("api_key", env.TMDB_API_KEY);
