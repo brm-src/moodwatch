@@ -709,7 +709,7 @@ const STRINGS = {
     q_state_pensive:  "Con pesadez, rumiando mis pensamientos.",
     q_state_good:     "Bien. Con disposición a lo que sea.",
 
-    q_appetite_t: "¿Qué te <em>provoca {time}?</em>",
+    q_appetite_t: "¿Qué <em>se te antoja ver {time}?</em>",
     q_appetite_feel:           "Algo que me haga sentir.",
     q_appetite_horror:         "Terror.",
     q_appetite_weird:          "Algo raro. Sueño febril.",
