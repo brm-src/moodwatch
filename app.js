@@ -1358,8 +1358,11 @@
       countryLabel(f.country),
       (f.genres || []).slice(0, 2).join(" · "),
     ].filter(Boolean);
-    // Title links to IMDb (preferred) or TMDb as fallback. Replaces the old "Detalles" button.
-    const titleHref = f.imdb || f.tmdb || null;
+    // Title links to IMDb (imdb.com) or TMDb as fallback. Replaces the old "Detalles" button.
+    // Note: hidden "Ver" button uses f.imdb (playimdb mirror); title uses canonical imdb.com.
+    const titleHref = f.imdb_id
+      ? `https://www.imdb.com/title/${f.imdb_id}/`
+      : (f.tmdb || null);
     const titleHtml = titleHref
       ? `<a href="${escapeHtml(titleHref)}" target="_blank" rel="noopener" class="title-link">${escapeHtml(f.title || "")}</a>`
       : escapeHtml(f.title || "");
