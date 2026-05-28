@@ -832,6 +832,101 @@
     return [...new Set(w)].slice(0, 3);
   }
 
+  // Build a short, reading-like synthesis of the user's answers.
+  // Returns a 1–2 sentence paragraph (or "" if there's not enough signal).
+  function vibeReading(a, lang) {
+    const ES = lang === "es";
+    const sentences = [];
+
+    // ── Sentence 1: where they're standing right now (state + depth + intent)
+    const opener = (() => {
+      if (a.state === "drained" && a.depth === "warm") {
+        return ES ? "Llegas cansado y necesitas que algo te abrace, no que te exija."
+                  : "You're arriving tired and you need something to hold you, not demand from you.";
+      }
+      if (a.state === "drained" && a.depth === "ruined") {
+        return ES ? "Vienes con poca energía pero quieres que algo te toque hondo, aunque te deje peor."
+                  : "You come in with low energy but you want something to land deep, even if it leaves you worse.";
+      }
+      if (a.state === "drained") {
+        return ES ? "Llegas sin batería, así que la cosa tiene que sostenerse sola sin pedirte demasiado."
+                  : "You're running on empty, so this needs to carry itself without asking much from you.";
+      }
+      if (a.state === "restless" && a.depth === "ruined") {
+        return ES ? "Estás inquieto y buscas algo que te golpee de verdad, no algo que te entretenga."
+                  : "You're restless and you're after something that actually hits, not something that just entertains.";
+      }
+      if (a.state === "restless") {
+        return ES ? "Estás inquieto: necesitas movimiento, tensión, algo que no te deje quieto."
+                  : "You're restless: you need movement, tension, something that won't let you sit still.";
+      }
+      if (a.state === "pensive" && a.depth === "thoughtful") {
+        return ES ? "Vienes pensando y quieres algo que acompañe ese pensamiento, no que lo interrumpa."
+                  : "You're already thinking, and you want something that walks alongside that, not something that breaks it.";
+      }
+      if (a.state === "pensive") {
+        return ES ? "Vienes en modo reflexivo: hay espacio para que la película respire."
+                  : "You're in a reflective mood: there's room for the film to breathe.";
+      }
+      if (a.depth === "fun") {
+        return ES ? "Buscas algo liviano: nada de pesadez, nada de doblez."
+                  : "You want something light: no heaviness, no double meaning.";
+      }
+      if (a.depth === "ruined") {
+        return ES ? "Estás listo para algo que duela. Quieres salir distinto a como entraste."
+                  : "You're ready for something that hurts. You want to walk out different from how you walked in.";
+      }
+      return "";
+    })();
+    if (opener) sentences.push(opener);
+
+    // ── Sentence 2: texture — pace, runtime, sound, door, ending
+    const tex = [];
+    if (a.runtime === "short" || a.appetite === "snack") {
+      tex.push(ES ? "algo corto, que no se enrede" : "something short, no detours");
+    } else if (a.runtime === "long" || a.appetite === "epic") {
+      tex.push(ES ? "tiempo largo, sin apuro" : "long stretches of time, no hurry");
+    }
+    if (a.pace === "slow") tex.push(ES ? "ritmo lento" : "slow rhythm");
+    if (a.pace === "fast") tex.push(ES ? "ritmo nervioso" : "nervous pace");
+    if (a.sound === "silence") tex.push(ES ? "silencios largos" : "long silences");
+    if (a.sound === "music")   tex.push(ES ? "música que pesa" : "music that carries weight");
+    if (a.door === "mystery")  tex.push(ES ? "una puerta que no termina de cerrar" : "a door that won't quite close");
+    if (a.door === "intimacy") tex.push(ES ? "la cámara cerca de la cara" : "the camera close to the face");
+    if (a.door === "intensity")tex.push(ES ? "tensión en cada plano" : "tension in every shot");
+    if (a.door === "fantasy")  tex.push(ES ? "una lógica de sueño" : "a dream logic");
+    if (a.weather === "rain")  tex.push(ES ? "lluvia de fondo" : "rain in the background");
+    if (a.weather === "fog")   tex.push(ES ? "niebla, contornos blandos" : "fog, soft edges");
+    if (a.weather === "winter")tex.push(ES ? "frío en la imagen" : "cold in the image");
+    if (a.ending === "open" || a.ending === "ambiguous") {
+      tex.push(ES ? "un final que no necesita cerrarse" : "an ending that doesn't need to close");
+    }
+    if (a.ending === "closed") {
+      tex.push(ES ? "un final que cierre" : "an ending that lands");
+    }
+    if (a.aftertaste === "haunting") {
+      tex.push(ES ? "algo que se quede pegado después" : "something that stays with you after");
+    }
+    if (tex.length) {
+      const pick = tex.slice(0, 3).join(ES ? ", " : ", ");
+      sentences.push(ES ? `Te calza: ${pick}.` : `What fits: ${pick}.`);
+    }
+
+    // ── Sentence 3: what they're avoiding (only if explicit)
+    if (a.avoid === "slow") {
+      sentences.push(ES ? "Nada de tedio ni autoindulgencia."
+                        : "Nothing tedious, nothing self-indulgent.");
+    } else if (a.avoid === "violence") {
+      sentences.push(ES ? "Sin violencia gratuita."
+                        : "No gratuitous violence.");
+    } else if (a.avoid === "sad") {
+      sentences.push(ES ? "Hoy no toca ponerse triste."
+                        : "Not in the mood to feel sad tonight.");
+    }
+
+    return sentences.join(" ");
+  }
+
   // ────────────────────────────────────────────────────────────
   // STATE & STEP MGMT
   // ────────────────────────────────────────────────────────────
@@ -1219,8 +1314,8 @@
     }
     // Hide chips on surprise mode (no quiz, era doesn't apply the same way).
     if (chipsEl) chipsEl.style.display = state.lastMode === "surprise" ? "none" : "";
-    const words = vibeWords(state.answers, window.LANG);
-    const moodLine = data?.why?.headline || (words.length ? words.join(" · ") : "");
+    const reading = vibeReading(state.answers, window.LANG);
+    const moodLine = reading || data?.why?.headline || "";
     renderWhy(data, moodLine);
     const cards = $("#cards");
     cards.innerHTML = "";
