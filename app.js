@@ -10,17 +10,19 @@
   // categories + the mandatory "ink" question (always last).
   // ────────────────────────────────────────────────────────────
   const BANK = {
+    // ────── PRIMARY signal categories (high randomizer weight) ──────
     state: {
-      key: "state", kind: "real", titleKey: "q_state_t",
+      key: "state", kind: "real", titleKey: "q_state_t", signal_weight: "primary",
       options: [
         { value: "drained",  labelKey: "q_state_drained"  },
         { value: "restless", labelKey: "q_state_restless" },
         { value: "pensive",  labelKey: "q_state_pensive"  },
         { value: "good",     labelKey: "q_state_good"     },
+        { value: "any",      labelKey: "q_state_any", sticky: true },
       ],
     },
     appetite: {
-      key: "appetite", kind: "real", titleKey: "q_appetite_t",
+      key: "appetite", kind: "real", titleKey: "q_appetite_t", signal_weight: "primary",
       options: [
         { value: "feel-deep",     labelKey: "q_appetite_feel" },
         { value: "horror",        labelKey: "q_appetite_horror" },
@@ -28,11 +30,11 @@
         { value: "lost-20s",      labelKey: "q_appetite_lost" },
         { value: "comfort",       labelKey: "q_appetite_comfort" },
         { value: "transformative",labelKey: "q_appetite_transformative" },
-        { value: "any",           labelKey: "q_appetite_any" },
+        { value: "any",           labelKey: "q_appetite_any", sticky: true },
       ],
     },
     flavor: {
-      key: "appetite", kind: "real", titleKey: "q_flavor_t",
+      key: "appetite", kind: "real", titleKey: "q_flavor_t", signal_weight: "primary",
       randomize: 6,
       options: [
         { value: "girly",         labelKey: "q_flavor_girly" },
@@ -41,23 +43,214 @@
         { value: "reality",       labelKey: "q_flavor_reality" },
         { value: "wtf",           labelKey: "q_flavor_wtf" },
         { value: "vintage_love",  labelKey: "q_flavor_vintage" },
-        { value: "underseen",     labelKey: "q_flavor_underseen" },
-        { value: "prestige",      labelKey: "q_flavor_prestige" },
         { value: "catharsis",     labelKey: "q_flavor_catharsis" },
         { value: "anthropocene",  labelKey: "q_flavor_anthropocene" },
-        { value: "doc",           labelKey: "q_flavor_doc" },
-        { value: "anime",         labelKey: "q_flavor_anime" },
-        { value: "blind_watch",   labelKey: "q_flavor_blind" },
         { value: "sleepover",     labelKey: "q_flavor_sleepover" },
         { value: "good_for_her",  labelKey: "q_flavor_good_for_her" },
-        { value: "hidden_gem",    labelKey: "q_flavor_hidden_gem" },
-        { value: "silent",        labelKey: "q_flavor_silent" },
-        { value: "romcom",        labelKey: "q_flavor_romcom" },
-        { value: "",              labelKey: "q_flavor_any", sticky: true },
+        { value: "desire_consequence", labelKey: "q_flavor_desire" },
+        { value: "any",           labelKey: "q_flavor_any", sticky: true },
       ],
     },
+    format_appetite: {
+      key: "format_appetite", kind: "real", titleKey: "q_format_t", signal_weight: "primary",
+      options: [
+        { value: "doc",         labelKey: "q_format_doc" },
+        { value: "anime",       labelKey: "q_format_anime" },
+        { value: "silent",      labelKey: "q_format_silent" },
+        { value: "romcom",      labelKey: "q_format_romcom" },
+        { value: "horror_soft", labelKey: "q_format_horror_soft" },
+        { value: "any",         labelKey: "q_format_any", sticky: true },
+      ],
+    },
+    quality_vs_popularity: {
+      key: "quality_vs_popularity", kind: "real", titleKey: "q_qvp_t", signal_weight: "primary",
+      options: [
+        { value: "crowd",    labelKey: "q_qvp_crowd"    },
+        { value: "canon",    labelKey: "q_qvp_canon"    },
+        { value: "festival", labelKey: "q_qvp_festival" },
+        { value: "hidden",   labelKey: "q_qvp_hidden"   },
+        { value: "wildcard", labelKey: "q_qvp_wildcard" },
+        { value: "any",      labelKey: "q_qvp_any", sticky: true },
+      ],
+    },
+    nostalgia: {
+      key: "nostalgia", kind: "real", titleKey: "q_nostalgia_t", signal_weight: "primary",
+      options: [
+        { value: "old_projector",     labelKey: "q_nostalgia_old"     },
+        { value: "seventies_eighties",labelKey: "q_nostalgia_70s80s"  },
+        { value: "nineties_video",    labelKey: "q_nostalgia_90s"     },
+        { value: "two_thousands",     labelKey: "q_nostalgia_2000s"   },
+        { value: "near_past",         labelKey: "q_nostalgia_2010s"   },
+        { value: "no_nostalgia",      labelKey: "q_nostalgia_now"     },
+        { value: "any",               labelKey: "q_nostalgia_any", sticky: true },
+      ],
+    },
+    aftertaste: {
+      key: "aftertaste", kind: "real", titleKey: "q_aftertaste_t", signal_weight: "primary",
+      options: [
+        { value: "held",     labelKey: "q_aftertaste_held"     },
+        { value: "lighter",  labelKey: "q_aftertaste_lighter"  },
+        { value: "thinking", labelKey: "q_aftertaste_thinking" },
+        { value: "haunted",  labelKey: "q_aftertaste_haunted"  },
+        { value: "wrecked",  labelKey: "q_aftertaste_wrecked"  },
+        { value: "charged",  labelKey: "q_aftertaste_charged"  },
+        { value: "any",      labelKey: "q_aftertaste_any", sticky: true },
+      ],
+    },
+    decade: {
+      key: "decade", kind: "real", titleKey: "q_decade_t", signal_weight: "primary",
+      options: [
+        { value: "old",   labelKey: "q_decade_old"   },
+        { value: "70s",   labelKey: "q_decade_70s"   },
+        { value: "80s",   labelKey: "q_decade_80s"   },
+        { value: "90s",   labelKey: "q_decade_90s"   },
+        { value: "00s",   labelKey: "q_decade_00s"   },
+        { value: "now",   labelKey: "q_decade_now"   },
+        { value: "any",   labelKey: "q_decade_any", sticky: true },
+      ],
+    },
+    runtime: {
+      key: "runtime", kind: "real", titleKey: "q_runtime_t", signal_weight: "primary",
+      options: [
+        { value: "short",  labelKey: "q_runtime_short"  },
+        { value: "medium", labelKey: "q_runtime_medium" },
+        { value: "long",   labelKey: "q_runtime_long"   },
+        { value: "any",    labelKey: "q_runtime_any", sticky: true },
+      ],
+    },
+    language_pref: {
+      key: "language_pref", kind: "real", titleKey: "q_lang_t", signal_weight: "primary",
+      options: [
+        { value: "spanish",  labelKey: "q_lang_spanish"  },
+        { value: "english",  labelKey: "q_lang_english"  },
+        { value: "asian",    labelKey: "q_lang_asian"    },
+        { value: "european", labelKey: "q_lang_european" },
+        { value: "any",      labelKey: "q_lang_any", sticky: true },
+      ],
+    },
+    avoid: {
+      key: "avoid", kind: "real", titleKey: "q_avoid_t", signal_weight: "primary",
+      options: [
+        { value: "violence", labelKey: "q_avoid_violence" },
+        { value: "romance",  labelKey: "q_avoid_romance"  },
+        { value: "cliche",   labelKey: "q_avoid_cliche"   },
+        { value: "slow",     labelKey: "q_avoid_slow"     },
+        { value: "weird",    labelKey: "q_avoid_weird"    },
+        { value: "any",      labelKey: "q_avoid_any", sticky: true },
+      ],
+    },
+    first_act: {
+      key: "first_act", kind: "real", titleKey: "q_firstact_t", signal_weight: "primary",
+      options: [
+        { value: "discover", labelKey: "q_firstact_discover" },
+        { value: "meet",     labelKey: "q_firstact_meet"     },
+        { value: "wrong",    labelKey: "q_firstact_wrong"    },
+        { value: "goal",     labelKey: "q_firstact_goal"     },
+        { value: "world",    labelKey: "q_firstact_world"    },
+        { value: "any",      labelKey: "q_firstact_any", sticky: true },
+      ],
+    },
+    trust: {
+      key: "trust", kind: "real", titleKey: "q_trust_t", signal_weight: "primary",
+      options: [
+        { value: "small_drama",     labelKey: "q_trust_drama"     },
+        { value: "good_thriller",   labelKey: "q_trust_thriller"  },
+        { value: "weird_film",      labelKey: "q_trust_weird"     },
+        { value: "smart_comedy",    labelKey: "q_trust_comedy"    },
+        { value: "moody_horror",    labelKey: "q_trust_horror"    },
+        { value: "erotic_thriller", labelKey: "q_trust_erotic"    },
+        { value: "warm_anim",       labelKey: "q_trust_animation" },
+        { value: "any",             labelKey: "q_trust_any", sticky: true },
+      ],
+    },
+    fear: {
+      key: "fear", kind: "real", titleKey: "q_fear_t", signal_weight: "primary",
+      options: [
+        { value: "gore",        labelKey: "q_fear_gore"        },
+        { value: "tears",       labelKey: "q_fear_tears"       },
+        { value: "boredom",     labelKey: "q_fear_boredom"     },
+        { value: "confusion",   labelKey: "q_fear_confusion"   },
+        { value: "predictable", labelKey: "q_fear_predictable" },
+        { value: "any",         labelKey: "q_fear_any", sticky: true },
+      ],
+    },
+    risk_taste: {
+      key: "risk_taste", kind: "real", titleKey: "q_risktaste_t", signal_weight: "primary",
+      options: [
+        { value: "classic",    labelKey: "q_risktaste_classic"   },
+        { value: "gem",        labelKey: "q_risktaste_gem"       },
+        { value: "weird",      labelKey: "q_risktaste_weird"     },
+        { value: "cult",       labelKey: "q_risktaste_cult"      },
+        { value: "hate_maybe", labelKey: "q_risktaste_hate"      },
+        { value: "any",        labelKey: "q_risktaste_any", sticky: true },
+      ],
+    },
+    intent: {
+      key: "intent", kind: "real", titleKey: "q_intent_t", signal_weight: "primary",
+      options: [
+        { value: "escape",  labelKey: "q_intent_escape"  },
+        { value: "feel",    labelKey: "q_intent_feel"    },
+        { value: "think",   labelKey: "q_intent_think"   },
+        { value: "company", labelKey: "q_intent_company" },
+        { value: "any",     labelKey: "q_intent_any", sticky: true },
+      ],
+    },
+    depth: {
+      key: "depth", kind: "real", titleKey: "q_depth_t", signal_weight: "primary",
+      options: [
+        { value: "fun",        labelKey: "q_depth_fun"        },
+        { value: "warm",       labelKey: "q_depth_warm"       },
+        { value: "thoughtful", labelKey: "q_depth_thoughtful" },
+        { value: "uneasy",     labelKey: "q_depth_uneasy"     },
+        { value: "ruined",     labelKey: "q_depth_ruined"     },
+        { value: "any",        labelKey: "q_depth_any", sticky: true },
+      ],
+    },
+    company: {
+      key: "company", kind: "real", titleKey: "q_company_t", signal_weight: "primary",
+      options: [
+        { value: "alone",   labelKey: "q_company_alone"   },
+        { value: "partner", labelKey: "q_company_partner" },
+        { value: "friends", labelKey: "q_company_friends" },
+        { value: "family",  labelKey: "q_company_family"  },
+        { value: "shared",  labelKey: "q_company_shared"  },
+        { value: "stray",   labelKey: "q_company_stray"   },
+        { value: "any",     labelKey: "q_company_any", sticky: true },
+      ],
+    },
+    pace: {
+      key: "pace", kind: "real", titleKey: "q_pace_t", signal_weight: "primary",
+      options: [
+        { value: "slow",   labelKey: "q_pace_slow"   },
+        { value: "steady", labelKey: "q_pace_steady" },
+        { value: "fast",   labelKey: "q_pace_fast"   },
+        { value: "any",    labelKey: "q_pace_any", sticky: true },
+      ],
+    },
+    ending: {
+      key: "ending", kind: "real", titleKey: "q_ending_t", signal_weight: "primary",
+      options: [
+        { value: "closed", labelKey: "q_ending_closed" },
+        { value: "open",   labelKey: "q_ending_open"   },
+        { value: "twist",  labelKey: "q_ending_twist"  },
+        { value: "bitter", labelKey: "q_ending_bitter" },
+        { value: "relief", labelKey: "q_ending_relief" },
+        { value: "any",    labelKey: "q_ending_any", sticky: true },
+      ],
+    },
+    attention: {
+      key: "attention", kind: "real", titleKey: "q_attention_t", signal_weight: "primary",
+      options: [
+        { value: "no_phone",   labelKey: "q_attention_full"   },
+        { value: "relaxed",    labelKey: "q_attention_relaxed"},
+        { value: "background", labelKey: "q_attention_bg"     },
+        { value: "any",        labelKey: "q_attention_any", sticky: true },
+      ],
+    },
+
+    // ────── TEXTURE categories (lower randomizer weight, atmospheric) ──────
     door: {
-      key: "door", kind: "doors", titleKey: "q_door_t",
+      key: "door", kind: "doors", titleKey: "q_door_t", signal_weight: "texture",
       options: [
         { value: "intensity", labelKey: "q_door_intensity", svg: "door-red" },
         { value: "mystery",   labelKey: "q_door_mystery",   svg: "door-old" },
@@ -66,194 +259,44 @@
       ],
     },
     scene: {
-      key: "scene", kind: "real", titleKey: "q_scene_t",
-      randomize: 4,
+      key: "scene", kind: "real", titleKey: "q_scene_t", signal_weight: "texture",
+      randomize: 5,
       options: [
-        // road
         { value: "road",      labelKey: "q_scene_road"           },
         { value: "road",      labelKey: "q_scene_road_train"     },
-        { value: "road",      labelKey: "q_scene_road_walk"      },
         { value: "road",      labelKey: "q_scene_road_motel"     },
         { value: "road",      labelKey: "q_scene_road_gas"       },
         { value: "road",      labelKey: "q_scene_road_bus"       },
-        { value: "road",      labelKey: "q_scene_road_ferry"     },
-        { value: "road",      labelKey: "q_scene_road_airport"   },
-        { value: "road",      labelKey: "q_scene_road_bridge"    },
-        // city
         { value: "city",      labelKey: "q_scene_city"           },
         { value: "city",      labelKey: "q_scene_city_neon"      },
-        { value: "city",      labelKey: "q_scene_city_window"    },
         { value: "city",      labelKey: "q_scene_city_subway"    },
-        { value: "city",      labelKey: "q_scene_city_sidewalk"  },
         { value: "city",      labelKey: "q_scene_city_rooftop"   },
         { value: "city",      labelKey: "q_scene_city_cafe"      },
-        { value: "city",      labelKey: "q_scene_city_elevator"  },
-        { value: "city",      labelKey: "q_scene_city_busstop"   },
-        // house
         { value: "house",     labelKey: "q_scene_house"          },
-        { value: "house",     labelKey: "q_scene_house_attic"    },
         { value: "house",     labelKey: "q_scene_house_kitchen"  },
         { value: "house",     labelKey: "q_scene_house_phone"    },
-        { value: "house",     labelKey: "q_scene_house_pool"     },
         { value: "house",     labelKey: "q_scene_house_door"     },
         { value: "house",     labelKey: "q_scene_house_mirror"   },
-        { value: "house",     labelKey: "q_scene_house_basement" },
-        { value: "house",     labelKey: "q_scene_house_window"   },
-        // dialogue
         { value: "dialogue",  labelKey: "q_scene_dialogue"          },
         { value: "dialogue",  labelKey: "q_scene_dialogue_bar"      },
-        { value: "dialogue",  labelKey: "q_scene_dialogue_break"    },
-        { value: "dialogue",  labelKey: "q_scene_dialogue_letter"   },
         { value: "dialogue",  labelKey: "q_scene_dialogue_dinner"   },
         { value: "dialogue",  labelKey: "q_scene_dialogue_car"      },
         { value: "dialogue",  labelKey: "q_scene_dialogue_voicemail"},
-        { value: "dialogue",  labelKey: "q_scene_dialogue_park"     },
-        { value: "dialogue",  labelKey: "q_scene_dialogue_friend"   },
-        // survival
         { value: "survival",  labelKey: "q_scene_survival"          },
         { value: "survival",  labelKey: "q_scene_survival_run"      },
-        { value: "survival",  labelKey: "q_scene_survival_wood"     },
         { value: "survival",  labelKey: "q_scene_survival_storm"    },
-        { value: "survival",  labelKey: "q_scene_survival_food"     },
-        { value: "survival",  labelKey: "q_scene_survival_sound"    },
         { value: "survival",  labelKey: "q_scene_survival_door"     },
-        { value: "survival",  labelKey: "q_scene_survival_dark"     },
         { value: "survival",  labelKey: "q_scene_survival_steps"    },
-        // discovery
         { value: "discovery", labelKey: "q_scene_discovery"          },
-        { value: "discovery", labelKey: "q_scene_discovery_door"     },
         { value: "discovery", labelKey: "q_scene_discovery_box"      },
-        { value: "discovery", labelKey: "q_scene_discovery_mirror"   },
-        { value: "discovery", labelKey: "q_scene_discovery_photo"    },
         { value: "discovery", labelKey: "q_scene_discovery_letter"   },
-        { value: "discovery", labelKey: "q_scene_discovery_drawer"   },
-        { value: "discovery", labelKey: "q_scene_discovery_name"     },
         { value: "discovery", labelKey: "q_scene_discovery_recording"},
         { value: "discovery", labelKey: "q_scene_discovery_key"      },
-        // sticky "any" — always appended last, never shuffled out
-        { value: "",          labelKey: "q_scene_any", sticky: true },
-      ],
-    },
-    intent: {
-      key: "intent", kind: "real", titleKey: "q_intent_t",
-      options: [
-        { value: "escape",  labelKey: "q_intent_escape"  },
-        { value: "feel",    labelKey: "q_intent_feel"    },
-        { value: "think",   labelKey: "q_intent_think"   },
-        { value: "company", labelKey: "q_intent_company" },
-      ],
-    },
-    depth: {
-      key: "depth", kind: "real", titleKey: "q_depth_t",
-      options: [
-        { value: "fun",        labelKey: "q_depth_fun"        },
-        { value: "warm",       labelKey: "q_depth_warm"       },
-        { value: "thoughtful", labelKey: "q_depth_thoughtful" },
-        { value: "uneasy",     labelKey: "q_depth_uneasy"     },
-        { value: "ruined",     labelKey: "q_depth_ruined"     },
-      ],
-    },
-    weather: {
-      key: "weather", kind: "real", titleKey: "q_weather_t",
-      options: [
-        { value: "rain",   labelKey: "q_weather_rain"   },
-        { value: "fog",    labelKey: "q_weather_fog"    },
-        { value: "sun",    labelKey: "q_weather_sun"    },
-        { value: "storm",  labelKey: "q_weather_storm"  },
-        { value: "snow",   labelKey: "q_weather_snow"   },
-        { value: "winter", labelKey: "q_weather_winter" },
-      ],
-    },
-    sound: {
-      key: "sound", kind: "real", titleKey: "q_sound_t",
-      options: [
-        { value: "silence", labelKey: "q_sound_silence" },
-        { value: "voices",  labelKey: "q_sound_voices"  },
-        { value: "music",   labelKey: "q_sound_music"   },
-        { value: "noise",   labelKey: "q_sound_noise"   },
-      ],
-    },
-    company: {
-      key: "company", kind: "real", titleKey: "q_company_t",
-      options: [
-        { value: "alone",   labelKey: "q_company_alone"   },
-        { value: "partner", labelKey: "q_company_partner" },
-        { value: "friends", labelKey: "q_company_friends" },
-        { value: "family",  labelKey: "q_company_family"  },
-        { value: "shared",  labelKey: "q_company_shared"  },
-        { value: "stray",   labelKey: "q_company_stray"   },
-      ],
-    },
-    attention: {
-      key: "attention", kind: "real", titleKey: "q_attention_t",
-      options: [
-        { value: "no_phone",   labelKey: "q_attention_full"   },
-        { value: "relaxed",    labelKey: "q_attention_relaxed"},
-        { value: "background", labelKey: "q_attention_bg"     },
-      ],
-    },
-    pace: {
-      key: "pace", kind: "real", titleKey: "q_pace_t",
-      options: [
-        { value: "slow",   labelKey: "q_pace_slow"   },
-        { value: "steady", labelKey: "q_pace_steady" },
-        { value: "fast",   labelKey: "q_pace_fast"   },
-      ],
-    },
-    ending: {
-      key: "ending", kind: "real", titleKey: "q_ending_t",
-      options: [
-        { value: "closed", labelKey: "q_ending_closed" },
-        { value: "open",   labelKey: "q_ending_open"   },
-        { value: "twist",  labelKey: "q_ending_twist"  },
-        { value: "bitter", labelKey: "q_ending_bitter" },
-      ],
-    },
-    color: {
-      key: "color", kind: "real", titleKey: "q_color_t",
-      options: [
-        { value: "blood",  labelKey: "q_color_blood"  },
-        { value: "neon",   labelKey: "q_color_neon"   },
-        { value: "gold",   labelKey: "q_color_gold"   },
-        { value: "ocean",  labelKey: "q_color_ocean"  },
-        { value: "ash",    labelKey: "q_color_ash"    },
-        { value: "earth",  labelKey: "q_color_earth"  },
-      ],
-    },
-    light: {
-      key: "light", kind: "real", titleKey: "q_light_t",
-      options: [
-        { value: "golden",      labelKey: "q_light_golden"      },
-        { value: "fluorescent", labelKey: "q_light_fluorescent" },
-        { value: "candle",      labelKey: "q_light_candle"      },
-        { value: "neon",        labelKey: "q_light_neon"        },
-        { value: "moon",        labelKey: "q_light_moon"        },
-      ],
-    },
-    texture: {
-      key: "texture", kind: "real", titleKey: "q_texture_t",
-      options: [
-        { value: "silk",     labelKey: "q_texture_silk"     },
-        { value: "sandpaper",labelKey: "q_texture_sandpaper"},
-        { value: "wet",      labelKey: "q_texture_wet"      },
-        { value: "wood",     labelKey: "q_texture_wood"     },
-        { value: "glass",    labelKey: "q_texture_glass"    },
-      ],
-    },
-    decade: {
-      key: "decade", kind: "real", titleKey: "q_decade_t",
-      options: [
-        { value: "old",   labelKey: "q_decade_old"   },
-        { value: "70s",   labelKey: "q_decade_70s"   },
-        { value: "80s",   labelKey: "q_decade_80s"   },
-        { value: "90s",   labelKey: "q_decade_90s"   },
-        { value: "00s",   labelKey: "q_decade_00s"   },
-        { value: "now",   labelKey: "q_decade_now"   },
-        { value: "any",   labelKey: "q_decade_any"   },
+        { value: "any",       labelKey: "q_scene_any", sticky: true },
       ],
     },
     place: {
-      key: "place", kind: "real", titleKey: "q_place_t",
+      key: "place", kind: "real", titleKey: "q_place_t", signal_weight: "texture",
       options: [
         { value: "town",      labelKey: "q_place_town"      },
         { value: "metropolis",labelKey: "q_place_metropolis"},
@@ -261,298 +304,92 @@
         { value: "abandoned", labelKey: "q_place_abandoned" },
         { value: "nowhere",   labelKey: "q_place_nowhere"   },
         { value: "interior",  labelKey: "q_place_interior"  },
+        { value: "any",       labelKey: "q_place_any", sticky: true },
       ],
     },
-    memory: {
-      key: "memory", kind: "real", titleKey: "q_memory_t",
+    atmosphere: {
+      key: "atmosphere", kind: "real", titleKey: "q_atmosphere_t", signal_weight: "texture",
       options: [
-        { value: "childhood", labelKey: "q_memory_childhood" },
-        { value: "heartbreak",labelKey: "q_memory_heartbreak"},
-        { value: "triumph",   labelKey: "q_memory_triumph"   },
-        { value: "regret",    labelKey: "q_memory_regret"    },
-        { value: "wonder",    labelKey: "q_memory_wonder"    },
+        { value: "rain_neon",      labelKey: "q_atmosphere_rain_neon"      },
+        { value: "warm_room",      labelKey: "q_atmosphere_warm_room"      },
+        { value: "cold_house",     labelKey: "q_atmosphere_cold_house"     },
+        { value: "open_sun",       labelKey: "q_atmosphere_open_sun"       },
+        { value: "storm_pressure", labelKey: "q_atmosphere_storm_pressure" },
+        { value: "ash_city",       labelKey: "q_atmosphere_ash_city"       },
+        { value: "gold_memory",    labelKey: "q_atmosphere_gold_memory"    },
+        { value: "skin_low_light", labelKey: "q_atmosphere_skin_low_light" },
+        { value: "any",            labelKey: "q_atmosphere_any", sticky: true },
       ],
     },
-    want: {
-      key: "want", kind: "real", titleKey: "q_want_t",
+    sound: {
+      key: "sound", kind: "real", titleKey: "q_sound_t", signal_weight: "texture",
       options: [
-        { value: "moved",      labelKey: "q_want_moved"      },
-        { value: "entertained",labelKey: "q_want_entertained"},
-        { value: "challenged", labelKey: "q_want_challenged" },
-        { value: "soothed",    labelKey: "q_want_soothed"    },
-        { value: "haunted",    labelKey: "q_want_haunted"    },
+        { value: "silence", labelKey: "q_sound_silence" },
+        { value: "voices",  labelKey: "q_sound_voices"  },
+        { value: "music",   labelKey: "q_sound_music"   },
+        { value: "noise",   labelKey: "q_sound_noise"   },
+        { value: "any",     labelKey: "q_sound_any", sticky: true },
       ],
     },
-    avoid: {
-      key: "avoid", kind: "real", titleKey: "q_avoid_t",
+    time_of_day: {
+      key: "time_of_day", kind: "real", titleKey: "q_tod_t", signal_weight: "texture",
       options: [
-        { value: "violence",  labelKey: "q_avoid_violence"  },
-        { value: "romance",   labelKey: "q_avoid_romance"   },
-        { value: "cliche",    labelKey: "q_avoid_cliche"    },
-        { value: "slow",      labelKey: "q_avoid_slow"      },
-        { value: "weird",     labelKey: "q_avoid_weird"     },
-        { value: "nothing",   labelKey: "q_avoid_nothing"   },
+        { value: "dawn",        labelKey: "q_tod_dawn"        },
+        { value: "morning",     labelKey: "q_tod_morning"     },
+        { value: "noon",        labelKey: "q_tod_noon"        },
+        { value: "afternoon",   labelKey: "q_tod_afternoon"   },
+        { value: "dusk",        labelKey: "q_tod_dusk"        },
+        { value: "night",       labelKey: "q_tod_night"       },
+        { value: "small_hours", labelKey: "q_tod_small_hours" },
+        { value: "any",         labelKey: "q_tod_any", sticky: true },
       ],
     },
-    animal: {
-      key: "animal", kind: "real", titleKey: "q_animal_t",
+    body: {
+      key: "body", kind: "real", titleKey: "q_body_t", signal_weight: "texture",
       options: [
-        { value: "cat",  labelKey: "q_animal_cat"  },
-        { value: "wolf", labelKey: "q_animal_wolf" },
-        { value: "fish", labelKey: "q_animal_fish" },
-        { value: "bird", labelKey: "q_animal_bird" },
-        { value: "fox",  labelKey: "q_animal_fox"  },
-      ],
-    },
-    lately: {
-      key: "lately", kind: "real", titleKey: "q_lately_t",
-      options: [
-        { value: "restless", labelKey: "q_lately_restless" },
-        { value: "numb",     labelKey: "q_lately_numb"     },
-        { value: "electric", labelKey: "q_lately_electric" },
-        { value: "lonely",   labelKey: "q_lately_lonely"   },
-        { value: "hopeful",  labelKey: "q_lately_hopeful"  },
-        { value: "stuck",    labelKey: "q_lately_stuck"    },
-      ],
-    },
-    risk_taste: {
-      key: "risk_taste", kind: "real", titleKey: "q_risktaste_t",
-      options: [
-        { value: "classic",   labelKey: "q_risktaste_classic"   },
-        { value: "gem",       labelKey: "q_risktaste_gem"       },
-        { value: "weird",     labelKey: "q_risktaste_weird"     },
-        { value: "cult",      labelKey: "q_risktaste_cult"      },
-        { value: "hate_maybe",labelKey: "q_risktaste_hate"      },
-      ],
-    },
-    smell: {
-      key: "smell", kind: "real", titleKey: "q_smell_t",
-      options: [
-        { value: "coffee",    labelKey: "q_smell_coffee"    },
-        { value: "petrichor", labelKey: "q_smell_petrichor" },
-        { value: "smoke",     labelKey: "q_smell_smoke"     },
-        { value: "sea",       labelKey: "q_smell_sea"       },
-        { value: "old_paper", labelKey: "q_smell_old_paper" },
-      ],
-    },
-    window: {
-      key: "window", kind: "real", titleKey: "q_window_t",
-      options: [
-        { value: "rain",    labelKey: "q_window_rain"    },
-        { value: "city",    labelKey: "q_window_city"    },
-        { value: "forest",  labelKey: "q_window_forest"  },
-        { value: "parking", labelKey: "q_window_parking" },
-        { value: "sea",     labelKey: "q_window_sea"     },
-        { value: "wall",    labelKey: "q_window_wall"    },
-      ],
-    },
-    temperature: {
-      key: "temperature", kind: "real", titleKey: "q_temp_t",
-      options: [
-        { value: "burning", labelKey: "q_temp_burning" },
-        { value: "warm",    labelKey: "q_temp_warm"    },
-        { value: "cool",    labelKey: "q_temp_cool"    },
-        { value: "freezing",labelKey: "q_temp_freezing"},
-      ],
-    },
-    runtime: {
-      key: "runtime", kind: "real", titleKey: "q_runtime_t",
-      options: [
-        { value: "tiny",   labelKey: "q_runtime_tiny"   },
-        { value: "short",  labelKey: "q_runtime_short"  },
-        { value: "medium", labelKey: "q_runtime_medium" },
-        { value: "long",   labelKey: "q_runtime_long"   },
-        { value: "epic",   labelKey: "q_runtime_epic"   },
-        { value: "any",    labelKey: "q_runtime_any"    },
-      ],
-    },
-    language_pref: {
-      key: "language_pref", kind: "real", titleKey: "q_lang_t",
-      options: [
-        { value: "any",      labelKey: "q_lang_any"      },
-        { value: "spanish",  labelKey: "q_lang_spanish"  },
-        { value: "english",  labelKey: "q_lang_english"  },
-        { value: "asian",    labelKey: "q_lang_asian"    },
-        { value: "european", labelKey: "q_lang_european" },
+        { value: "tense",  labelKey: "q_body_tense"  },
+        { value: "tired",  labelKey: "q_body_tired"  },
+        { value: "wired",  labelKey: "q_body_wired"  },
+        { value: "soft",   labelKey: "q_body_soft"   },
+        { value: "buzzed", labelKey: "q_body_buzzed" },
+        { value: "any",    labelKey: "q_body_any", sticky: true },
       ],
     },
     opening: {
-      key: "opening", kind: "real", titleKey: "q_opening_t",
+      key: "opening", kind: "real", titleKey: "q_opening_t", signal_weight: "texture",
       options: [
         { value: "burst",     labelKey: "q_opening_burst"     },
         { value: "quiet",     labelKey: "q_opening_quiet"     },
         { value: "voiceover", labelKey: "q_opening_voiceover" },
         { value: "middle",    labelKey: "q_opening_middle"    },
         { value: "title",     labelKey: "q_opening_title"     },
-      ],
-    },
-    rewatch_taste: {
-      key: "rewatch_taste", kind: "real", titleKey: "q_rewatch_t",
-      options: [
-        { value: "popular", labelKey: "q_rewatch_popular" },
-        { value: "obscure", labelKey: "q_rewatch_obscure" },
-        { value: "either",  labelKey: "q_rewatch_either"  },
-      ],
-    },
-    director_vibe: {
-      key: "director_vibe", kind: "real", titleKey: "q_director_t",
-      options: [
-        { value: "auteur",    labelKey: "q_director_auteur"    },
-        { value: "mainstream",labelKey: "q_director_mainstream"},
-        { value: "indie",     labelKey: "q_director_indie"     },
-        { value: "any",       labelKey: "q_director_any"       },
-      ],
-    },
-    first_act: {
-      key: "first_act", kind: "real", titleKey: "q_firstact_t",
-      options: [
-        { value: "discover", labelKey: "q_firstact_discover" },
-        { value: "meet",     labelKey: "q_firstact_meet"     },
-        { value: "wrong",    labelKey: "q_firstact_wrong"    },
-        { value: "goal",     labelKey: "q_firstact_goal"     },
-      ],
-    },
-    fear: {
-      key: "fear", kind: "real", titleKey: "q_fear_t",
-      options: [
-        { value: "gore",          labelKey: "q_fear_gore"         },
-        { value: "tears",         labelKey: "q_fear_tears"        },
-        { value: "boredom",       labelKey: "q_fear_boredom"      },
-        { value: "confusion",     labelKey: "q_fear_confusion"    },
-        { value: "predictable",   labelKey: "q_fear_predictable"  },
-      ],
-    },
-    trust: {
-      key: "trust", kind: "real", titleKey: "q_trust_t",
-      options: [
-        { value: "small_drama",      labelKey: "q_trust_drama"     },
-        { value: "good_thriller",    labelKey: "q_trust_thriller"  },
-        { value: "weird_film",       labelKey: "q_trust_weird"     },
-        { value: "smart_comedy",     labelKey: "q_trust_comedy"    },
-        { value: "moody_horror",     labelKey: "q_trust_horror"    },
-        { value: "erotic_thriller",  labelKey: "q_trust_erotic"    },
-        { value: "warm_anim",        labelKey: "q_trust_animation" },
-      ],
-    },
-    time_of_day: {
-      key: "time_of_day", kind: "real", titleKey: "q_tod_t",
-      options: [
-        { value: "dawn",      labelKey: "q_tod_dawn"      },
-        { value: "morning",   labelKey: "q_tod_morning"   },
-        { value: "noon",      labelKey: "q_tod_noon"      },
-        { value: "afternoon", labelKey: "q_tod_afternoon" },
-        { value: "dusk",      labelKey: "q_tod_dusk"      },
-        { value: "night",     labelKey: "q_tod_night"     },
-        { value: "small_hours", labelKey: "q_tod_small_hours" },
-      ],
-    },
-    garment: {
-      key: "garment", kind: "real", titleKey: "q_garment_t",
-      options: [
-        { value: "trench",     labelKey: "q_garment_trench"     },
-        { value: "sweater",    labelKey: "q_garment_sweater"    },
-        { value: "leather",    labelKey: "q_garment_leather"    },
-        { value: "white_shirt",labelKey: "q_garment_white_shirt"},
-        { value: "robe",       labelKey: "q_garment_robe"       },
-        { value: "naked",      labelKey: "q_garment_naked"      },
-      ],
-    },
-    food: {
-      key: "food", kind: "real", titleKey: "q_food_t",
-      options: [
-        { value: "ramen",   labelKey: "q_food_ramen"   },
-        { value: "wine",    labelKey: "q_food_wine"    },
-        { value: "fries",   labelKey: "q_food_fries"   },
-        { value: "fruit",   labelKey: "q_food_fruit"   },
-        { value: "bread",   labelKey: "q_food_bread"   },
-        { value: "nothing", labelKey: "q_food_nothing" },
-      ],
-    },
-    drink: {
-      key: "drink", kind: "real", titleKey: "q_drink_t",
-      options: [
-        { value: "coffee",  labelKey: "q_drink_coffee"  },
-        { value: "wine",    labelKey: "q_drink_wine"    },
-        { value: "whisky",  labelKey: "q_drink_whisky"  },
-        { value: "water",   labelKey: "q_drink_water"   },
-        { value: "tea",     labelKey: "q_drink_tea"     },
-        { value: "beer",    labelKey: "q_drink_beer"    },
-      ],
-    },
-    instrument: {
-      key: "instrument", kind: "real", titleKey: "q_instrument_t",
-      options: [
-        { value: "piano",   labelKey: "q_instrument_piano"   },
-        { value: "guitar",  labelKey: "q_instrument_guitar"  },
-        { value: "synth",   labelKey: "q_instrument_synth"   },
-        { value: "strings", labelKey: "q_instrument_strings" },
-        { value: "drums",   labelKey: "q_instrument_drums"   },
-        { value: "voice",   labelKey: "q_instrument_voice"   },
-      ],
-    },
-    transport: {
-      key: "transport", kind: "real", titleKey: "q_transport_t",
-      options: [
-        { value: "walking", labelKey: "q_transport_walking" },
-        { value: "car",     labelKey: "q_transport_car"     },
-        { value: "train",   labelKey: "q_transport_train"   },
-        { value: "boat",    labelKey: "q_transport_boat"    },
-        { value: "bike",    labelKey: "q_transport_bike"    },
-        { value: "running", labelKey: "q_transport_running" },
-      ],
-    },
-    season: {
-      key: "season", kind: "real", titleKey: "q_season_t",
-      options: [
-        { value: "spring", labelKey: "q_season_spring" },
-        { value: "summer", labelKey: "q_season_summer" },
-        { value: "autumn", labelKey: "q_season_autumn" },
-        { value: "winter", labelKey: "q_season_winter" },
-      ],
-    },
-    object: {
-      key: "object", kind: "real", titleKey: "q_object_t",
-      options: [
-        { value: "photo",    labelKey: "q_object_photo"    },
-        { value: "key",      labelKey: "q_object_key"      },
-        { value: "letter",   labelKey: "q_object_letter"   },
-        { value: "mirror",   labelKey: "q_object_mirror"   },
-        { value: "knife",    labelKey: "q_object_knife"    },
-        { value: "clock",    labelKey: "q_object_clock"    },
-      ],
-    },
-    body: {
-      key: "body", kind: "real", titleKey: "q_body_t",
-      options: [
-        { value: "tense",   labelKey: "q_body_tense"   },
-        { value: "tired",   labelKey: "q_body_tired"   },
-        { value: "wired",   labelKey: "q_body_wired"   },
-        { value: "soft",    labelKey: "q_body_soft"    },
-        { value: "buzzed",  labelKey: "q_body_buzzed"  },
+        { value: "any",       labelKey: "q_opening_any", sticky: true },
       ],
     },
     phrase: {
       key: "phrase", kind: "phrase",
-      titleKey: "q_phrase_t",
+      titleKey: "q_phrase_t", signal_weight: "texture",
       placeholderKey: "q_phrase_ph",
       chipsKeys: ["q_phrase_c1","q_phrase_c2","q_phrase_c3",
                   "q_phrase_c4","q_phrase_c5","q_phrase_c6"],
     },
     // Mandatory, always last:
     ink: {
-      key: "ink", kind: "rorschach", titleKey: "q_ink_t",
+      key: "ink", kind: "rorschach", titleKey: "q_ink_t", signal_weight: "texture",
       // 4 procedural blots generated per render; "options" filled at runtime
     },
   };
 
-  // Categories that can rotate (excluding ink which is mandatory)
+  // Categories that can rotate (excluding ink which is mandatory).
+  // signal_weight=primary categories carry the recommendation logic;
+  // texture categories add atmosphere but lower precision.
   const ROTATING = [
-    "state","door","scene","intent","depth","weather","sound","company","pace","ending",
-    "color","light","texture","decade","place","memory","want","avoid","animal","lately",
-    "risk_taste","smell","window","temperature",
-    "runtime","language_pref","opening","rewatch_taste","director_vibe","first_act","fear","trust",
-    "time_of_day","garment","food","drink","instrument","transport","season","object","body",
-    "phrase",
+    // primary
+    "state","appetite","flavor","format_appetite","quality_vs_popularity","nostalgia",
+    "aftertaste","decade","runtime","language_pref","avoid","first_act","trust","fear",
+    "risk_taste","intent","depth","company","pace","ending","attention",
+    // texture
+    "door","scene","place","atmosphere","sound","time_of_day","body","opening","phrase",
   ];
 
   function takeRandom(keys, n) {
@@ -564,19 +401,39 @@
   // else is fully random across all categories. The first step (movie/tv/any)
   // and the last (ink) are the only fixed pieces of the ritual.
   function buildSession() {
-    const all = [
-      "state","appetite","flavor","door","scene","intent","depth","weather","sound","company","attention","pace","ending",
-      "color","light","texture","place","temperature","memory","want","decade","smell","window",
-      "object","body","risk_taste","first_act","trust","avoid","rewatch_taste","runtime","language_pref",
-      "opening","time_of_day","garment","food","drink","instrument","transport","season","fear","phrase",
+    // Sample primary signals first, then add texture for atmosphere.
+    // buildSession picks N=7 categories total before ink.
+    const primary = [
+      "state","appetite","flavor","format_appetite","quality_vs_popularity","nostalgia",
+      "aftertaste","decade","runtime","language_pref","avoid","first_act","trust","fear",
+      "risk_taste","intent","depth","company","pace","ending","attention",
     ].filter(k => BANK[k]);
+    const texture = [
+      "door","scene","place","atmosphere","sound","time_of_day","body","opening","phrase",
+    ].filter(k => BANK[k]);
+    const all = [...primary, ...texture];
     const N = 7;
+    const N_PRIMARY = 5;  // ~70% primary signal questions
     const picked = [];
-    const pool = [...all];
-    while (picked.length < N && pool.length) {
-      const i = Math.floor(Math.random() * pool.length);
-      picked.push(pool.splice(i, 1)[0]);
+    const primaryPool = [...primary];
+    const texturePool = [...texture];
+    // First pick N_PRIMARY from primary
+    while (picked.length < N_PRIMARY && primaryPool.length) {
+      const i = Math.floor(Math.random() * primaryPool.length);
+      picked.push(primaryPool.splice(i, 1)[0]);
     }
+    // Then fill remainder from texture
+    while (picked.length < N && texturePool.length) {
+      const i = Math.floor(Math.random() * texturePool.length);
+      picked.push(texturePool.splice(i, 1)[0]);
+    }
+    // If not enough texture, top up from leftover primary
+    while (picked.length < N && primaryPool.length) {
+      const i = Math.floor(Math.random() * primaryPool.length);
+      picked.push(primaryPool.splice(i, 1)[0]);
+    }
+    // Shuffle final order so primary/texture aren't grouped
+    picked.sort(() => Math.random() - 0.5);
     return [...picked.map(k => BANK[k]), BANK.ink];
   }
 
@@ -730,127 +587,189 @@
   // ────────────────────────────────────────────────────────────
   function ritualToMood(a) {
     const m = {};
+    // Skip any "any" sticky values — they signal no preference.
+    const has = (k) => a[k] && a[k] !== "any";
+
+    // door (texture)
     if (a.door === "intensity") { m.tone = "dark";  m.energy = "engage"; }
     if (a.door === "mystery")   { m.tone = "dark";  m.energy = "engage"; }
     if (a.door === "fantasy")   { m.tone = "light"; m.energy = "engage"; }
     if (a.door === "intimacy")  { m.tone = "light"; m.energy = "unwind"; }
+
+    // state (primary)
     if (a.state === "drained")  { m.energy = "unwind"; m.risk = "safe"; }
     if (a.state === "restless") { m.energy = "engage"; m.risk = "discover"; }
-    if (a.state === "pensive")  { m.energy = "engage"; }
+    if (a.state === "pensive")  { m.energy = "engage"; m.depth = m.depth || "thoughtful"; }
     if (a.state === "good")     { m.risk = m.risk || "discover"; }
-    if (a.appetite && a.appetite !== "any") m.appetite = a.appetite;
-    if (a.appetite === "feel-deep") { m.energy = "engage"; m.depth = m.depth || "thoughtful"; }
-    if (a.appetite === "horror")    { m.tone = "dark"; m.trust = "horror"; m.first_act = m.first_act || "thriller_horror"; }
-    if (a.appetite === "weird")     { m.tone = "dark"; m.trust = "weird"; m.risk = "discover"; }
-    if (a.appetite === "lost-20s")  { m.depth = m.depth || "thoughtful"; m.tone = m.tone || "dark"; }
-    // New flavor mappings (added when expanding the flavor pool from 9 → 19 options).
+
+    // appetite + flavor (both write to a.appetite)
+    if (has("appetite")) m.appetite = a.appetite;
+    if (a.appetite === "feel-deep")    { m.energy = "engage"; m.depth = m.depth || "thoughtful"; }
+    if (a.appetite === "horror")       { m.tone = "dark"; m.trust = "horror"; m.first_act = m.first_act || "thriller_horror"; }
+    if (a.appetite === "weird")        { m.tone = "dark"; m.trust = "weird"; m.risk = "discover"; }
+    if (a.appetite === "lost-20s")     { m.depth = m.depth || "thoughtful"; m.tone = m.tone || "dark"; }
+    if (a.appetite === "comfort")      { m.energy = m.energy || "unwind"; m.depth = m.depth || "warm"; m.risk = m.risk || "safe"; }
+    if (a.appetite === "transformative"){ m.energy = m.energy || "engage"; m.depth = m.depth || "thoughtful"; m.risk = m.risk || "discover"; }
+    // flavor values (also write to appetite key)
     if (a.appetite === "girly")        { m.tone = m.tone || "light"; m.depth = m.depth || "warm"; m.first_act = m.first_act || "drama_romance"; }
     if (a.appetite === "queer")        { m.depth = m.depth || "thoughtful"; }
     if (a.appetite === "a24")          { m.quality = "high"; m.popularity = m.popularity || "mid"; m.risk = m.risk || "discover"; }
     if (a.appetite === "reality")      { m.trust = m.trust || "weird"; m.depth = m.depth || "thoughtful"; }
     if (a.appetite === "wtf")          { m.trust = "weird"; m.risk = "discover"; m.energy = "engage"; }
     if (a.appetite === "vintage_love") { m.first_act = m.first_act || "drama_romance"; m.tone = m.tone || "light"; m.decade = m.decade || "old"; }
-    if (a.appetite === "underseen")    { m.popularity = "low"; m.risk = "discover"; }
-    if (a.appetite === "prestige")     { m.quality = "high"; m.popularity = m.popularity || "high"; }
     if (a.appetite === "catharsis")    { m.energy = "engage"; m.depth = m.depth || "uneasy"; m.tone = m.tone || "dark"; }
     if (a.appetite === "anthropocene") { m.trust = m.trust || "doc"; m.depth = m.depth || "thoughtful"; }
-    if (a.appetite === "doc")          { m.trust = "doc"; m.depth = m.depth || "thoughtful"; }
-    if (a.appetite === "anime")        { m.trust = "animation"; }
-    if (a.appetite === "blind_watch")  { m.risk = "discover"; m.popularity = m.popularity || "low"; }
     if (a.appetite === "sleepover")    { m.tone = "light"; m.energy = "unwind"; m.depth = "fun"; m.company = m.company || "shared"; }
     if (a.appetite === "good_for_her") { m.tone = "dark"; m.depth = m.depth || "uneasy"; m.energy = m.energy || "engage"; }
-    if (a.appetite === "hidden_gem")   { m.popularity = "low"; m.quality = "high"; m.risk = "discover"; }
-    if (a.appetite === "silent")       { m.decade = m.decade || "old"; }
-    if (a.appetite === "romcom")       { m.tone = "light"; m.first_act = "drama_romance"; m.depth = m.depth || "warm"; }
-    if (a.scene === "survival" || a.scene === "discovery") m.energy = "engage";
+    if (a.appetite === "desire_consequence") { m.tone = "dark"; m.depth = m.depth || "uneasy"; m.trust = m.trust || "thriller"; }
+
+    // format_appetite (primary)
+    if (a.format_appetite === "doc")         { m.trust = "doc"; m.depth = m.depth || "thoughtful"; }
+    if (a.format_appetite === "anime")       { m.trust = "animation"; }
+    if (a.format_appetite === "silent")      { m.decade = m.decade || "old"; }
+    if (a.format_appetite === "romcom")      { m.tone = "light"; m.first_act = "drama_romance"; m.depth = m.depth || "warm"; }
+    if (a.format_appetite === "horror_soft") { m.trust = "horror"; m.tone = "dark"; m.energy = m.energy || "unwind"; m.first_act = m.first_act || "thriller_horror"; }
+
+    // quality_vs_popularity (primary) — replaces director_vibe + rewatch_taste
+    if (a.quality_vs_popularity === "crowd")    { m.popularity = "high"; m.risk = m.risk || "safe"; }
+    if (a.quality_vs_popularity === "canon")    { m.quality = "high"; m.popularity = "high"; m.risk = m.risk || "safe"; }
+    if (a.quality_vs_popularity === "festival") { m.quality = "high"; m.popularity = m.popularity || "mid"; m.risk = m.risk || "discover"; }
+    if (a.quality_vs_popularity === "hidden")   { m.quality = "high"; m.popularity = "low"; m.risk = "discover"; }
+    if (a.quality_vs_popularity === "wildcard") { m.popularity = "low"; m.risk = "discover"; }
+
+    // nostalgia (primary) — maps to decade
+    if (a.nostalgia === "old_projector")      m.decade = m.decade || "old";
+    if (a.nostalgia === "seventies_eighties") m.decade = m.decade || "70s80s";
+    if (a.nostalgia === "nineties_video")     m.decade = m.decade || "90s";
+    if (a.nostalgia === "two_thousands")      m.decade = m.decade || "00s";
+    if (a.nostalgia === "near_past")          m.decade = m.decade || "now";
+    if (a.nostalgia === "no_nostalgia")       m.decade = m.decade || "now";
+
+    // aftertaste (primary) — replaces memory + lately + want
+    if (a.aftertaste === "held")     { m.energy = "unwind"; m.depth = m.depth || "warm"; m.risk = m.risk || "safe"; }
+    if (a.aftertaste === "lighter")  { m.energy = "unwind"; m.depth = m.depth || "fun"; m.tone = m.tone || "light"; }
+    if (a.aftertaste === "thinking") { m.energy = "engage"; m.depth = m.depth || "thoughtful"; }
+    if (a.aftertaste === "haunted")  { m.energy = "engage"; m.depth = m.depth || "uneasy"; m.tone = m.tone || "dark"; }
+    if (a.aftertaste === "wrecked")  { m.energy = "engage"; m.depth = m.depth || "ruined"; m.tone = m.tone || "dark"; m.risk = m.risk || "discover"; }
+    if (a.aftertaste === "charged")  { m.energy = "engage"; m.risk = m.risk || "discover"; }
+
+    // scene (texture)
+    if (a.scene === "survival" || a.scene === "discovery") m.energy = m.energy || "engage";
     if (a.scene === "dialogue" || a.scene === "house")     m.company = m.company || "alone";
+
+    // intent (primary)
     if (a.intent === "escape")  { m.energy = "unwind"; m.tone = m.tone || "light"; }
     if (a.intent === "feel")    { m.energy = "engage"; }
     if (a.intent === "think")   { m.energy = "engage"; m.company = "alone"; }
     if (a.intent === "company") { m.company = "shared"; }
-    if (a.depth === "fun")        { m.energy = "unwind"; m.risk = "safe"; }
-    if (a.depth === "warm")       { m.risk = "safe"; }
+
+    // depth (primary)
+    if (a.depth === "fun")        { m.energy = "unwind"; m.risk = m.risk || "safe"; }
+    if (a.depth === "warm")       { m.risk = m.risk || "safe"; }
     if (a.depth === "thoughtful") { m.energy = "engage"; }
     if (a.depth === "uneasy")     { m.energy = "engage"; m.risk = "discover"; m.tone = m.tone || "dark"; }
     if (a.depth === "ruined")     { m.energy = "engage"; m.risk = "discover"; m.tone = "dark"; }
-    if (a.weather === "rain" || a.weather === "fog") m.tone = m.tone || "dark";
-    if (a.weather === "sun")    m.tone = m.tone || "light";
-    if (a.weather === "storm")  { m.tone = "dark"; m.energy = "engage"; }
-    if (a.weather === "winter") m.tone = m.tone || "dark";
-    if (a.sound === "silence") m.energy = "unwind";
-    if (a.sound === "noise")   m.energy = "engage";
-    if (a.sound === "voices")  m.company = "shared";
-    if (a.company) m.company = a.company;
+
+    // sound (texture)
+    if (a.sound === "silence") m.energy = m.energy || "unwind";
+    if (a.sound === "noise")   m.energy = m.energy || "engage";
+    if (a.sound === "voices")  m.company = m.company || "shared";
+
+    // company (primary)
+    if (has("company")) m.company = a.company;
+
+    // pace (primary)
     if (a.pace === "slow")  m.energy = m.energy || "unwind";
     if (a.pace === "fast")  m.energy = "engage";
-    if (a.ending === "twist")  m.risk = "discover";
+
+    // ending (primary)
+    if (a.ending === "twist")  m.risk = m.risk || "discover";
     if (a.ending === "bitter") m.tone = m.tone || "dark";
-    // new axes
-    if (a.color === "blood" || a.color === "ash") m.tone = m.tone || "dark";
-    if (a.color === "gold"  || a.color === "earth") m.tone = m.tone || "light";
-    if (a.color === "neon")  { m.tone = "dark"; m.energy = "engage"; }
-    if (a.light === "fluorescent" || a.light === "neon") m.tone = m.tone || "dark";
-    if (a.light === "candle" || a.light === "golden") m.tone = m.tone || "light";
-    if (a.texture === "sandpaper" || a.texture === "wet") m.tone = m.tone || "dark";
-    if (a.texture === "silk" || a.texture === "wood") m.tone = m.tone || "light";
+    if (a.ending === "open")   m.risk = m.risk || "discover";
+    if (a.ending === "closed") m.risk = m.risk || "safe";
+    if (a.ending === "relief") { m.energy = m.energy || "unwind"; m.depth = m.depth || "warm"; m.risk = m.risk || "safe"; }
+
+    // place (texture)
     if (a.place === "abandoned" || a.place === "nowhere") m.tone = m.tone || "dark";
-    if (a.place === "interior") m.company = m.company || "alone";
-    if (a.memory === "heartbreak" || a.memory === "regret") m.tone = m.tone || "dark";
-    if (a.memory === "wonder" || a.memory === "childhood") m.tone = m.tone || "light";
-    if (a.want === "moved" || a.want === "haunted") m.energy = "engage";
-    if (a.want === "soothed" || a.want === "entertained") m.energy = "unwind";
-    if (a.want === "challenged") { m.energy = "engage"; m.risk = "discover"; }
-    if (a.avoid) m.avoid = a.avoid;
-    if (a.lately === "numb" || a.lately === "stuck") m.risk = "discover";
-    if (a.lately === "lonely") m.company = "alone";
-    if (a.risk_taste === "classic")  m.risk = "safe";
-    if (a.risk_taste === "gem" || a.risk_taste === "weird" || a.risk_taste === "cult") m.risk = "discover";
+    if (a.place === "interior")   m.company = m.company || "alone";
+    if (a.place === "metropolis") m.tone = m.tone || "dark";
+    if (a.place === "forest")     m.tone = m.tone || "dark";
+
+    // atmosphere (texture) — replaces weather/color/light/texture/season/smell/window/temperature
+    if (a.atmosphere === "rain_neon")      { m.tone = "dark"; m.energy = "engage"; }
+    if (a.atmosphere === "warm_room")      { m.tone = "light"; m.energy = "unwind"; }
+    if (a.atmosphere === "cold_house")     { m.tone = "dark"; m.company = m.company || "alone"; }
+    if (a.atmosphere === "open_sun")       { m.tone = "light"; m.energy = m.energy || "unwind"; }
+    if (a.atmosphere === "storm_pressure") { m.tone = "dark"; m.energy = "engage"; }
+    if (a.atmosphere === "ash_city")       { m.tone = "dark"; m.depth = m.depth || "thoughtful"; }
+    if (a.atmosphere === "gold_memory")    { m.tone = "light"; m.depth = m.depth || "warm"; }
+    if (a.atmosphere === "skin_low_light") { m.tone = "dark"; m.depth = m.depth || "uneasy"; }
+
+    // decade (primary)
+    if (has("decade")) m.decade = a.decade;
+
+    // backend-mapped axes
+    if (has("runtime"))       m.runtime = a.runtime;
+    if (has("language_pref")) m.language_pref = a.language_pref;
+    if (has("avoid"))         m.avoid = a.avoid;
+
+    // risk_taste (primary)
+    if (a.risk_taste === "classic")    m.risk = m.risk || "safe";
+    if (a.risk_taste === "gem")        { m.risk = "discover"; m.popularity = m.popularity || "low"; m.quality = m.quality || "high"; }
+    if (a.risk_taste === "weird")      { m.risk = "discover"; m.trust = m.trust || "weird"; }
+    if (a.risk_taste === "cult")       { m.risk = "discover"; m.popularity = m.popularity || "low"; }
     if (a.risk_taste === "hate_maybe") { m.risk = "discover"; m.tone = m.tone || "dark"; }
-    if (a.window === "rain" || a.window === "parking" || a.window === "wall") m.tone = m.tone || "dark";
-    if (a.window === "sea" || a.window === "forest") m.tone = m.tone || "light";
-    if (a.temperature === "burning" || a.temperature === "freezing") m.energy = "engage";
-    if (a.temperature === "warm") m.energy = m.energy || "unwind";
-    if (a.decade) m.decade = a.decade;
-    if (a.animal) m.animal = a.animal;
-    if (a.smell) m.smell = a.smell;
-    // backend-mapped axes (worker reads these directly)
-    if (a.runtime) m.runtime = a.runtime;
-    if (a.language_pref) m.language_pref = a.language_pref;
-    if (a.avoid && a.avoid !== "nothing") m.avoid = a.avoid;
-    if (a.opening === "burst")  { m.energy = "engage"; m.tone = m.tone || "dark"; }
-    if (a.opening === "quiet")  { m.energy = m.energy || "unwind"; }
-    if (a.opening === "voiceover") { m.tone = m.tone || "dark"; }
-    if (a.opening === "middle") { m.energy = "engage"; m.risk = "discover"; }
-    if (a.opening === "title")  { m.risk = "discover"; }
-    if (a.rewatch_taste === "popular") m.popularity = "high";
-    if (a.rewatch_taste === "obscure") { m.popularity = "low"; m.risk = "discover"; }
-    if (a.director_vibe === "auteur")     { m.quality = "high"; m.popularity = "low"; }
-    if (a.director_vibe === "mainstream") { m.popularity = "high"; }
-    if (a.director_vibe === "indie")      { m.quality = "high"; m.popularity = "mid"; }
-    if (a.first_act === "discover") m.first_act = "fantasy_scifi";
+
+    // opening (texture)
+    if (a.opening === "burst")     { m.energy = "engage"; m.tone = m.tone || "dark"; }
+    if (a.opening === "quiet")     { m.energy = m.energy || "unwind"; }
+    if (a.opening === "voiceover") { m.tone = m.tone || "dark"; m.depth = m.depth || "thoughtful"; }
+    if (a.opening === "middle")    { m.energy = "engage"; m.risk = m.risk || "discover"; }
+    if (a.opening === "title")     { m.quality = m.quality || "high"; }
+
+    // first_act (primary)
+    if (a.first_act === "discover") m.first_act = "thriller_horror";
     if (a.first_act === "meet")     m.first_act = "drama_romance";
-    if (a.first_act === "wrong")    m.first_act = "thriller_horror";
+    if (a.first_act === "wrong")    { m.first_act = "thriller_horror"; m.energy = m.energy || "engage"; }
     if (a.first_act === "goal")     m.first_act = "action_adventure";
+    if (a.first_act === "world")    m.first_act = "fantasy_scifi";
+
+    // fear (primary)
     if (a.fear === "gore")        m.exclude = (m.exclude || []).concat(["horror_extreme"]);
     if (a.fear === "tears")       m.exclude = (m.exclude || []).concat(["heavy_drama"]);
-    if (a.fear === "boredom")     m.energy = "engage";
+    if (a.fear === "boredom")     m.energy = m.energy || "engage";
     if (a.fear === "confusion")   m.popularity = m.popularity || "high";
-    if (a.fear === "predictable") m.risk = "discover";
-    if (a.trust === "small_drama")  m.trust = "drama";
-    if (a.trust === "good_thriller")m.trust = "thriller";
-    if (a.trust === "weird_film")   m.trust = "weird";
-    if (a.trust === "smart_comedy") m.trust = "comedy";
-    if (a.trust === "moody_horror") m.trust = "horror";
-    if (a.trust === "warm_anim")    m.trust = "animation";
+    if (a.fear === "predictable") m.risk = m.risk || "discover";
+
+    // trust (primary)
+    if (a.trust === "small_drama")     m.trust = "drama";
+    if (a.trust === "good_thriller")   m.trust = "thriller";
+    if (a.trust === "weird_film")      m.trust = "weird";
+    if (a.trust === "smart_comedy")    m.trust = "comedy";
+    if (a.trust === "moody_horror")    { m.trust = "horror"; m.tone = m.tone || "dark"; }
+    if (a.trust === "erotic_thriller") { m.trust = "thriller"; m.tone = m.tone || "dark"; }
+    if (a.trust === "warm_anim")       m.trust = "animation";
+
+    // body (texture)
+    if (a.body === "tense")  { m.energy = m.energy || "engage"; m.tone = m.tone || "dark"; }
+    if (a.body === "tired")  { m.energy = m.energy || "unwind"; m.risk = m.risk || "safe"; }
+    if (a.body === "wired")  { m.energy = m.energy || "engage"; }
+    if (a.body === "soft")   { m.energy = m.energy || "unwind"; m.tone = m.tone || "light"; }
+    if (a.body === "buzzed") { m.energy = m.energy || "engage"; m.risk = m.risk || "discover"; }
+
+    // ink — kept for visual climax
     if (a.ink) {
       try {
         const blot = JSON.parse(a.ink);
-        if (blot.tone)   m.tone = blot.tone;
+        if (blot.tone)   m.tone = m.tone || blot.tone;
         if (blot.energy) m.energy = m.energy || blot.energy;
         if (blot.door && !m.tone) m.tone = blot.door === "fantasy" || blot.door === "intimacy" ? "light" : "dark";
       } catch {}
     }
+
+    // phrase — free text, passed through
     if (a.phrase) m.phrase = a.phrase;
+
     return m;
   }
 
