@@ -1546,6 +1546,7 @@
     document.querySelectorAll("[data-media]").forEach(btn => {
       btn.addEventListener("click", () => {
         state.media = btn.dataset.media || "movie";
+        if (window.setMediaCtx) window.setMediaCtx(state.media);
         QUIZ = buildSession();
         state.qIdx = 0;
         renderQuestion();

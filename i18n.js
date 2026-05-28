@@ -298,7 +298,7 @@ const STRINGS = {
     q_pace_steady: "Firm, no hurry, no sleeping.",
     q_pace_fast:   "Fast, with pressure and clean cuts.",
 
-    q_ending_t: "How do you want to <em>walk out?</em>",
+    q_ending_t: "How do you want to <em>walk out of the {media}?</em>",
     q_ending_closed: "Tight closure, no false loose ends.",
     q_ending_open:   "A door left open, but not from laziness.",
     q_ending_twist:  "A reveal that changes what I was watching.",
@@ -433,7 +433,7 @@ const STRINGS = {
     q_opening_middle:    "In the middle of the trouble, no permission asked.",
     q_opening_title:     "Title, silence, total confidence.",
 
-    q_rewatch_t: "Should others <em>know it?</em>",
+    q_rewatch_t: "Should others <em>know this {media}?</em>",
     q_rewatch_popular: "Something many have seen.",
     q_rewatch_obscure: "Something almost no one has seen.",
     q_rewatch_either:  "I don't care.",
@@ -455,7 +455,7 @@ const STRINGS = {
     q_fear_tears:        "Manipulated emotional blow.",
     q_fear_boredom:      "Feeling that nothing moves.",
     q_fear_confusion:    "Confusion that feels like sloppiness, not mystery.",
-    q_fear_predictable:  "Knowing the ending before the film wakes up.",
+    q_fear_predictable:  "Knowing the ending before the {media} wakes up.",
 
     q_trust_t: "Where do you <em>trust the most?</em>",
     q_trust_drama:     "An intimate drama that watches more than explains.",
@@ -531,7 +531,7 @@ const STRINGS = {
 
     q_body_t: "What does the <em>body say before pressing play?</em>",
     q_body_tense:  "Jaw clenched, shoulders up.",
-    q_body_tired:  "Tired body, no fight left for the film.",
+    q_body_tired:  "Tired body, no fight left for the {media}.",
     q_body_wired:  "Sped up, like a scene is missing.",
     q_body_soft:   "Soft, surrendered, looking for kindness.",
     q_body_buzzed: "Vibrating, ready to be pushed.",
@@ -579,7 +579,7 @@ const STRINGS = {
     q_nostalgia_any: "Era doesn’t matter.",
 
     q_aftertaste_t: "How do you want to <em>feel when credits roll?</em>",
-    q_aftertaste_held: "Held, like the film stays close.",
+    q_aftertaste_held: "Held, like the {media} stays close.",
     q_aftertaste_lighter: "Lighter, without being treated like a fool.",
     q_aftertaste_thinking: "Thinking about a scene hours later.",
     q_aftertaste_haunted: "Haunted by an image that won’t leave.",
@@ -925,7 +925,7 @@ const STRINGS = {
     q_pace_steady: "Firme, sin correr ni dormirse.",
     q_pace_fast:   "Rápido, con presión y cortes limpios.",
 
-    q_ending_t: "¿Cómo quieres <em>salir de la película?</em>",
+    q_ending_t: "¿Cómo quieres <em>salir de la {media}?</em>",
     q_ending_closed: "Con cierre preciso, sin cabos sueltos falsos.",
     q_ending_open:   "Con una puerta abierta, pero no por flojera.",
     q_ending_twist:  "Con una revelación que cambie lo que estaba mirando.",
@@ -1060,7 +1060,7 @@ const STRINGS = {
     q_opening_middle:    "En mitad del problema, sin pedir permiso.",
     q_opening_title:     "Título, silencio y confianza total.",
 
-    q_rewatch_t: "Esta película la <em>conocen?</em>",
+    q_rewatch_t: "Esta {media} la <em>conocen?</em>",
     q_rewatch_popular: "Algo que muchos hayan visto.",
     q_rewatch_obscure: "Algo que casi nadie haya visto.",
     q_rewatch_either:  "No me importa.",
@@ -1082,7 +1082,7 @@ const STRINGS = {
     q_fear_tears:        "Golpe emocional manipulado.",
     q_fear_boredom:      "Sentir que nada avanza.",
     q_fear_confusion:    "Confusión que parece descuido, no misterio.",
-    q_fear_predictable:  "Saber el final antes de que la película despierte.",
+    q_fear_predictable:  "Saber el final antes de que la {media} despierte.",
 
     q_trust_t: "¿En qué <em>zona confías más?</em>",
     q_trust_drama:     "Drama íntimo que observa más de lo que explica.",
@@ -1158,7 +1158,7 @@ const STRINGS = {
 
     q_body_t: "¿Qué dice el <em>cuerpo antes de poner play?</em>",
     q_body_tense:  "Mandíbula apretada, hombros arriba.",
-    q_body_tired:  "Cuerpo cansado, sin ganas de pelear con la película.",
+    q_body_tired:  "Cuerpo cansado, sin ganas de pelear con la {media}.",
     q_body_wired:  "Acelerado, como si faltara una escena.",
     q_body_soft:   "Blando, rendido, buscando algo amable.",
     q_body_buzzed: "Vibrando, con ganas de algo que empuje.",
@@ -1206,7 +1206,7 @@ const STRINGS = {
     q_nostalgia_any: "La época me da igual.",
 
     q_aftertaste_t: "¿Cómo <em>quieres quedar al final?</em>",
-    q_aftertaste_held: "Acompañado, como si la película se quedara cerca.",
+    q_aftertaste_held: "Acompañado, como si la {media} se quedara cerca.",
     q_aftertaste_lighter: "Más liviano, sin que me traten como tonto.",
     q_aftertaste_thinking: "Pensando en una escena varias horas después.",
     q_aftertaste_haunted: "Perseguido por una imagen que no se va.",
@@ -1279,10 +1279,30 @@ function timePhrase(lang) {
 }
 window.timePhrase = timePhrase;
 
+// Media-aware phrase. Used to interpolate {media} / {medias} in question
+// copy so the quiz doesn't say "salir de la película" when the user picked SERIE.
+// state.media is one of "movie" | "tv" | "any".
+window.__mediaCtx = "any";
+window.setMediaCtx = (m) => { window.__mediaCtx = (m === "movie" || m === "tv") ? m : "any"; };
+function mediaWord(lang, plural) {
+  const m = window.__mediaCtx || "any";
+  if (lang === "es") {
+    if (m === "movie") return plural ? "películas" : "película";
+    if (m === "tv")    return plural ? "series"    : "serie";
+    return plural ? "historias" : "historia";
+  }
+  if (m === "movie") return plural ? "films" : "film";
+  if (m === "tv")    return plural ? "shows" : "show";
+  return plural ? "stories" : "story";
+}
+window.mediaWord = mediaWord;
+
 window.t = (key) => {
   let v = (T[key] !== undefined ? T[key] : (STRINGS.en[key] !== undefined ? STRINGS.en[key] : key));
-  if (typeof v === "string" && v.indexOf("{time}") !== -1) {
-    v = v.split("{time}").join(timePhrase(LANG));
+  if (typeof v === "string") {
+    if (v.indexOf("{time}") !== -1) v = v.split("{time}").join(timePhrase(LANG));
+    if (v.indexOf("{medias}") !== -1) v = v.split("{medias}").join(mediaWord(LANG, true));
+    if (v.indexOf("{media}")  !== -1) v = v.split("{media}").join(mediaWord(LANG, false));
   }
   return v;
 };
