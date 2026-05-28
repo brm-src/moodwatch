@@ -4,6 +4,19 @@
   const $$ = (s) => Array.from(document.querySelectorAll(s));
   const API_BASE = (window.MOODWATCH_API || "/api").replace(/\/$/, "");
 
+  // Single silent retry on network failure / 5xx (Cloudflare cold start, transient blip).
+  // Only retries once, then propagates whatever happened. Keeps total wait bounded (~300ms).
+  async function fetchRetry(url, opts) {
+    try {
+      const r = await fetch(url, opts);
+      if (!r.ok && r.status >= 500) throw new Error(`http_${r.status}`);
+      return r;
+    } catch (e) {
+      await new Promise(res => setTimeout(res, 300));
+      return fetch(url, opts);
+    }
+  }
+
   // ────────────────────────────────────────────────────────────
   // QUESTION BANK
   // Each entry is one *category*. Per session we pick 5–6 random
@@ -1299,7 +1312,7 @@
     state.lastMode = "surprise";
     state.lastProfile = activeProfile;
     try {
-      const r = await fetch(`${API_BASE}/surprise?${params}`);
+      const r = await fetchRetry(`${API_BASE}/surprise?${params}`);
       const data = await r.json();
       if (!r.ok) {
         const code = data.error || "generic";
@@ -1347,7 +1360,7 @@
     state.lastMode = "recommend";
     state.lastMoodB64 = moodB64;
     try {
-      const r = await fetch(`${API_BASE}/recommend?${params}`);
+      const r = await fetchRetry(`${API_BASE}/recommend?${params}`);
       const data = await r.json();
       if (!r.ok) {
         const code = data.error || "generic";
@@ -1627,7 +1640,7 @@
     params.set("media", resolveMedia(state.media));
     if (exclude.length) params.set("exclude", exclude.join(","));
     try {
-      const r = await fetch(`${API_BASE}/alt?${params}`);
+      const r = await fetchRetry(`${API_BASE}/alt?${params}`);
       if (!r.ok) return null;
       const data = await r.json();
       const film = data.film;
