@@ -518,7 +518,11 @@ async function recommend(req, env, ctx) {
   const TRUST_GENRES = {
     drama:     ["drama"],
     thriller:  ["thriller","mystery","crime"],
-    horror:    ["horror"],
+    // Horror in TMDb-TV doesn't exist — the closest tags are mystery,
+    // thriller, sci-fi & fantasy. Movies still match strictly.
+    horror:    media === "tv"
+      ? ["horror","mystery","thriller","sci-fi & fantasy","fantasy"]
+      : ["horror"],
     comedy:    ["comedy"],
     animation: ["animation"],
     doc:       ["documentary"],
