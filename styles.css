@@ -682,6 +682,16 @@ header.top {
   border-bottom: 2px solid var(--rule);
   padding-bottom: 4px;
   margin: var(--s-3) 0 var(--s-4);
+  position: relative;
+  /* Underline grows from center when section enters */
+  background-image: linear-gradient(to right, var(--accent), var(--accent));
+  background-position: 50% 100%;
+  background-size: 0 2px;
+  background-repeat: no-repeat;
+  transition: background-size .55s cubic-bezier(.2,.7,.2,1);
+}
+.user-row:focus-within {
+  background-size: 100% 2px;
 }
 .user-row .at {
   font-family: var(--font-display);
@@ -689,7 +699,9 @@ header.top {
   color: var(--muted);
   font-size: var(--t-h3);
   padding-right: 4px;
+  transition: color .35s ease, transform .35s ease;
 }
+.user-row:focus-within .at { color: var(--accent); transform: translateX(-1px); }
 .user-row input {
   flex: 1;
   background: transparent;
@@ -700,9 +712,66 @@ header.top {
   font-size: var(--t-h3);
   font-weight: 500;
   outline: none;
+  caret-color: var(--accent);
 }
-.user-row input::placeholder { color: var(--muted); font-style: italic; }
+.user-row input::placeholder { color: var(--muted); font-style: italic; transition: opacity .25s ease; }
+.user-row:focus-within input::placeholder { opacity: .4; }
 .lb-actions { display: flex; flex-direction: column; gap: var(--s-2); }
+
+/* ─── lb-ask: curated entrance choreography ─── */
+@keyframes lb-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes lb-at-pop {
+  0%   { opacity: 0; transform: translateX(-6px) scale(.85); letter-spacing: -0.05em; }
+  60%  { opacity: 1; transform: translateX(1px) scale(1.05); letter-spacing: 0; }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes lb-input-reveal {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes lb-underline-grow {
+  from { background-size: 0 2px; }
+  to   { background-size: 100% 2px; }
+}
+
+.step[data-step="lb-ask"].active .fig,
+.step[data-step="lb-ask"].active .q-title,
+.step[data-step="lb-ask"].active .user-row,
+.step[data-step="lb-ask"].active .user-row .at,
+.step[data-step="lb-ask"].active .user-row input,
+.step[data-step="lb-ask"].active .lb-actions {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(.2,.7,.2,1);
+}
+.step[data-step="lb-ask"].active .fig {
+  animation: lb-fade-up .5s 0s;
+}
+.step[data-step="lb-ask"].active .q-title {
+  animation: lb-fade-up .55s .1s;
+}
+.step[data-step="lb-ask"].active .user-row {
+  animation: lb-underline-grow .8s .35s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.step[data-step="lb-ask"].active .user-row .at {
+  animation: lb-at-pop .7s .55s cubic-bezier(.2,1.2,.4,1);
+}
+.step[data-step="lb-ask"].active .user-row input {
+  animation: lb-input-reveal .55s .75s;
+}
+.step[data-step="lb-ask"].active .lb-actions {
+  animation: lb-fade-up .55s .9s;
+}
+/* Reset the static underline so the animation owns it during entrance.
+   After focus-within engages, the transition above takes over. */
+.step[data-step="lb-ask"].active .user-row {
+  background-size: 100% 2px; /* end state matches keyframe target */
+}
+@media (prefers-reduced-motion: reduce) {
+  .step[data-step="lb-ask"].active * { animation: none !important; }
+}
 
 /* ─── loading ─── */
 .loader {

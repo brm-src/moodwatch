@@ -1611,7 +1611,8 @@
     $("#path-lb").addEventListener("click", () => {
       state.path = "lb";
       show("lb-ask");
-      setTimeout(() => $("#user")?.focus(), 200);
+      // Delay focus until the entrance choreography settles (input reveals at ~0.75s).
+      setTimeout(() => $("#user")?.focus(), 850);
     });
 
     $("#lb-confirm").addEventListener("click", () => {
