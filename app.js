@@ -1536,6 +1536,23 @@
     $("#q-back").addEventListener("click", backQ);
     $("#q-skip").addEventListener("click", skipQ);
 
+    // FAQ modal: open from footer link, close on x or backdrop click.
+    const faqModal = $("#faq-modal");
+    const faqLink = $("#faq-link");
+    const faqClose = $("#faq-modal-close");
+    if (faqModal && faqLink) {
+      faqLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (typeof faqModal.showModal === "function") faqModal.showModal();
+        else faqModal.setAttribute("open", "");
+      });
+      faqClose?.addEventListener("click", () => faqModal.close?.() || faqModal.removeAttribute("open"));
+      faqModal.addEventListener("click", (e) => {
+        // Click on backdrop (the dialog itself, not its inner content) closes it.
+        if (e.target === faqModal) faqModal.close?.() || faqModal.removeAttribute("open");
+      });
+    }
+
     $("#path-global").addEventListener("click", () => {
       state.path = "global";
       state.answers = {};

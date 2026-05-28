@@ -223,13 +223,14 @@
   </section>
 </main>
 
-<!-- ─── FAQ (collapsed under a single button) ─── -->
-<details class="faq-section" id="faq">
-  <summary class="faq-toggle">
-    <span data-i18n="faq_toggle">Frequently asked questions</span>
-    <span class="faq-toggle-mark">+</span>
-  </summary>
-  <div class="faq-inner">
+<!-- ─── FAQ modal (opened from footer link) ─── -->
+<dialog class="faq-modal" id="faq-modal" aria-labelledby="faq-modal-title">
+  <div class="faq-modal-inner">
+    <div class="faq-modal-head">
+      <h2 id="faq-modal-title" data-i18n="faq_toggle">Frequently asked questions</h2>
+      <button type="button" class="faq-modal-close" id="faq-modal-close" aria-label="Close">×</button>
+    </div>
+    <div class="faq-modal-body">
     <details class="faq-item">
       <summary><span data-i18n="faq_q1">How is this different from asking ChatGPT?</span><span class="faq-mark">+</span></summary>
       <p data-i18n="faq_a1">Moodwatch is built around how you feel right now, not a generic prompt. It reads your Letterboxd watchlist, takes mood and runtime into account, and surfaces films from a curated catalogue of 1,500+ titles plus TMDb. ChatGPT doesn't know what you saved, what you've already watched, or where to actually stream it tonight.</p>
@@ -269,8 +270,9 @@
       <summary><span data-i18n="faq_q8">OK, how does the algorithm actually work?</span><span class="faq-mark">+</span></summary>
       <p data-i18n="faq_a8">Technical breakdown of the pipeline.</p>
     </details>
+    </div>
   </div>
-</details>
+</dialog>
 
 <footer class="bottom">
   <div class="row">
@@ -282,7 +284,8 @@
       <span data-i18n="footer_made">Built with</span> ·
       <a href="https://letterboxd.com" target="_blank" rel="noopener">Letterboxd</a> ·
       <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDb</a> ·
-      <a href="https://www.justwatch.com" target="_blank" rel="noopener">JustWatch</a>
+      <a href="https://www.justwatch.com" target="_blank" rel="noopener">JustWatch</a> ·
+      <a href="#" id="faq-link" data-i18n="faq_link">FAQ</a>
     </small>
     <button type="button" class="clear-taste" id="clear-taste" data-i18n="clear_taste" title="Reset my taste">Reset my taste</button>
   </div>
@@ -291,7 +294,7 @@
 <script>
   window.MOODWATCH_API = "https://moodwatch-api.brmcl.workers.dev";
 </script>
-<script src="./i18n.js?v=launch-eve-3"></script>
-<script src="./app.js?v=media-aware-copy-20260528"></script>
+<script src="./i18n.js?v=launch-eve-4"></script>
+<script src="./app.js?v=faq-modal-20260528"></script>
 </body>
 </html>
