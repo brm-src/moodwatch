@@ -6,6 +6,16 @@
 
 import { tmdbDiscover, tmdbDiscoverTV, GENRES, TV_GENRES } from "./tmdb.js";
 
+// Single source of truth for "what counts as a mood signal".
+// Used by index.js (specificity gating) and scorer.js (density damp).
+export const MOOD_AXES = [
+  "tone","energy","depth","trust","first_act","appetite","decade",
+  "language_pref","runtime","quality","popularity","company","risk","fear","avoid"
+];
+export function moodSpecificity(mood) {
+  return MOOD_AXES.reduce((n, k) => n + (mood[k] && mood[k] !== "any" ? 1 : 0), 0);
+}
+
 // Genre presets per axis. Multiple axes combine via union (with_genres OR-ed in TMDb).
 function genreSet(mood, media = "movie") {
   const G = media === "tv" ? TV_GENRES : GENRES;
@@ -41,9 +51,18 @@ function genreSet(mood, media = "movie") {
   const trustMap = {
     drama: G.drama, thriller: G.thriller, horror: G.horror,
     comedy: G.comedy, animation: G.animation,
+    doc: G.documentary,
     weird: null, // no clean genre, handled by lower vote_count
   };
   if (mood.trust && trustMap[mood.trust]) inc.add(trustMap[mood.trust]);
+  // Erotic thriller → drama+thriller axis (no single TMDb genre fits).
+  if (mood.trust === "erotic_thriller") {
+    [G.thriller, G.drama].forEach(x => inc.add(x));
+  }
+  // Doc → exclude family/animation noise that creeps via tone=light defaults.
+  if (mood.trust === "doc") {
+    exc.add(G.family); exc.add(G.animation);
+  }
 
   // avoid → hard without_genres + scoring penalty downstream.
   // violence: action, war, horror, crime, thriller out — hard exclusion.
@@ -76,9 +95,11 @@ function runtimeRange(mood) {
   // user-asked runtime overrides default min of 75
   if (m === "tiny")   return { "with_runtime.lte": 40 };
   if (m === "short")  return { "with_runtime.gte": 60, "with_runtime.lte": 100 };
-  if (m === "medium") return { "with_runtime.gte": 90, "with_runtime.lte": 120 };
-  if (m === "long")   return { "with_runtime.gte": 120, "with_runtime.lte": 180 };
-  if (m === "epic")   return { "with_runtime.gte": 150 };
+  if (m === "medium") return { "with_runtime.gte": 90, "with_runtime.lte": 130 };
+  if (m === "long")   return { "with_runtime.gte": 120, "with_runtime.lte": 200 };
+  // "epic" = scope/tone, not duration. Bias via genres + scorer; no hard runtime cap.
+  // (Many epics are 130-150min: Lawrence of Arabia is 218, but Mad Max Fury Road is 120.)
+  if (m === "epic")   return {};
   return {};
 }
 
@@ -111,6 +132,10 @@ function voteFilters(mood) {
   if (mood.popularity === "high") out["vote_count.gte"] = 1000;
   if (mood.popularity === "low")  out["vote_count.gte"] = 100; // cap below
   if (mood.popularity === "low")  out["vote_count.lte"] = 1500;
+  // Short films are niche by nature — drop the 500-vote floor or pool is empty.
+  if (mood.runtime === "short" || mood.runtime === "tiny") {
+    out["vote_count.gte"] = 80;
+  }
   // depth → quality floor (also shapes vote_count: thoughtful → less mainstream)
   if (mood.depth === "thoughtful" || mood.depth === "uneasy" || mood.depth === "ruined") {
     out["vote_average.gte"] = 6.8;

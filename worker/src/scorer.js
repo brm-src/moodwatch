@@ -83,6 +83,14 @@ export function fitScore(film, mood = {}) {
 
   // Era bias.
   const dateStr = film.release_date || film.first_air_date || "";
+
+  // Unreleased films: heavy penalty unless explicitly wanted.
+  // QA #3 caught The Punisher 2026 / Lee Cronin's Mummy polluting many scenarios
+  // due to high promotional popularity with no real release.
+  const todayStr = new Date().toISOString().slice(0, 10);
+  if (dateStr && dateStr > todayStr) {
+    s -= 5;
+  }
   const year = dateStr ? parseInt(dateStr.slice(0, 4), 10) : 0;
   const wantsOld = mood.decade === "old" || mood.decade === "70s" || mood.decade === "70s80s" ||
                    mood.decade === "80s" || mood.appetite === "vintage_love" ||

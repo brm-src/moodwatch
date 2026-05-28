@@ -31,10 +31,16 @@ async function fetchHtml(url) {
 }
 
 function extractSlugs(html) {
+  // Letterboxd watchlist HTML wraps items in <ul class="poster-list"> ... </ul>.
+  // Earlier regex matched ANY /film/... link on the page, which included sidebar
+  // recommendations ("similar films", "popular this week", footer). That polluted
+  // the watchlist with films the user never added.
   const slugs = new Set();
+  const listMatch = html.match(/<ul[^>]*class="[^"]*poster-list[^"]*"[^>]*>([\s\S]*?)<\/ul>/i);
+  const scope = listMatch ? listMatch[1] : html; // fallback to whole HTML if class changes
   const reA = /\/film\/([a-z0-9][a-z0-9-]+)\/?/gi;
   let m;
-  while ((m = reA.exec(html))) slugs.add(m[1]);
+  while ((m = reA.exec(scope))) slugs.add(m[1]);
   return [...slugs].filter(s => !["a","is","of","the","this","new","top"].includes(s));
 }
 

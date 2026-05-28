@@ -2,7 +2,7 @@
 // Endpoint: GET /recommend?country=CL&lang=es&mood=<base64json>&user=<lb_user>?
 // Returns:  { films: [{title, year, director, runtime, genres, poster, justwatch, tmdb, curated_note?}] }
 
-import { discoverByMood } from "./mood.js";
+import { discoverByMood, MOOD_AXES, moodSpecificity } from "./mood.js";
 import {
   tmdbDetails, tmdbProviders, tmdbCredits, tmdbImageBase, tmdbDiscover,
   tmdbSimilar, tmdbRecommendations,
@@ -12,6 +12,31 @@ import { fetchWatchlistTmdbIds } from "./letterboxd.js";
 import { CURATED, curatedFor, CURATED_TV, curatedTvFor } from "./curated.js";
 import { matchLists } from "./lists.js";
 import { imdbTierBoost, imdbTierTier, selectTierForMood, IMDB_TIER_COUNTS } from "./imdb_tier.js";
+
+// Films that surface too aggressively when mood is light (QA #2 finding).
+// IDs from TMDb. Used only when mood specificity ≤ 2 — for specific moods,
+// fitScore signals dominate and these get picked normally if they fit.
+const OVEREXPOSED_CANON = new Set([
+  278,    // The Shawshank Redemption
+  299536, // Avengers: Infinity War
+  299534, // Avengers: Endgame
+  157336, // Interstellar
+  16869,  // Inglourious Basterds
+  396535, // Train to Busan
+  381288, // Prisoners
+  11324,  // Shutter Island
+  105,    // Back to the Future
+  238,    // The Godfather
+  680,    // Pulp Fiction
+  120,    // LOTR Fellowship
+  121,    // LOTR Two Towers
+  122,    // LOTR Return of the King
+  13,     // Forrest Gump
+  98,     // Gladiator
+  687163, // Project Hail Mary
+  73,     // American History X
+  324857, // Spider-Man: Into the Spider-Verse
+]);
 import { fitScore } from "./scorer.js";
 
 // Per-media TMDb helper bundle. Keeps movie path identical when media === "movie".
@@ -64,7 +89,7 @@ function json(data, init = {}, headers = {}) {
 function decodeMood(b64) {
   try {
     const s = atob(b64);
-    return JSON.parse(decodeURIComponent(escape(s)));
+    return JSON.parse(new TextDecoder().decode(Uint8Array.from(s, c => c.charCodeAt(0))));
   } catch { return {}; }
 }
 
@@ -154,7 +179,7 @@ async function recommend(req, env, ctx) {
   const media = mediaParam === "tv" ? "tv" : "movie";
   const M = mediaApi(media);
   const exclude = (url.searchParams.get("exclude") || "")
-    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n)).slice(0, 200);
   const excludeSet = new Set(exclude);
   const liked = (url.searchParams.get("liked") || "")
     .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n)).slice(0, 30);
@@ -248,13 +273,11 @@ async function recommend(req, env, ctx) {
   // Subrequest budget: ~18 discover + 4 list + watchlist + 6 like-seeds + 5 dislike + 18 enrich = ~50.
   // Density-aware: drop tier injection completely when mood is specific OR avoid is set,
   // so we don't keep injecting Shawshank into a "dark thriller, avoid violence" mood.
-  const moodAxes = ["tone","energy","depth","trust","first_act","appetite","decade",
-                    "language_pref","runtime","quality","popularity","company","risk","fear"];
-  const moodSpecificity = moodAxes.reduce((n, k) => n + (mood[k] && mood[k] !== "any" ? 1 : 0), 0);
+  const _moodSpec1 = moodSpecificity(mood);
   let tierCap = media === "tv" ? 5 : 2;
   if (mood.avoid && mood.avoid !== "any" && mood.avoid !== "nothing") tierCap = 0;
-  if (moodSpecificity >= 5) tierCap = 0;
-  if (moodSpecificity >= 3) tierCap = Math.min(tierCap, 1);
+  if (_moodSpec1 >= 5) tierCap = 0;
+  if (_moodSpec1 >= 3) tierCap = Math.min(tierCap, 1);
   const tierInjectIds = tierCap > 0
     ? selectTierForMood(media === "tv", tierGenreFilter, haveIds, tierCap)
     : [];
@@ -398,9 +421,7 @@ async function recommend(req, env, ctx) {
   // Density-aware base scoring: when mood is empty, use full vote_average baseline
   // (people without preference want canon). When mood is specific, dampen baseline so
   // mood signals dominate — fixes "Shawshank in everything" bug.
-  const moodAxesAll = ["tone","energy","depth","trust","first_act","appetite","decade",
-                       "language_pref","runtime","quality","popularity","company","risk","fear","avoid"];
-  const moodSpec = moodAxesAll.reduce((n, k) => n + (mood[k] && mood[k] !== "any" ? 1 : 0), 0);
+  const moodSpec = moodSpecificity(mood);
   // baseDamp: 1.0 for empty mood, 0.4 for 5+ axes set
   const baseDamp = Math.max(0.4, 1.0 - 0.12 * Math.max(0, moodSpec - 1));
 
@@ -417,7 +438,129 @@ async function recommend(req, env, ctx) {
     if (mood.avoid === "weird"    && has("27","878","horror","scifi","science fiction")) return false;
     return true;
   };
+  const _preFilterPool = pool;
   pool = pool.filter(avoidFilter);
+
+  // Drop unreleased films from the pool. QA #3 caught Punisher 2026 / Mummy 2026
+  // dominating because TMDb has them with high promo popularity but no real release.
+  // The user is asking "what to watch tonight", not "what's coming up".
+  const _todayISO = new Date().toISOString().slice(0, 10);
+  pool = pool.filter(f => {
+    const d = f.release_date || f.first_air_date || "";
+    return !d || d <= _todayISO;
+  });
+
+  // Drop micro-runtime entries for movie pool: episodes/shorts/specials
+  // sometimes leak via tier injection (e.g. Punisher: One Last Kill runtime=51min).
+  // Only filter if film has a runtime; missing runtimes pass through to enrichment.
+  if (media === "movie") {
+    pool = pool.filter(f => {
+      if (!f.runtime) return true;
+      // tiny mood explicitly wants <40min; otherwise require at least 60min
+      if (mood.runtime === "tiny") return true;
+      return f.runtime >= 60;
+    });
+  }
+
+  // Promo-popularity guard: films with very few votes but high popularity score
+  // are usually trending due to marketing, not actual audience love.
+  // Drop the worst offenders (popularity > 200, vote_count < 100).
+  pool = pool.filter(f => {
+    const pop = f.popularity || 0;
+    const vc = f.vote_count || 0;
+    if (pop > 200 && vc < 100) return false;
+    return true;
+  });
+
+  // Hard language_pref filter — applied to ALL sources (not just /discover).
+  // QA found that tier injection + curated + watchlist were leaking other
+  // languages even when user picked "Spanish only" / "Asian only" / etc.
+  // Honor the same regex set used by mood.js languagePref().
+  const LANG_GROUPS = {
+    spanish:  new Set(["es","ca","gl","eu"]),
+    english:  new Set(["en"]),
+    asian:    new Set(["ja","ko","zh","cn","th","vi","id","ms","tl"]),
+    european: new Set(["fr","it","de","sv","da","no","fi","nl","pt","cs","hu","pl","ru","ro","sr","hr","sk","el","tr","is"]),
+  };
+  if (LANG_GROUPS[mood.language_pref]) {
+    const allowed = LANG_GROUPS[mood.language_pref];
+    pool = pool.filter(f => {
+      const ol = (f.original_language || "").toLowerCase();
+      return !ol || allowed.has(ol); // unknown language passes (rare)
+    });
+  }
+
+  // Hard decade filter — applied to ALL sources.
+  // QA #3 found tier injection + curated bypass the date range from /discover.
+  const DECADE_RANGES = {
+    old:    [0,    1969],
+    "70s":  [1970, 1979],
+    "70s80s":[1970, 1989],
+    "80s":  [1980, 1989],
+    "90s":  [1990, 1999],
+    "00s":  [2000, 2009],
+    "90s00s":[1990, 2009],
+    now:    [2010, 9999],
+  };
+  if (DECADE_RANGES[mood.decade]) {
+    const [lo, hi] = DECADE_RANGES[mood.decade];
+    pool = pool.filter(f => {
+      const yrStr = (f.release_date || f.first_air_date || "").slice(0, 4);
+      const yr = parseInt(yrStr, 10);
+      if (!yr) return true; // missing date, let it through
+      return yr >= lo && yr <= hi;
+    });
+  }
+
+  // Soft trust filter: if user picked trust=X, require at least one matching genre.
+  // QA #3 found drama/horror/comedy at 50-54% accuracy because tier/curated injected
+  // off-genre canon. trust is a contract: if you ask for horror, no Project Hail Mary.
+  const TRUST_GENRES = {
+    drama:     ["drama"],
+    thriller:  ["thriller","mystery","crime"],
+    horror:    ["horror"],
+    comedy:    ["comedy"],
+    animation: ["animation"],
+    doc:       ["documentary"],
+    erotic_thriller: ["thriller","drama"],
+    // weird: no genre constraint, handled by lower vote_count signal
+  };
+  if (TRUST_GENRES[mood.trust]) {
+    const allowed = new Set(TRUST_GENRES[mood.trust]);
+    const trustFiltered = pool.filter(f => {
+      const fg = new Set([...(f.genres || []), ...(f.genre_ids || [])].map(x => String(x).toLowerCase()));
+      return [...allowed].some(g => fg.has(g));
+    });
+    if (trustFiltered.length >= 6) pool = trustFiltered; // only apply if it doesn't empty pool
+  }
+
+  // Safety net: if filters left us with too few films, fall back gradually.
+  // QA #3 found a dense mood (12 axes + popularity:low + quality:high)
+  // returning zero films. Better to relax than to give an error screen.
+  // BUT: language_pref and decade are user-set hard contracts — don't bypass.
+  if (pool.length < 4) {
+    // Stage 1: re-include _preFilterPool items that match avoid + lang + decade.
+    let stage1 = _preFilterPool.filter(avoidFilter);
+    if (LANG_GROUPS[mood.language_pref]) {
+      const allowed = LANG_GROUPS[mood.language_pref];
+      stage1 = stage1.filter(f => {
+        const ol = (f.original_language || "").toLowerCase();
+        return !ol || allowed.has(ol);
+      });
+    }
+    if (DECADE_RANGES[mood.decade]) {
+      const [lo, hi] = DECADE_RANGES[mood.decade];
+      stage1 = stage1.filter(f => {
+        const yr = parseInt((f.release_date || f.first_air_date || "").slice(0,4), 10);
+        return !yr || (yr >= lo && yr <= hi);
+      });
+    }
+    if (stage1.length >= 4) {
+      pool = stage1;
+    }
+    // Note: if stage1 still <4, give up gracefully — return whatever pool has,
+    // which may be empty. Better to send empty than to violate user contracts.
+  }
 
   const ranked = pool.map(f => {
     const cur = M.curatedFor(f.id);
@@ -437,7 +580,12 @@ async function recommend(req, env, ctx) {
       genreOverlap +
       langPenalty -
       (mood.popularity === "low" ? Math.min((f.popularity || 0) / 42, 3) : 0) +
-      (Math.random() * 0.9);
+      // Entropy: higher when mood is light, so tied canon items rotate session-to-session.
+      // moodSpec=0 → up to 4.5 random; moodSpec=5 → 0.9; cap at 5 to not drown signal.
+      (Math.random() * Math.min(5, 0.9 + Math.max(0, 4 - moodSpec) * 0.9)) -
+      // Light dampening of over-exposed canon when mood is generic. Doesn't kick in
+      // for specific moods (mood drives the scorer instead).
+      (OVEREXPOSED_CANON.has(f.id) ? (moodSpec <= 2 ? 3.5 : moodSpec <= 4 ? 1.5 : 0) : 0);
     return { ...f, _score: score, _curated: cur || null, _list: listName, _likeBoost: likeBoost > 0, _fromWatchlist: wlBoost > 0 };
   }).sort((a, b) => b._score - a._score);
 
@@ -577,7 +725,7 @@ async function recommend(req, env, ctx) {
       justwatch: watchUrl({ providersLink: providers.link, mediaType: media, tmdbId: f.id, country }),
       tmdb: M.tmdbUrl(f.id),
       imdb_id: details.external_ids?.imdb_id || null,
-      imdb: details.external_ids?.imdb_id ? `https://www.playimdb.com/es/title/${details.external_ids.imdb_id}/` : null,
+      imdb: details.external_ids?.imdb_id ? `https://www.imdb.com/title/${details.external_ids.imdb_id}/` : null,
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
@@ -587,8 +735,13 @@ async function recommend(req, env, ctx) {
 
   const enriched = enrichedPool.filter(f => {
     if (media === "movie") {
-      if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
-      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+      // Drop micro-runtime entries (episodes, shorts, specials) — TMDb sometimes
+      // tags these as movies. QA #3: Punisher: One Last Kill (51min) leaked through.
+      // Allow only when mood explicitly wants tiny.
+      if (f.runtime && f.runtime < 60 && mood.runtime !== "tiny") return false;
+      if (mood.runtime === "tiny" && f.runtime && f.runtime > 45) return false;
+      if (mood.runtime === "short" && f.runtime && f.runtime > 100) return false;
+      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 135)) return false;
       if (mood.runtime === "long" && f.runtime && f.runtime < 110) return false;
     }
     return true;
@@ -613,7 +766,7 @@ async function surprise(req, env, ctx) {
   const M = mediaApi(media);
   const surpriseMood = surpriseMoodForProfile(profile);
   const exclude = (url.searchParams.get("exclude") || "")
-    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n)).slice(0, 200);
   const excludeSet = new Set(exclude);
 
   if (!env.TMDB_API_KEY) return { error: "config" };
@@ -752,7 +905,7 @@ async function surprise(req, env, ctx) {
       justwatch: watchUrl({ providersLink: providers.link, mediaType: media, tmdbId: f.id, country }),
       tmdb: M.tmdbUrl(f.id),
       imdb_id: details.external_ids?.imdb_id || null,
-      imdb: details.external_ids?.imdb_id ? `https://www.playimdb.com/es/title/${details.external_ids.imdb_id}/` : null,
+      imdb: details.external_ids?.imdb_id ? `https://www.imdb.com/title/${details.external_ids.imdb_id}/` : null,
       curated_note: cur?.note || null,
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
@@ -777,7 +930,7 @@ async function alt(req, env) {
   const media = mediaParam === "tv" ? "tv" : "movie";
   const M = mediaApi(media);
   const exclude = (url.searchParams.get("exclude") || "")
-    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n));
+    .split(",").map(s => parseInt(s, 10)).filter(n => Number.isFinite(n)).slice(0, 200);
   const excludeSet = new Set(exclude);
   excludeSet.add(seed);
 
@@ -860,7 +1013,7 @@ async function alt(req, env) {
         justwatch: watchUrl({ providersLink: providers.link, mediaType: media, tmdbId: details.id, country }),
         tmdb: M.tmdbUrl(details.id),
         imdb_id: details.external_ids?.imdb_id || null,
-        imdb: details.external_ids?.imdb_id ? `https://www.playimdb.com/es/title/${details.external_ids.imdb_id}/` : null,
+        imdb: details.external_ids?.imdb_id ? `https://www.imdb.com/title/${details.external_ids.imdb_id}/` : null,
         curated_note: M.curatedFor(details.id)?.note || null,
         from_list: null,
         from_feedback: kind === "similar",

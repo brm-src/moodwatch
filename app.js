@@ -1332,7 +1332,7 @@
       (f.genres || []).slice(0, 2).join(" · "),
     ].filter(Boolean);
     // Title links to IMDb (imdb.com) or TMDb as fallback. Replaces the old "Detalles" button.
-    // Note: hidden "Ver" button uses f.imdb (playimdb mirror); title uses canonical imdb.com.
+    // Both buttons now use canonical imdb.com (worker switched away from playimdb mirror).
     const titleHref = f.imdb_id
       ? `https://www.imdb.com/title/${f.imdb_id}/`
       : (f.tmdb || null);
