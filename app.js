@@ -597,7 +597,12 @@
   ];
   function freshBlots() {
     const moods = [...BLOT_MOODS].sort(() => Math.random() - 0.5).slice(0, 4);
-    return moods.map(m => ({ value: JSON.stringify(m), ...makeBlot(m) }));
+    return moods.map(m => {
+      const blot = makeBlot(m);
+      // value carries the full enriched mood (incl. density/chaos signals)
+      // so the post-quiz reading can interpret what the user chose.
+      return { value: JSON.stringify(blot.mood), ...blot };
+    });
   }
 
   // ────────────────────────────────────────────────────────────
@@ -924,7 +929,71 @@
                         : "Not in the mood to feel sad tonight.");
     }
 
+    // ── Sentence 4: ink blot reading (always last — it's the climax of the ritual)
+    const inkLine = inkReading(a.ink, ES);
+    if (inkLine) sentences.push(inkLine);
+
     return sentences.join(" ");
+  }
+
+  // Read the user's chosen Rorschach blot as a psychological close.
+  // The blot value is a JSON-encoded mood object enriched at generation time
+  // with: tone, energy, door, dense, sparse, chaotic, broken, symmetry, fragments, spatter.
+  function inkReading(inkValue, ES) {
+    if (!inkValue) return "";
+    let m;
+    try { m = JSON.parse(inkValue); } catch { return ""; }
+    if (!m || typeof m !== "object") return "";
+
+    // Pick the dominant trait. Order matters: chaotic+broken trumps dense, etc.
+    let body = "";
+    if (m.broken && m.chaotic) {
+      body = ES ? "una mancha rota y dispersa: estás dejando entrar el desorden, no buscas que cierre"
+                : "a broken, scattered blot: you're letting disorder in, not looking for closure";
+    } else if (m.broken) {
+      body = ES ? "una mancha asimétrica: hay algo que no encaja y no quieres forzarlo"
+                : "an asymmetric blot: something isn't fitting and you don't want to force it";
+    } else if (m.chaotic && m.dense) {
+      body = ES ? "una mancha densa y agitada: vienes lleno y necesitas que la pantalla esté igual de ocupada"
+                : "a dense, agitated blot: you're full inside and you need the screen just as crowded";
+    } else if (m.dense) {
+      body = ES ? "una mancha densa y simétrica: pides peso, pero ordenado"
+                : "a dense, symmetric blot: you want weight, but contained";
+    } else if (m.sparse && m.symmetry) {
+      body = ES ? "una mancha despejada y simétrica: pides aire, claridad, una imagen que respire"
+                : "a clean, symmetric blot: you want air, clarity, an image that breathes";
+    } else if (m.sparse) {
+      body = ES ? "una mancha mínima: hoy lo poco te dice más que lo mucho"
+                : "a minimal blot: today, less tells you more than more";
+    } else if (m.fragments && m.spatter) {
+      body = ES ? "una mancha con fragmentos y salpicaduras: te atrae lo que se desarma en partes"
+                : "a blot with fragments and spatter: you're drawn to what comes apart in pieces";
+    } else if (m.tone === "dark" && m.door === "intensity") {
+      body = ES ? "una mancha oscura y tensa: vas directo a la intensidad"
+                : "a dark, tense blot: you're heading straight for the intensity";
+    } else if (m.tone === "dark" && m.door === "mystery") {
+      body = ES ? "una mancha oscura y abierta: te interesa más la pregunta que la respuesta"
+                : "a dark, open blot: you're more interested in the question than the answer";
+    } else if (m.tone === "light" && m.door === "intimacy") {
+      body = ES ? "una mancha clara y cerrada: pides cercanía, no espectáculo"
+                : "a light, contained blot: you want closeness, not spectacle";
+    } else if (m.tone === "light" && m.door === "fantasy") {
+      body = ES ? "una mancha clara y ligera: te llama lo que se aleja de lo real"
+                : "a light, airy blot: you're drawn to what drifts from the real";
+    } else {
+      // generic fallback by tone+energy
+      if (m.tone === "dark" && m.energy === "engage") {
+        body = ES ? "una mancha oscura: estás dispuesto a entrar"
+                  : "a dark blot: you're willing to step in";
+      } else if (m.tone === "light" && m.energy === "unwind") {
+        body = ES ? "una mancha clara: vienes a soltar, no a apretar"
+                  : "a light blot: you came here to let go, not to tense up";
+      } else {
+        return "";
+      }
+    }
+    return ES ? `Y la tinta lo confirma: elegiste ${body}.`
+              : `And the ink confirms it: you chose ${body}.`;
   }
 
   // ────────────────────────────────────────────────────────────
