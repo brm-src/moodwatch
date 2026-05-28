@@ -56,6 +56,7 @@ const STRINGS = {
 
     lb_label: "Letterboxd",
     lb_ask_title: "Your <em>username.</em>",
+    lb_ask_title_plain: "Letterboxd username",
     lb_continue: "Continue",
     user_ph: "your_username",
 
@@ -683,6 +684,7 @@ const STRINGS = {
 
     lb_label: "Letterboxd",
     lb_ask_title: "Tu <em>usuario.</em>",
+    lb_ask_title_plain: "Usuario de Letterboxd",
     lb_continue: "Continuar",
     user_ph: "tu_usuario",
 
