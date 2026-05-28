@@ -48,7 +48,8 @@ html, body {
   text-rendering: optimizeLegibility;
   transition: background-color .25s ease;
 }
-body.on-hero { background: var(--charcoal); }
+html { background: var(--charcoal); overflow-x: clip; scrollbar-width: none; -ms-overflow-style: none; }
+body.on-hero { background: transparent; }
 body.on-hero footer.bottom { margin-top: 0; border-top: 0; }
 
 /* Journey background: same hero still, blurred + dimmed.
@@ -56,8 +57,9 @@ body.on-hero footer.bottom { margin-top: 0; border-top: 0; }
    ritual feels continuous with the entrance. */
 body.has-journey-hero {
   position: relative;
-  background-color: var(--charcoal);
+  background-color: transparent;
 }
+body.has-journey-hero:not(.on-hero) { background: transparent; }
 body.has-journey-hero::before {
   content: "";
   position: fixed;
@@ -114,9 +116,9 @@ body.has-journey-hero:not(.on-hero) .phrase input { color: var(--paper); border-
 body.has-journey-hero:not(.on-hero) .phrase input::placeholder { color: var(--paper-3); }
 body.has-journey-hero:not(.on-hero) .chip { color: var(--paper-3); border-color: rgba(237,231,218,0.25); }
 body.has-journey-hero:not(.on-hero) .chip:hover { color: var(--accent); border-color: var(--accent); }
+html { overflow-x: clip; scrollbar-width: none; -ms-overflow-style: none; }
 body.has-journey-hero:not(.on-hero) .loader-text { color: var(--paper); }
 /* Loading/results retain the same dim treatment by default. */
-html { overflow-x: clip; scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar { width: 0; height: 0; display: none; }
 body { overflow-x: clip; min-height: 100dvh; display: flex; flex-direction: column; scrollbar-width: none; -ms-overflow-style: none; }
 body::-webkit-scrollbar { width: 0; height: 0; display: none; }
@@ -995,6 +997,19 @@ body.on-hero .site-top {
   letter-spacing: 0.12em;
 }
 .why-panel p { margin-top: 8px; color: var(--ink-soft); font-family: var(--font-display); font-style: italic; }
+
+/* On dark journey background, flip the why-panel tokens so the reading is legible. */
+body.has-journey-hero:not(.on-hero) .why-panel {
+  background: rgba(20, 22, 15, 0.55);
+  border-color: rgba(237, 231, 218, 0.22);
+}
+body.has-journey-hero:not(.on-hero) .why-panel p {
+  color: var(--paper);
+}
+body.has-journey-hero:not(.on-hero) .why-chips span {
+  color: var(--paper-3);
+  border-color: rgba(237, 231, 218, 0.28);
+}
 .card {
   display: grid;
   grid-template-columns: 132px 1fr;
