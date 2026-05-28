@@ -477,8 +477,9 @@ header.top {
   letter-spacing: 0.10em;
   text-transform: uppercase;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 12px 8px;
   opacity: 0.6;
+  min-height: 44px;
 }
 .clear-taste:hover { color: var(--accent); opacity: 1; }
 
@@ -1075,7 +1076,7 @@ footer.bottom small {
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
-footer.bottom small a { color: var(--paper-3); text-decoration: none; }
+footer.bottom small a { color: var(--paper-3); text-decoration: none; padding: 8px 4px; display: inline-block; }
 footer.bottom small a:hover { color: var(--accent); }
 
 .editor-badge {
