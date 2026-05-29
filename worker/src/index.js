@@ -692,16 +692,13 @@ async function recommend(req, env, ctx) {
       // (Korean, Japanese, Chinese, etc.). For Latin-script originals, we use original_title directly.
       M.details(env, f.id, "en-US"),
     ]);
-    // Title rule: Latin-script originals → original_title (Sinners, Amélie, Requiem for a Dream).
-    // Non-Latin (ko, ja, zh, ar, he, hi…) → English title; original goes underneath in italic.
-    const NON_LATIN_LANGS = new Set(["ko","ja","zh","cn","th","hi","ta","te","ml","bn","ur","fa","ar","he","el","ru","uk","bg","sr","mk","ka","hy","yi","vi"]);
+    // Title rule: English by default. Only Spanish-language films keep their Spanish title.
     const originalTitleField = media === "tv" ? details.original_name : details.original_title;
     const englishTitle = M.titleOf(details);
     const origLang = (details.original_language || f.original_language || "").toLowerCase();
-    const isNonLatin = NON_LATIN_LANGS.has(origLang);
-    const title = isNonLatin
-      ? (englishTitle || originalTitleField || f.title)
-      : (originalTitleField || englishTitle || f.title);
+    const title = origLang === "es"
+      ? (originalTitleField || englishTitle || f.title)
+      : (englishTitle || originalTitleField || f.title);
     const date = M.dateOf(details) || f.release_date;
     const runtime = (media === "tv")
       ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
@@ -894,15 +891,13 @@ async function surprise(req, env, ctx) {
       M.details(env, f.id, "en-US"),
     ]);
     const cur = M.curatedFor(f.id);
-    // Title rule: Latin → original; Non-Latin → English. Original below in italic.
-    const NON_LATIN_LANGS = new Set(["ko","ja","zh","cn","th","hi","ta","te","ml","bn","ur","fa","ar","he","el","ru","uk","bg","sr","mk","ka","hy","yi","vi"]);
+    // Title rule: English by default. Only Spanish-language films keep their Spanish title.
     const originalTitleField = media === "tv" ? details.original_name : details.original_title;
     const englishTitle = M.titleOf(details);
     const origLang = (details.original_language || f.original_language || "").toLowerCase();
-    const isNonLatin = NON_LATIN_LANGS.has(origLang);
-    const title = isNonLatin
-      ? (englishTitle || originalTitleField || f.title)
-      : (originalTitleField || englishTitle || f.title);
+    const title = origLang === "es"
+      ? (originalTitleField || englishTitle || f.title)
+      : (englishTitle || originalTitleField || f.title);
     const date = f.release_date || M.dateOf(details);
     const runtime = media === "tv"
       ? (details.episode_run_time && details.episode_run_time[0]) || f.runtime || null
@@ -1004,15 +999,13 @@ async function alt(req, env) {
       const today = new Date().toISOString().slice(0, 10);
       const date = M.dateOf(details);
       if (date && date > today) continue;
-      // Title rule: Latin → original; Non-Latin → English. Original below in italic.
-      const NON_LATIN_LANGS = new Set(["ko","ja","zh","cn","th","hi","ta","te","ml","bn","ur","fa","ar","he","el","ru","uk","bg","sr","mk","ka","hy","yi","vi"]);
+      // Title rule: English by default. Only Spanish-language films keep their Spanish title.
       const originalTitleField = media === "tv" ? details.original_name : details.original_title;
       const englishTitle = M.titleOf(details);
       const origLang = (details.original_language || "").toLowerCase();
-      const isNonLatin = NON_LATIN_LANGS.has(origLang);
-      const title = isNonLatin
-        ? (englishTitle || originalTitleField)
-        : (originalTitleField || englishTitle);
+      const title = origLang === "es"
+        ? (originalTitleField || englishTitle)
+        : (englishTitle || originalTitleField);
       const runtime = media === "tv"
         ? (details.episode_run_time && details.episode_run_time[0]) || null
         : (details.runtime || null);
