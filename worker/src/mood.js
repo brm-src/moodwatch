@@ -99,7 +99,7 @@ function runtimeRange(mood) {
   const m = mood.runtime;
   // user-asked runtime overrides default min of 75
   if (m === "tiny")   return { "with_runtime.lte": 40 };
-  if (m === "short")  return { "with_runtime.gte": 60, "with_runtime.lte": 110 };
+  if (m === "short")  return { "with_runtime.gte": 60, "with_runtime.lte": 90 };
   if (m === "medium") return { "with_runtime.gte": 80, "with_runtime.lte": 140 };
   if (m === "long")   return { "with_runtime.gte": 120, "with_runtime.lte": 220 };
   // "epic" = scope/tone, not duration. Bias via genres + scorer; no hard runtime cap.

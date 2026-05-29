@@ -58,7 +58,7 @@ export function fitScore(film, mood = {}) {
     else s -= 2;
   }
 
-  if (mood.runtime === "short" && film.runtime && film.runtime <= 95) s += 1.5;
+  if (mood.runtime === "short" && film.runtime && film.runtime <= 90) s += 1.5;
   if (mood.runtime === "medium" && film.runtime && film.runtime >= 90 && film.runtime <= 125) s += 1;
 
   // Popularity preference (low = harder to find).

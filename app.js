@@ -1410,7 +1410,7 @@
     const moodB64 = btoa(unescape(encodeURIComponent(JSON.stringify(mood))));
     const params = new URLSearchParams({ country, lang, mood: moodB64 });
     if (withUser && state.user) params.set("user", state.user);
-    params.set("media", resolveMedia(state.media));
+    params.set("media", useLB ? "movie" : resolveMedia(state.media));
     const _autoExclude = recentlyShown(80);
     const _allExclude = (exclude && exclude.length ? [...exclude, ..._autoExclude] : _autoExclude);
     if (_allExclude.length) params.set("exclude", Array.from(new Set(_allExclude)).join(","));
@@ -1613,6 +1613,7 @@
       ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}
       ${f.from_feedback ? `<span class="taste-badge">${window.t("from_feedback")}</span>` : ""}`;
     if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 220));
+    if (f.reason) meta.appendChild(expandableText(f.reason, "reason", 180));
     if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 280));
     const actions = document.createElement("div");
     actions.className = "actions";
@@ -1841,6 +1842,8 @@
     $("#media-back")?.addEventListener("click", () => { show("intro"); });
     $("#path-surprise")?.addEventListener("click", async () => {
       state.path = "surprise";
+      state.media = "movie";
+      if (window.setMediaCtx) window.setMediaCtx(state.media);
       state.answers = {};
       state.shownIds = [];
       state.lastWithUser = false;
@@ -1849,6 +1852,10 @@
     });
     $("#path-lb").addEventListener("click", () => {
       state.path = "lb";
+      state.media = "movie";
+      if (window.setMediaCtx) window.setMediaCtx(state.media);
+      state.answers = {};
+      state.shownIds = [];
       show("lb-ask");
       // Delay focus until the entrance choreography settles (input reveals at ~0.75s).
       setTimeout(() => $("#user")?.focus(), 850);
@@ -1862,6 +1869,8 @@
         return;
       }
       state.user = u;
+      state.media = "movie";
+      if (window.setMediaCtx) window.setMediaCtx(state.media);
       QUIZ = buildSession();
       state.qIdx = 0;
       state.answers = {};
@@ -1895,14 +1904,16 @@
     $("#shuffle-chips")?.addEventListener("click", shuffleChipsAnimated);
 
     $("#brand-home")?.addEventListener("click", () => {
-      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality";
+      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality"; state.media = "movie";
+      if (window.setMediaCtx) window.setMediaCtx(state.media);
       state.shownIds = []; state.lastMode = null;
       const inp = $("#user"); if (inp) { inp.value = ""; }
       show("intro");
     });
 
     $("#restart").addEventListener("click", () => {
-      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality";
+      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality"; state.media = "movie";
+      if (window.setMediaCtx) window.setMediaCtx(state.media);
       state.shownIds = [];
       const inp = $("#user"); if (inp) { inp.value = ""; }
       show("intro");
@@ -1968,6 +1979,8 @@
       b.textContent = (window.t && window.t(c.key)) || c.profile;
       b.addEventListener("click", async () => {
         state.path = "surprise";
+        state.media = "movie";
+        if (window.setMediaCtx) window.setMediaCtx(state.media);
         state.answers = {};
         state.shownIds = [];
         state.lastWithUser = false;

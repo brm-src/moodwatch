@@ -40,6 +40,8 @@ const OVEREXPOSED_CANON = new Set([
 ]);
 import { fitScore } from "./scorer.js";
 
+const SHORT_RUNTIME_MAX = 90;
+
 // Per-media TMDb helper bundle. Keeps movie path identical when media === "movie".
 function mediaApi(media) {
   if (media === "tv") {
@@ -149,7 +151,7 @@ function surpriseMoodForProfile(profile) {
   const p = (profile || "quality").toLowerCase();
   const presets = {
     weird:     { trust: "weird", risk: "discover", popularity: "low" },
-    short:     { runtime: "short", risk: "safe" },
+    short:     { runtime: "short", risk: "safe", quality: "high" },
     beautiful: { tone: "light", energy: "unwind", want: "soothed", quality: "high" },
     hurt:      { memory: "heartbreak", want: "haunted", depth: "ruined" },
     pace:      { energy: "engage", first_act: "action_adventure", popularity: "mid" },
@@ -280,7 +282,7 @@ async function recommend(req, env, ctx) {
     if (!f) return false;
     if (f.release_date && f.release_date > today) return false;
     if (media === "movie") {
-      if (mood.runtime === "short" && f.runtime && f.runtime > 110) return false;
+      if (mood.runtime === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
       if (mood.runtime === "medium" && f.runtime && (f.runtime < 80 || f.runtime > 140)) return false;
     }
     // Respect avoid for tier injections too. Genres on tier extras come from TMDb details.
@@ -355,7 +357,7 @@ async function recommend(req, env, ctx) {
     if (!f) return false;
     if (f.release_date && f.release_date > today) return false;
     if (media === "movie") {
-      if (mood.runtime === "short" && f.runtime && f.runtime > 110) return false;
+      if (mood.runtime === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
       if (mood.runtime === "medium" && f.runtime && (f.runtime < 80 || f.runtime > 140)) return false;
     }
     // Respect avoid for tier injections too. Genres on tier extras come from TMDb details.
@@ -685,7 +687,8 @@ async function recommend(req, env, ctx) {
   const finalSix = top.slice(0, 6);
   shuffleInPlace(finalSix);
   top.splice(0, 6, ...finalSix);
-  const enrichedPool = await Promise.all(top.slice(0, 6).map(async (f) => {
+  const enrichLimit = mood.runtime === "short" ? 12 : 8;
+  const enrichedPool = await Promise.all(top.slice(0, enrichLimit).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       M.providers(env, f.id, country),
       M.credits(env, f.id),
@@ -734,6 +737,7 @@ async function recommend(req, env, ctx) {
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
       from_watchlist: !!f._fromWatchlist,
+      reason: pickReason(f, mood, lang),
       media,
     };
   }));
@@ -745,7 +749,7 @@ async function recommend(req, env, ctx) {
       // Allow only when mood explicitly wants tiny.
       if (f.runtime && f.runtime < 60 && mood.runtime !== "tiny") return false;
       if (mood.runtime === "tiny" && f.runtime && f.runtime > 45) return false;
-      if (mood.runtime === "short" && f.runtime && f.runtime > 110) return false;
+      if (mood.runtime === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
       if (mood.runtime === "medium" && f.runtime && (f.runtime < 80 || f.runtime > 140)) return false;
       if (mood.runtime === "long" && f.runtime && f.runtime < 110) return false;
     }
@@ -788,10 +792,11 @@ async function surprise(req, env, ctx) {
   const today = new Date().toISOString().slice(0, 10);
   const sorts = ["vote_average.desc", "popularity.desc"];
   const pages = [];
+  const pageMax = profile === "classic" ? 6 : (profile === "short" ? 10 : 25);
   for (let i = 0; i < 6; i++) {
     pages.push({
       sort_by: sorts[Math.floor(Math.random() * sorts.length)],
-      page: 1 + Math.floor(Math.random() * 25),
+      page: 1 + Math.floor(Math.random() * pageMax),
     });
   }
 
@@ -806,7 +811,7 @@ async function surprise(req, env, ctx) {
     include_adult: "false",
   };
   if (media === "movie") baseParams["with_runtime.gte"] = 75;
-  if (profile === "short" && media === "movie") baseParams["with_runtime.lte"] = 95;
+  if (profile === "short" && media === "movie") baseParams["with_runtime.lte"] = SHORT_RUNTIME_MAX;
   if (profile === "weird") {
     baseParams["vote_count.lte"] = 1500;
     baseParams["vote_count.gte"] = 60;
@@ -816,7 +821,7 @@ async function surprise(req, env, ctx) {
   }
   if (profile === "classic") {
     baseParams[`${dateKey}.lte`] = "1979-12-31";
-    baseParams["vote_count.gte"] = 250;
+    baseParams["vote_count.gte"] = media === "tv" ? 120 : 250;
   }
   if (profile === "horror") {
     baseParams.with_genres = media === "tv" ? "9648" : "27|53|9648";
@@ -904,7 +909,7 @@ async function surprise(req, env, ctx) {
     if (f.release_date && f.release_date > today) return false;
     if (media === "movie") {
       if (f.runtime && f.runtime < 75) return false;
-      if (profile === "short" && f.runtime && f.runtime > 95) return false;
+      if (profile === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
     }
     // Respect profile filters so list injection doesn't break the chip's promise
     const fid = new Set((f.genre_ids || []).map(x => String(x)));
@@ -956,7 +961,7 @@ async function surprise(req, env, ctx) {
   pool = pool.filter(f => {
     if (excludeSet.has(f.id)) return false;
     if (seen.has(f.id)) return false;
-    if (media === "movie" && profile === "short" && f.runtime && f.runtime > 110) return false;
+    if (media === "movie" && profile === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
     if (!profileFilter(f)) return false;
     seen.add(f.id);
     return true;
@@ -1007,6 +1012,7 @@ async function surprise(req, env, ctx) {
       id: f.id,
       title,
       original_title: originalTitleField && originalTitleField !== title ? originalTitleField : null,
+      original_language: details.original_language || f.original_language || null,
       year: (date || "").slice(0, 4),
       director: credits.director || null,
       runtime,
@@ -1020,12 +1026,14 @@ async function surprise(req, env, ctx) {
       curated_note: cur?.note || null,
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
+      reason: pickReason(f, surpriseMood, lang),
       media,
     };
   }));
 
   const enriched = enrichedRaw.filter(f => {
-    if (media === "movie" && profile === "short" && f.runtime && f.runtime > 95) return false;
+    if (media === "movie" && profile === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
+    if (profile === "classic" && f.year && f.year > "1979") return false;
     return true;
   }).slice(0, 4);
 
@@ -1127,6 +1135,7 @@ async function alt(req, env) {
         curated_note: M.curatedFor(details.id)?.note || null,
         from_list: null,
         from_feedback: kind === "similar",
+        reason: pickReason({ runtime, genres: localizeGenres(details.genres || [], lang.slice(0,2)), genre_ids: (details.genres || []).map(g => g.id), original_language: details.original_language }, {}, lang),
         media,
       };
       return { film, kind };
