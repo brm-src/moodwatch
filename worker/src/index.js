@@ -137,13 +137,27 @@ function moodSummary(mood, lang = "en") {
 function pickReason(film, mood, lang = "en") {
   const es = String(lang || "").startsWith("es");
   const bits = [];
-  if (film._curated) bits.push(es ? "tiene nota editorial" : "has an editor note");
-  if (film._list) bits.push(es ? `calza con ${film._list}` : `matches ${film._list}`);
-  if (mood?.runtime && film.runtime) bits.push(es ? `${film.runtime} min dentro del tiempo` : `${film.runtime} min fits the runtime`);
-  if (mood?.trust === "horror") bits.push(es ? "viene del eje terror/atmósfera" : "comes from the horror/atmosphere axis");
-  if (mood?.risk === "discover") bits.push(es ? "privilegié descubrimiento sobre obviedad" : "leans discovery over obvious picks");
-  if (mood?.popularity === "low") bits.push(es ? "evité solo blockbusters" : "avoids only-blockbuster picks");
-  if (!bits.length) bits.push(es ? "salió por mezcla de rating, mood y variedad" : "picked by rating, mood fit and variety");
+  const genres = new Set([...(film.genres || []), ...(film.genre_ids || [])].map(g => String(g).toLowerCase()));
+  const has = (...xs) => xs.some(x => genres.has(String(x).toLowerCase()));
+  if (film._fromWatchlist) bits.push(es ? "salió desde tu watchlist, no desde un catálogo genérico" : "came from your watchlist, not a generic shelf");
+  else if (film._list) bits.push(es ? `calza con una ruta curada: ${film._list}` : `matches an editorial route: ${film._list}`);
+  else if (film._curated) bits.push(es ? "tiene nota editorial, así que no llegó solo por números" : "has an editor note, so it was not picked by score alone");
+
+  if (mood?.runtime === "short" && film.runtime) bits.push(es ? `${film.runtime} min: sirve cuando quieres algo breve` : `${film.runtime} min: fits a short-viewing brief`);
+  else if (mood?.runtime && film.runtime) bits.push(es ? `${film.runtime} min dentro del tiempo que pediste` : `${film.runtime} min fits the runtime you asked for`);
+
+  if (mood?.trust === "horror") bits.push(es ? "prioricé atmósfera y amenaza" : "prioritizes atmosphere and threat");
+  if (mood?.trust === "thriller") bits.push(es ? "va por tensión antes que solemnidad" : "leans tension over solemnity");
+  if (mood?.trust === "comedy") bits.push(es ? "mantiene la entrada liviana" : "keeps the entry light");
+  if (mood?.depth === "uneasy" || mood?.depth === "ruined") bits.push(es ? "deja un residuo más incómodo" : "leaves a more uneasy aftertaste");
+  if (mood?.company === "shared" || mood?.company === "partner" || mood?.company === "friends" || mood?.company === "family") bits.push(es ? "funciona mejor con alguien al lado" : "plays better with someone in the room");
+  if (mood?.risk === "discover" || mood?.popularity === "low") bits.push(es ? "bajé debajo de lo más obvio" : "digs below the most obvious picks");
+  if (mood?.risk === "safe" || mood?.popularity === "high") bits.push(es ? "privilegié una entrada más segura" : "keeps the entry point safer");
+  if (mood?.avoid === "violence") bits.push(es ? "dejé fuera violencia explícita como pediste" : "keeps explicit violence out as requested");
+  if (mood?.avoid === "slow") bits.push(es ? "evita quedar atrapado en la lentitud" : "avoids getting stuck in slowness");
+  if (mood?.tone === "dark" && has("thriller","mystery","crime","horror","53","9648","80","27")) bits.push(es ? "sostiene el lado oscuro del mood" : "holds the darker side of the mood");
+  if (mood?.tone === "light" && has("comedy","romance","adventure","family","35","10749","12","10751")) bits.push(es ? "mantiene una superficie más respirable" : "keeps the surface more breathable");
+  if (!bits.length) bits.push(es ? "mezcla rating sólido, ajuste al mood y variedad" : "mixes solid rating, mood fit and variety");
   return (es ? "Por qué: " : "Why: ") + bits.slice(0, 3).join("; ") + ".";
 }
 

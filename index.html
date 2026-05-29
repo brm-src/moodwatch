@@ -31,7 +31,7 @@
 <meta name="twitter:image" content="https://brm-src.github.io/moodwatch/assets/og-cover.jpg">
 
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2314160f'/><text x='32' y='44' font-size='40' text-anchor='middle' fill='%23c43b2a' font-family='serif' font-style='italic'>m</text></svg>">
-<link rel="stylesheet" href="./styles.css?v=qa-pass-20260528-8">
+<link rel="stylesheet" href="./styles.css?v=question-engine-improvements-20260529">
 </head>
 <body>
 
@@ -203,6 +203,7 @@
     <div class="fig"><span data-i18n="picks_label">Picks</span><span class="bar"></span></div>
     <h2 class="q-title" id="vibe-title" data-i18n="picks_title">For your <em>mood.</em></h2>
     <div id="why-panel" class="why-panel" hidden></div>
+    <div id="refine-panel" class="refine-panel" hidden></div>
     <div class="era-chips-row">
       <div class="era-chips" id="era-chips" role="group" aria-label="Filter by era">
         <button type="button" class="era-chip is-active" data-era="any" data-i18n="chip_any_era">Any era</button>
@@ -220,8 +221,11 @@
       </button>
     </div>
     <div id="cards"></div>
+    <div id="compare-panel" class="compare-panel" hidden></div>
     <div class="results-actions">
       <button class="restart" id="restart" data-i18n="restart">Start over</button>
+      <button class="restart subtle" id="save-route" data-i18n="save_route">Save route</button>
+      <button class="restart subtle" id="share-route" data-i18n="share_route">Share route</button>
     </div>
   </section>
 
@@ -310,7 +314,7 @@
 <script>
   window.MOODWATCH_API = "https://moodwatch-api.brmcl.workers.dev";
 </script>
-<script src="./i18n.js?v=qa-pass-20260528-8"></script>
-<script src="./app.js?v=qa-pass-20260528-8"></script>
+<script src="./i18n.js?v=question-engine-improvements-20260529"></script>
+<script src="./app.js?v=question-engine-improvements-20260529"></script>
 </body>
 </html>

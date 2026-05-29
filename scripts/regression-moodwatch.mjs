@@ -28,6 +28,15 @@ assert(index.includes('profile === "classic" ? 6'), 'classic surprise should not
 assert(index.includes('media === "tv" ? 120 : 250'), 'classic TV needs lower vote floor than movies');
 assert(index.includes('reason: pickReason(f, mood, lang)'), 'recommend response must attach per-film reasons');
 assert(index.includes('reason: pickReason(f, surpriseMood, lang)'), 'surprise response must attach per-film reasons');
+assert(app.includes('session_mode'), 'question-engine mode selector must live inside quiz bank');
+assert(app.includes('quick:    ["state"]'), 'quick route must stay a 3-question path inside the engine');
+assert(app.includes('REFINE_ACTIONS'), 'results must expose post-result refinement actions');
+assert(app.includes('showDislikeReasons'), 'dislike feedback must ask why before swapping');
+assert(app.includes('moodwatch.routes.v1'), 'route save/share must use local browser storage only');
+assert(app.includes('renderComparePanel'), 'results must compare the first two options');
+assert(!app.includes('cineclub'), 'festival/cineclub mode must not be introduced');
+assert(!app.includes('domingo'), 'domingo/cansancio mode must not be introduced');
+assert(!read('i18n.js').includes('Cuidado de festival'), 'festival/cineclub copy must not be user-facing');
 
 const ids = LISTS.flatMap(l => l.ids || []);
 assert(!ids.includes(553604), 'known wrong TMDb id 553604 must stay out of lists');

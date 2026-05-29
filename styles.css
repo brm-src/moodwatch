@@ -1655,3 +1655,79 @@ footer.bottom small a:hover { color: var(--accent); }
   font-weight: 600;
   color: var(--ink);
 }
+
+
+/* ─── product controls: refine, compare, saved routes ─── */
+.refine-panel,
+.compare-panel {
+  margin: var(--s-2) 0;
+  padding: 12px;
+  border: 1px solid rgba(237,231,218,0.22);
+  background: rgba(20,22,15,0.28);
+  color: var(--paper);
+  backdrop-filter: blur(8px);
+}
+.refine-panel[hidden], .compare-panel[hidden] { display: none; }
+.refine-title,
+.compare-title,
+.feedback-reasons-title {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.refine-actions,
+.no-picks-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.refine-chip,
+.feedback-reason {
+  border: 1px solid rgba(237,231,218,0.35);
+  background: rgba(237,231,218,0.08);
+  color: var(--paper);
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+}
+.refine-chip:hover,
+.feedback-reason:hover {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--paper);
+}
+.feedback-reasons {
+  margin: 10px 0 12px;
+  padding: 10px;
+  border: 1px solid rgba(196,59,42,0.35);
+  background: rgba(196,59,42,0.08);
+}
+.feedback-reason { margin: 0 6px 6px 0; }
+.card.is-primary-pick {
+  border-color: rgba(196,59,42,0.65);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.28);
+}
+.card.is-primary-pick .card-rank { color: var(--accent); }
+.compare-panel p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--paper-2);
+}
+.results-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.restart.subtle {
+  opacity: .78;
+  border-color: rgba(237,231,218,0.35);
+}

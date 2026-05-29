@@ -24,6 +24,15 @@
   // ────────────────────────────────────────────────────────────
   const BANK = {
     // ────── PRIMARY signal categories (high randomizer weight) ──────
+    session_mode: {
+      key: "session_mode", kind: "real", titleKey: "q_session_t", signal_weight: "primary",
+      options: [
+        { value: "balanced", labelKey: "q_session_balanced" },
+        { value: "quick",    labelKey: "q_session_quick" },
+        { value: "together", labelKey: "q_session_together" },
+        { value: "list",     labelKey: "q_session_list" },
+      ],
+    },
     state: {
       key: "state", kind: "real", titleKey: "q_state_t", signal_weight: "primary",
       options: [
@@ -80,7 +89,7 @@
       options: [
         { value: "crowd",    labelKey: "q_qvp_crowd"    },
         { value: "canon",    labelKey: "q_qvp_canon"    },
-        { value: "festival", labelKey: "q_qvp_festival" },
+        { value: "curated",  labelKey: "q_qvp_curated" },
         { value: "hidden",   labelKey: "q_qvp_hidden"   },
         { value: "wildcard", labelKey: "q_qvp_wildcard" },
         { value: "any",      labelKey: "q_qvp_any", sticky: true },
@@ -415,8 +424,10 @@
   // else is fully random across all categories. The first step (movie/tv/any)
   // and the last (ink) are the only fixed pieces of the ritual.
   function buildSession() {
-    // Sample primary signals first, then add texture for atmosphere.
-    // buildSession picks N=7 categories total before ink.
+    // First ask how the engine should behave. This keeps “quick / together / watchlist intention”
+    // inside the question engine instead of adding external modes on the landing page.
+    // Then sample primary signals + texture for atmosphere.
+    // buildSession picks N=6 categories after session_mode before ink.
     const primary = [
       "state","appetite","flavor","format_appetite","quality_vs_popularity","nostalgia",
       "aftertaste","decade","runtime","language_pref","avoid","first_act","trust","fear",
@@ -426,8 +437,8 @@
       "door","scene","place","atmosphere","sound","time_of_day","body","opening","phrase",
     ].filter(k => BANK[k]);
     const all = [...primary, ...texture];
-    const N = 7;
-    const N_PRIMARY = 5;  // ~70% primary signal questions
+    const N = 6;
+    const N_PRIMARY = 4;  // ~70% primary signal questions
     const picked = [];
     const primaryPool = [...primary];
     const texturePool = [...texture];
@@ -448,7 +459,24 @@
     }
     // Shuffle final order so primary/texture aren't grouped
     picked.sort(() => Math.random() - 0.5);
-    return [...picked.map(k => BANK[k]), BANK.ink];
+    return [BANK.session_mode, ...picked.map(k => BANK[k]), BANK.ink];
+  }
+
+
+  function applySessionMode(mode) {
+    if (!mode || mode === "balanced") {
+      QUIZ = buildSession();
+      return false;
+    }
+    const forced = {
+      // Three questions total: session intent → current state → inkblot.
+      quick:    ["state"],
+      together: ["company", "runtime", "depth", "quality_vs_popularity"],
+      list:     ["runtime", "risk_taste", "quality_vs_popularity", "avoid"],
+    }[mode];
+    if (!forced) return false;
+    QUIZ = [BANK.session_mode, ...forced.map(k => BANK[k]).filter(Boolean), BANK.ink];
+    return true;
   }
 
   let QUIZ = buildSession();
@@ -626,6 +654,11 @@
     // Skip any "any" sticky values — they signal no preference.
     const has = (k) => a[k] && a[k] !== "any";
 
+    // session_mode is not an external mode; it biases the same mood object.
+    if (a.session_mode === "quick")    { m.risk = m.risk || "safe"; }
+    if (a.session_mode === "together") { m.company = m.company || "shared"; }
+    if (a.session_mode === "list")     { m.risk = "discover"; m.popularity = m.popularity || "low"; }
+
     // door (texture)
     if (a.door === "intensity") { m.tone = "dark";  m.energy = "engage"; }
     if (a.door === "mystery")   { m.tone = "dark";  m.energy = "engage"; }
@@ -669,7 +702,7 @@
     // quality_vs_popularity (primary) — replaces director_vibe + rewatch_taste
     if (a.quality_vs_popularity === "crowd")    { m.popularity = "high"; m.risk = m.risk || "safe"; }
     if (a.quality_vs_popularity === "canon")    { m.quality = "high"; m.popularity = "high"; m.risk = m.risk || "safe"; }
-    if (a.quality_vs_popularity === "festival") { m.quality = "high"; m.popularity = m.popularity || "mid"; m.risk = m.risk || "discover"; }
+    if (a.quality_vs_popularity === "curated") { m.quality = "high"; m.popularity = m.popularity || "mid"; m.risk = m.risk || "discover"; }
     if (a.quality_vs_popularity === "hidden")   { m.quality = "high"; m.popularity = "low"; m.risk = "discover"; }
     if (a.quality_vs_popularity === "wildcard") { m.popularity = "low"; m.risk = "discover"; }
 
@@ -1075,7 +1108,7 @@
   // ────────────────────────────────────────────────────────────
   // STATE & STEP MGMT
   // ────────────────────────────────────────────────────────────
-  const state = { qIdx: 0, answers: {}, user: "", path: null, surpriseProfile: "quality", media: "movie" };
+  const state = { qIdx: 0, answers: {}, user: "", path: null, surpriseProfile: "quality", media: "movie", refineMood: {}, lastData: null, lastMoodLine: "" };
 
   const steps = {
     intro:    $('[data-step="intro"]'),
@@ -1308,6 +1341,12 @@
   }
 
   function nextQ() {
+    const q = QUIZ[state.qIdx];
+    if (q?.key === "session_mode" && applySessionMode(state.answers.session_mode)) {
+      state.qIdx = Math.min(1, QUIZ.length - 1);
+      renderQuestion();
+      return;
+    }
     if (state.qIdx < QUIZ.length - 1) { state.qIdx++; renderQuestion(); }
     else recommend({ withUser: state.path === "lb" });
   }
@@ -1403,6 +1442,7 @@
     const country = guessCountry();
     const lang = window.LANG;
     const mood = ritualToMood(state.answers);
+    if (state.refineMood && Object.keys(state.refineMood).length) Object.assign(mood, state.refineMood);
     // Era chip override (memphid feedback): if user clicked "Recent only",
     // force decade=now regardless of what the quiz inferred.
     if (state.eraOverride === "now") mood.decade = "now";
@@ -1436,6 +1476,80 @@
     }
   }
 
+
+  const REFINE_ACTIONS = [
+    ["weirder",     { trust: "weird", risk: "discover", popularity: "low" }],
+    ["safer",       { risk: "safe", popularity: "high" }],
+    ["less_known",  { popularity: "low", quality: "high", risk: "discover" }],
+    ["emotional",   { depth: "thoughtful", energy: "engage" }],
+    ["shorter",     { runtime: "short" }],
+    ["together",    { company: "shared" }],
+  ];
+  const REFINE_MAP = Object.fromEntries(REFINE_ACTIONS);
+  function rerunWithCurrentMode() {
+    if (state.path === "surprise") state.path = "global";
+    recommend({ withUser: state.lastWithUser });
+  }
+  function applyRefine(action) {
+    const patch = REFINE_MAP[action];
+    if (!patch) return;
+    state.refineMood = { ...(state.refineMood || {}), ...patch };
+    showToast(window.t(`toast_refine_${action}`) || window.t("toast_refine"));
+    rerunWithCurrentMode();
+  }
+  function renderRefinePanel(data) {
+    const panel = document.getElementById("refine-panel");
+    if (!panel) return;
+    const prefix = state.lastWithUser ? window.t("refine_lb_title") : window.t("refine_title");
+    panel.innerHTML = `<div class="refine-title">${escapeHtml(prefix)}</div>`;
+    const row = document.createElement("div");
+    row.className = "refine-actions";
+    for (const [key] of REFINE_ACTIONS) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "refine-chip";
+      b.dataset.refine = key;
+      b.textContent = window.t(`refine_${key}`);
+      b.addEventListener("click", () => applyRefine(key));
+      row.appendChild(b);
+    }
+    panel.appendChild(row);
+    panel.hidden = false;
+  }
+  function saveRoute() {
+    try {
+      const key = "moodwatch.routes.v1";
+      const cur = JSON.parse(localStorage.getItem(key) || "[]");
+      const item = { at: new Date().toISOString(), answers: state.answers, refineMood: state.refineMood || {}, user: state.lastWithUser ? state.user : "", media: state.media, moodLine: state.lastMoodLine || "" };
+      cur.unshift(item);
+      localStorage.setItem(key, JSON.stringify(cur.slice(0, 20)));
+      showToast(window.t("toast_route_saved"));
+    } catch { showToast(window.t("toast_route_save_failed")); }
+  }
+  async function shareRoute() {
+    const text = [window.t("share_route_title"), state.lastMoodLine || "", location.href].filter(Boolean).join("\n");
+    try {
+      if (navigator.share) await navigator.share({ title: "moodwatch", text, url: location.href });
+      else { await navigator.clipboard.writeText(text); showToast(window.t("toast_route_copied")); }
+    } catch {}
+  }
+  function renderComparePanel(films) {
+    const host = document.getElementById("compare-panel");
+    if (!host) return;
+    host.innerHTML = "";
+    if (!films || films.length < 2) { host.hidden = true; return; }
+    const [a, b] = films;
+    const ar = Number(a.runtime || 0), br = Number(b.runtime || 0);
+    const faster = ar && br ? (ar <= br ? a : b) : a;
+    const reasonDeeper = (a.reason || "").length >= (b.reason || "").length ? a : b;
+    const deeper = reasonDeeper.id === faster.id ? (faster.id === a.id ? b : a) : reasonDeeper;
+    host.innerHTML = `
+      <div class="compare-title">${escapeHtml(window.t("compare_title"))}</div>
+      <p>${escapeHtml((window.t("compare_body") || "").replace("{a}", faster.title || "").replace("{b}", deeper.title || ""))}</p>
+    `;
+    host.hidden = false;
+  }
+
   function renderResults(data) {
     // Wire era chips (memphid: "no quiero pelis tan antiguas").
     const chipsEl = document.getElementById("era-chips");
@@ -1452,7 +1566,7 @@
         if (state.lastMode === "recommend") {
           recommend({ withUser: state.lastWithUser });
         } else if (state.lastMode === "surprise") {
-          surprise({ profile: state.surpriseProfile });
+          surpriseFlow({ profile: state.surpriseProfile });
         }
       });
     }
@@ -1480,7 +1594,10 @@
     }
     const reading = vibeReading(state.answers, window.LANG);
     const moodLine = reading || data?.why?.headline || "";
+    state.lastData = data;
+    state.lastMoodLine = moodLine;
     renderWhy(data, moodLine);
+    renderRefinePanel(data);
     const cards = $("#cards");
     cards.innerHTML = "";
     if (!data.films || !data.films.length) {
@@ -1488,9 +1605,16 @@
       p.className = "err-msg";
       p.textContent = window.t("no_picks");
       cards.appendChild(p);
+      const relax = document.createElement("div");
+      relax.className = "no-picks-actions";
+      [["safer", "refine_safer"], ["less_known", "refine_less_known"], ["shorter", "refine_shorter"]].forEach(([act, label]) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "refine-chip"; b.textContent = window.t(label); b.addEventListener("click", () => applyRefine(act)); relax.appendChild(b);
+      });
+      cards.appendChild(relax);
     } else {
       stopLoader();
       data.films.forEach((f, i) => cards.appendChild(filmCard(f, i + 1)));
+      renderComparePanel(data.films);
       pushShown(data.films.map(f => f.id).filter(Boolean));
     }
     show("results");
@@ -1520,7 +1644,7 @@
 
   function filmCard(f, rank) {
     const c = document.createElement("article");
-    c.className = "card";
+    c.className = "card" + (rank === 1 ? " is-primary-pick" : "");
     c._filmId = f.id;
     const taste = getTaste(f.id);
     if (taste === "liked") c.classList.add("is-liked");
@@ -1543,7 +1667,7 @@
       <button type="button" class="fb-btn fb-seen"  data-act="seen"     title="${window.t("fb_seen")}"     aria-label="${window.t("fb_seen")}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
-      <button type="button" class="fb-btn fb-like" data-act="like"     title="${window.t("fb_like")}"     aria-label="${window.t("fb_like")}">👍</button>
+      <button type="button" class="fb-btn fb-like" data-act="like"     title="${window.t("fb_like")}"     aria-label="${window.t("fb_like")}">↗</button>
       <button type="button" class="fb-btn fb-dis"  data-act="dislike"  title="${window.t("fb_dislike")}"  aria-label="${window.t("fb_dislike")}">👎</button>`;
     fb.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-act]");
@@ -1563,19 +1687,11 @@
       if (next === "liked")    showToast(window.t("toast_liked"));
       if (next === "disliked") showToast(window.t("toast_disliked"));
       if (next === "seen")     showToast(window.t("toast_seen"));
-      // Like → replace with a similar one. Dislike → replace with an opposite one.
-      if (next === "liked" || next === "disliked") {
-        const kind = next === "liked" ? "similar" : "opposite";
-        try {
-          const repl = await fetchAltFilm(f.id, kind);
-          if (repl) {
-            const newCard = filmCard(repl, rank);
-            // tiny crossfade
-            c.style.transition = "opacity .2s";
-            c.style.opacity = "0";
-            setTimeout(() => c.replaceWith(newCard), 180);
-          }
-        } catch {}
+      // Like → replace with a similar one. Dislike → ask what failed, then replace.
+      if (next === "liked") {
+        await replaceCardFromFeedback(c, f, rank, "similar");
+      } else if (next === "disliked") {
+        showDislikeReasons(c, f, rank);
       }
     });
     posterWrap.appendChild(fb);
@@ -1604,7 +1720,7 @@
       ? `<a href="${escapeHtml(titleHref)}" target="_blank" rel="noopener" class="title-link">${escapeHtml(f.title || "")}</a>`
       : escapeHtml(f.title || "");
     meta.innerHTML = `
-      <span class="card-rank">${window.t("pick_n").replace("{n}", String(rank).padStart(2, "0"))}</span>
+      <span class="card-rank">${rank === 1 ? window.t("pick_main") : window.t("pick_n").replace("{n}", String(rank).padStart(2, "0"))}</span>
       <h3>${titleHtml} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
       ${showOriginal ? `<div class="alt-title">${escapeHtml(f.original_title)}</div>` : ""}
       ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
@@ -1700,17 +1816,65 @@
   function writeTaste(obj) {
     try { localStorage.setItem(TASTE_KEY, JSON.stringify(obj)); } catch {}
   }
-  function getTaste(id) { return readTaste()[String(id)] || null; }
-  function setTaste(id, value) {
+  function tasteKind(v) { return typeof v === "string" ? v : (v && v.kind) || null; }
+  function getTaste(id) { return tasteKind(readTaste()[String(id)]); }
+  function setTaste(id, value, reason = null) {
     const t = readTaste();
-    if (!value) delete t[String(id)]; else t[String(id)] = value;
+    if (!value) delete t[String(id)];
+    else t[String(id)] = { kind: value, reason, at: new Date().toISOString() };
     writeTaste(t);
   }
   function tasteIds(kind) {
     const t = readTaste();
-    return Object.entries(t).filter(([_, v]) => v === kind).map(([k]) => parseInt(k, 10)).filter(Number.isFinite);
+    return Object.entries(t).filter(([_, v]) => tasteKind(v) === kind).map(([k]) => parseInt(k, 10)).filter(Number.isFinite);
   }
   function clearTaste() { writeTaste({}); }
+
+
+  function feedbackReasonToRefine(reason) {
+    return {
+      not_tone: "weirder",
+      too_obvious: "less_known",
+      too_heavy: "safer",
+      already_seen: "less_known",
+      no_genre: "weirder",
+    }[reason] || null;
+  }
+  async function replaceCardFromFeedback(card, film, rank, kind) {
+    try {
+      const repl = await fetchAltFilm(film.id, kind);
+      if (repl) {
+        const newCard = filmCard(repl, rank);
+        card.style.transition = "opacity .2s";
+        card.style.opacity = "0";
+        setTimeout(() => card.replaceWith(newCard), 180);
+      }
+    } catch {}
+  }
+  function showDislikeReasons(card, film, rank) {
+    card.querySelector(".feedback-reasons")?.remove();
+    const box = document.createElement("div");
+    box.className = "feedback-reasons";
+    box.innerHTML = `<div class="feedback-reasons-title">${escapeHtml(window.t("feedback_why"))}</div>`;
+    const reasons = ["not_tone", "too_obvious", "too_heavy", "already_seen", "no_genre", "just_swap"];
+    for (const reason of reasons) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "feedback-reason";
+      b.textContent = window.t(`feedback_${reason}`);
+      b.addEventListener("click", () => {
+        const kind = reason === "already_seen" ? "seen" : "disliked";
+        setTaste(film.id, kind, reason);
+        const refine = feedbackReasonToRefine(reason);
+        if (refine && REFINE_MAP[refine]) state.refineMood = { ...(state.refineMood || {}), ...REFINE_MAP[refine] };
+        showToast(window.t(reason === "just_swap" ? "toast_disliked" : "toast_feedback_reason"));
+        box.remove();
+        replaceCardFromFeedback(card, film, rank, "opposite");
+      });
+      box.appendChild(b);
+    }
+    card.querySelector(".meta")?.prepend(box);
+  }
 
   // Fetch a single replacement film tied to a SPECIFIC seed film.
   // kind="similar" → use TMDb /similar+/recommendations of seed (for likes).
@@ -1825,6 +1989,7 @@
     $("#path-global").addEventListener("click", () => {
       state.path = "global";
       state.answers = {};
+      state.refineMood = {};
       show("media-pick");
     });
 
@@ -1843,6 +2008,7 @@
     $("#path-surprise")?.addEventListener("click", async () => {
       state.path = "surprise";
       state.media = "movie";
+      state.refineMood = {};
       if (window.setMediaCtx) window.setMediaCtx(state.media);
       state.answers = {};
       state.shownIds = [];
@@ -1853,6 +2019,7 @@
     $("#path-lb").addEventListener("click", () => {
       state.path = "lb";
       state.media = "movie";
+      state.refineMood = {};
       if (window.setMediaCtx) window.setMediaCtx(state.media);
       state.answers = {};
       state.shownIds = [];
@@ -1904,7 +2071,7 @@
     $("#shuffle-chips")?.addEventListener("click", shuffleChipsAnimated);
 
     $("#brand-home")?.addEventListener("click", () => {
-      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality"; state.media = "movie";
+      state.qIdx = 0; state.answers = {}; state.refineMood = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality"; state.media = "movie";
       if (window.setMediaCtx) window.setMediaCtx(state.media);
       state.shownIds = []; state.lastMode = null;
       const inp = $("#user"); if (inp) { inp.value = ""; }
@@ -1912,7 +2079,7 @@
     });
 
     $("#restart").addEventListener("click", () => {
-      state.qIdx = 0; state.answers = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality"; state.media = "movie";
+      state.qIdx = 0; state.answers = {}; state.refineMood = {}; state.user = ""; state.path = null; state.surpriseProfile = "quality"; state.media = "movie";
       if (window.setMediaCtx) window.setMediaCtx(state.media);
       state.shownIds = [];
       const inp = $("#user"); if (inp) { inp.value = ""; }
@@ -1926,6 +2093,8 @@
       }
     });
     $("#retry").addEventListener("click", () => recommend({ withUser: state.path === "lb" }));
+    $("#save-route")?.addEventListener("click", saveRoute);
+    $("#share-route")?.addEventListener("click", shareRoute);
     $("#clear-taste")?.addEventListener("click", () => {
       if (confirm(t("feedback_clear_confirm"))) {
         clearTaste();
