@@ -50,7 +50,8 @@ html, body {
 }
 html { background: var(--charcoal); overflow-x: clip; scrollbar-width: none; -ms-overflow-style: none; }
 body.on-hero { background: transparent; }
-body.on-hero footer.bottom { margin-top: 0; border-top: 0; }
+body.on-hero footer.bottom,
+body:not(.has-results) footer.bottom { display: none; }
 
 /* Journey background: same hero still, blurred + dimmed.
    Replaces the flat bone-white paper for quiz/loading/results so the
@@ -69,7 +70,7 @@ body.has-journey-hero::before {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: blur(28px) saturate(0.85) brightness(0.55);
+  filter: blur(12px) saturate(0.95) brightness(0.72);
   transform: scale(1.08);
   opacity: 0;
   transition: opacity .6s ease;
@@ -152,8 +153,10 @@ header.top {
 
 /* ─── persistent site header (logo always clickable) ─── */
 .site-top {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 40;
   display: flex;
   align-items: baseline;
@@ -165,6 +168,7 @@ header.top {
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
+body { padding-top: 56px; }
 body.on-hero .site-top {
   background: transparent;
   border-bottom-color: transparent;

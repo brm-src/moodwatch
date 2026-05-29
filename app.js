@@ -1098,6 +1098,7 @@
     _shownOnce = true;
     Object.entries(steps).forEach(([k, el]) => el && el.classList.toggle("active", k === want));
     document.body.classList.toggle("on-hero", want === "intro");
+    document.body.classList.toggle("has-results", want === "results");
     // First call (on page load) → never scroll, leave the user at the top.
     if (!wasShown) return;
     // Hero/intro → always go to 0. Other steps → scroll the section into view.
