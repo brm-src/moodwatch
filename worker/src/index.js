@@ -192,11 +192,17 @@ async function recommend(req, env, ctx) {
     return { error: "config", message: "TMDB_API_KEY not set" };
   }
 
-  // 1. Get candidate pool from TMDb /discover (multi-page if discoverable)
-  const candidates = await discoverByMood(env, mood, lang, media);
+  // 1. Get candidate pool from TMDb /discover (multi-page if discoverable).
+  // Skip when user@ is given for a movie request — watchlist will be the pool
+  // and the subrequest budget needs to go to watchlist /details enrichment.
+  const skipDiscover = !!(user && media === "movie");
+  const candidates = skipDiscover
+    ? []
+    : await discoverByMood(env, mood, lang, media);
 
   // 1b. Merge mood-matched editorial list seeds into the candidate pool.
-  const matched = matchLists(mood, media);
+  // Same skip when user@ is given — watchlist replaces curated lists.
+  const matched = skipDiscover ? [] : matchLists(mood, media);
   const listIds = new Map();
   for (const m of matched) {
     for (const id of (m.list.ids || [])) {
@@ -279,6 +285,9 @@ async function recommend(req, env, ctx) {
   if (mood.avoid && mood.avoid !== "any" && mood.avoid !== "nothing") tierCap = 0;
   if (_moodSpec1 >= 5) tierCap = 0;
   if (_moodSpec1 >= 3) tierCap = Math.min(tierCap, 1);
+  // When user@ is provided, skip tier injection entirely — watchlist will be the pool
+  // and the subrequest budget needs to be reserved for watchlist enrichment.
+  if (user && media === "movie") tierCap = 0;
   const tierInjectIds = tierCap > 0
     ? selectTierForMood(media === "tv", tierGenreFilter, haveIds, tierCap)
     : [];
@@ -346,7 +355,7 @@ async function recommend(req, env, ctx) {
             const j = Math.floor(Math.random() * (i + 1));
             [wlPicks[i], wlPicks[j]] = [wlPicks[j], wlPicks[i]];
           }
-          const cap = 30;
+          const cap = 18;
           const wlSlice = wlPicks.slice(0, cap);
           const inPoolItems = wlSlice.filter(id => have.has(id)).map(id => have.get(id));
           const missingIds = wlSlice.filter(id => !have.has(id));
