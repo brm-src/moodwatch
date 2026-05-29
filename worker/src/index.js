@@ -192,16 +192,58 @@ async function recommend(req, env, ctx) {
     return { error: "config", message: "TMDB_API_KEY not set" };
   }
 
-  // 1. Get candidate pool from TMDb /discover (multi-page if discoverable).
-  // Skip when user@ is given for a movie request — watchlist will be the pool
-  // and the subrequest budget needs to go to watchlist /details enrichment.
-  const skipDiscover = !!(user && media === "movie");
+  // 1. Watchlist FIRST when @ is given — if it succeeds, it becomes the pool
+  // and we skip /discover + lists to preserve the subrequest budget. If it
+  // fails or is empty, we fall through to normal /discover-based recommendation.
+  let watchlistIds = null;
+  let wlPoolItems = null; // pre-enriched pool when WL succeeds
+  let lbUsed = false;
+  if (user && media === "movie" && /^[a-z0-9_-]{1,30}$/.test(user)) {
+    try {
+      const wlIds = await fetchWatchlistTmdbIds(env, user);
+      if (wlIds && wlIds.size > 0) {
+        watchlistIds = wlIds;
+        lbUsed = true;
+        const wlPicks = [...wlIds].filter(id => !excludeSet.has(id));
+        for (let i = wlPicks.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [wlPicks[i], wlPicks[j]] = [wlPicks[j], wlPicks[i]];
+        }
+        const cap = 18;
+        const wlSlice = wlPicks.slice(0, cap);
+        wlPoolItems = (await Promise.all(wlSlice.map(id =>
+          M.details(env, id, lang).then(d => ({
+            id: d.id,
+            title: M.titleOf(d),
+            release_date: M.dateOf(d),
+            vote_average: d.vote_average,
+            vote_count: d.vote_count,
+            popularity: d.popularity,
+            genre_ids: (d.genres || []).map(g => g.id),
+            genres: (d.genres || []).map(g => g.name?.toLowerCase()),
+            poster_path: d.poster_path,
+            overview: sanitizeOverview(d.overview),
+            runtime: d.runtime || null,
+            original_language: d.original_language,
+            _list: null,
+            _media: media,
+          })).catch(() => null)
+        ))).filter(Boolean);
+      }
+    } catch (e) {
+      console.log("LB fail:", e?.message);
+    }
+  }
+
+  // 2. Get candidate pool from TMDb /discover (multi-page if discoverable).
+  // Skip when watchlist succeeded — that's our pool now.
+  const skipDiscover = !!(wlPoolItems && wlPoolItems.length);
   const candidates = skipDiscover
     ? []
     : await discoverByMood(env, mood, lang, media);
 
-  // 1b. Merge mood-matched editorial list seeds into the candidate pool.
-  // Same skip when user@ is given — watchlist replaces curated lists.
+  // 2b. Merge mood-matched editorial list seeds into the candidate pool.
+  // Same skip when watchlist is the pool.
   const matched = skipDiscover ? [] : matchLists(mood, media);
   const listIds = new Map();
   for (const m of matched) {
@@ -238,8 +280,8 @@ async function recommend(req, env, ctx) {
     if (!f) return false;
     if (f.release_date && f.release_date > today) return false;
     if (media === "movie") {
-      if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
-      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+      if (mood.runtime === "short" && f.runtime && f.runtime > 110) return false;
+      if (mood.runtime === "medium" && f.runtime && (f.runtime < 80 || f.runtime > 140)) return false;
     }
     // Respect avoid for tier injections too. Genres on tier extras come from TMDb details.
     const fg = new Set((f.genres || []).map(g => String(g).toLowerCase()));
@@ -285,9 +327,9 @@ async function recommend(req, env, ctx) {
   if (mood.avoid && mood.avoid !== "any" && mood.avoid !== "nothing") tierCap = 0;
   if (_moodSpec1 >= 5) tierCap = 0;
   if (_moodSpec1 >= 3) tierCap = Math.min(tierCap, 1);
-  // When user@ is provided, skip tier injection entirely — watchlist will be the pool
-  // and the subrequest budget needs to be reserved for watchlist enrichment.
-  if (user && media === "movie") tierCap = 0;
+  // When watchlist succeeded as the pool, skip tier injection too — that pool
+  // is already a closed set of films from the user's watchlist.
+  if (wlPoolItems && wlPoolItems.length) tierCap = 0;
   const tierInjectIds = tierCap > 0
     ? selectTierForMood(media === "tv", tierGenreFilter, haveIds, tierCap)
     : [];
@@ -313,8 +355,8 @@ async function recommend(req, env, ctx) {
     if (!f) return false;
     if (f.release_date && f.release_date > today) return false;
     if (media === "movie") {
-      if (mood.runtime === "short" && f.runtime && f.runtime > 95) return false;
-      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 130)) return false;
+      if (mood.runtime === "short" && f.runtime && f.runtime > 110) return false;
+      if (mood.runtime === "medium" && f.runtime && (f.runtime < 80 || f.runtime > 140)) return false;
     }
     // Respect avoid for tier injections too. Genres on tier extras come from TMDb details.
     const fg = new Set((f.genres || []).map(g => String(g).toLowerCase()));
@@ -329,63 +371,10 @@ async function recommend(req, env, ctx) {
   });
   allCandidates.push(...tierExtras);
 
-  // 2. If LB user provided, fetch their watchlist as TMDb IDs.
-  // Letterboxd is movies only — skip for TV requests.
-  // Strategy: when @ is given, watchlist BECOMES the pool. We score watchlist
-  // items by mood fit and return the top matches. Discover pool is only used
-  // as a fallback when watchlist is too small to yield 6 picks for this mood.
-  let pool = allCandidates;
-  let lbUsed = false;
-  let watchlistIds = null;
-  if (user && media === "movie") {
-    if (/^[a-z0-9_-]{1,30}$/.test(user)) {
-      try {
-        const wlIds = await fetchWatchlistTmdbIds(env, user);
-        if (wlIds && wlIds.size > 0) {
-          watchlistIds = wlIds;
-          lbUsed = true;
-          // Enrich watchlist items in batches so we don't blow the subrequest
-          // budget. Cap at ~30 random items: that's plenty to filter down to
-          // 6 mood-fit picks. Items already in the discover pool are kept
-          // (they already have details), missing ones get a /details call.
-          const have = new Map(allCandidates.map(c => [c.id, c]));
-          const wlPicks = [...wlIds].filter(id => !excludeSet.has(id));
-          // shuffle so different sessions get different watchlist picks
-          for (let i = wlPicks.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [wlPicks[i], wlPicks[j]] = [wlPicks[j], wlPicks[i]];
-          }
-          const cap = 18;
-          const wlSlice = wlPicks.slice(0, cap);
-          const inPoolItems = wlSlice.filter(id => have.has(id)).map(id => have.get(id));
-          const missingIds = wlSlice.filter(id => !have.has(id));
-          const fetchedItems = (await Promise.all(missingIds.map(id =>
-            M.details(env, id, lang).then(d => ({
-              id: d.id,
-              title: M.titleOf(d),
-              release_date: M.dateOf(d),
-              vote_average: d.vote_average,
-              vote_count: d.vote_count,
-              popularity: d.popularity,
-              genre_ids: (d.genres || []).map(g => g.id),
-              genres: (d.genres || []).map(g => g.name?.toLowerCase()),
-              poster_path: d.poster_path,
-              overview: sanitizeOverview(d.overview),
-              runtime: d.runtime || null,
-              original_language: d.original_language,
-              _list: null,
-              _media: media,
-            })).catch(() => null)
-          ))).filter(Boolean);
-          // Watchlist IS the pool. Discover pool is held in reserve as fallback
-          // (used only if final scoring leaves <6 picks, see below).
-          pool = [...inPoolItems, ...fetchedItems];
-        }
-      } catch (e) {
-        console.log("LB fail:", e?.message);
-      }
-    }
-  }
+  // Watchlist already fetched above (if user@ provided). When WL succeeded,
+  // it becomes the pool — discover/lists/tier injection were all skipped.
+  // Otherwise fall through to discover-based pool.
+  let pool = (wlPoolItems && wlPoolItems.length) ? wlPoolItems : allCandidates;
 
   // Drop excluded ids (re-roll case) and future releases
   pool = pool.filter(f => !excludeSet.has(f.id) && (!f.release_date || f.release_date <= today));
@@ -744,6 +733,7 @@ async function recommend(req, env, ctx) {
       curated_note: f._curated?.note || null,
       from_list: f._list || null,
       from_feedback: !!f._likeBoost,
+      from_watchlist: !!f._fromWatchlist,
       media,
     };
   }));
@@ -755,8 +745,8 @@ async function recommend(req, env, ctx) {
       // Allow only when mood explicitly wants tiny.
       if (f.runtime && f.runtime < 60 && mood.runtime !== "tiny") return false;
       if (mood.runtime === "tiny" && f.runtime && f.runtime > 45) return false;
-      if (mood.runtime === "short" && f.runtime && f.runtime > 100) return false;
-      if (mood.runtime === "medium" && f.runtime && (f.runtime < 85 || f.runtime > 135)) return false;
+      if (mood.runtime === "short" && f.runtime && f.runtime > 110) return false;
+      if (mood.runtime === "medium" && f.runtime && (f.runtime < 80 || f.runtime > 140)) return false;
       if (mood.runtime === "long" && f.runtime && f.runtime < 110) return false;
     }
     // Final language safety net: curated items don't carry original_language until
@@ -817,11 +807,61 @@ async function surprise(req, env, ctx) {
   };
   if (media === "movie") baseParams["with_runtime.gte"] = 75;
   if (profile === "short" && media === "movie") baseParams["with_runtime.lte"] = 95;
-  if (profile === "weird") baseParams["vote_count.lte"] = 1500;
-  if (profile === "classic") baseParams[`${dateKey}.lte`] = "1979-12-31";
-  if (profile === "horror") baseParams.with_genres = media === "tv" ? "9648" : "27|53|9648";
+  if (profile === "weird") {
+    baseParams["vote_count.lte"] = 1500;
+    baseParams["vote_count.gte"] = 60;
+    baseParams["vote_average.gte"] = 6.4;
+    // Lean into genres that produce weird/cult films
+    baseParams.with_genres = media === "tv" ? "9648|10765" : "27|878|14|9648";
+  }
+  if (profile === "classic") {
+    baseParams[`${dateKey}.lte`] = "1979-12-31";
+    baseParams["vote_count.gte"] = 250;
+  }
+  if (profile === "horror") {
+    baseParams.with_genres = media === "tv" ? "9648" : "27|53|9648";
+    baseParams["vote_count.gte"] = 200;
+  }
   if (profile === "pace") baseParams.with_genres = media === "tv" ? "10759" : "28|12|53";
   if (profile === "hurt") baseParams["vote_count.gte"] = 120;
+  if (profile === "latam") {
+    baseParams.with_original_language = "es|pt";
+    baseParams["vote_count.gte"] = 80;
+  }
+  if (profile === "asian") {
+    baseParams.with_original_language = "ja|ko|zh|cn|th|vi|hi|tl";
+    baseParams["vote_count.gte"] = 200;
+  }
+  if (profile === "noir") {
+    baseParams.with_genres = media === "tv" ? "80|9648" : "80|53|9648";
+    baseParams["vote_count.gte"] = 200;
+  }
+  if (profile === "rainy") {
+    baseParams.with_genres = media === "tv" ? "18|80" : "18|80|53";
+    baseParams["vote_count.gte"] = 150;
+  }
+  if (profile === "lonely") {
+    baseParams.with_genres = media === "tv" ? "18" : "18|10749";
+    baseParams["vote_count.gte"] = 150;
+  }
+  if (profile === "neon") {
+    baseParams.with_genres = media === "tv" ? "10765|80" : "28|878|80|53";
+    baseParams["vote_count.gte"] = 200;
+  }
+  if (profile === "trip" || profile === "cult") {
+    baseParams["vote_count.lte"] = 2000;
+    baseParams["vote_count.gte"] = 80;
+    baseParams.with_genres = media === "tv" ? "9648|10765" : "27|878|14|9648";
+  }
+  if (profile === "lost-20s") {
+    baseParams.with_genres = media === "tv" ? "18|10751" : "18|10749";
+    baseParams[`${dateKey}.gte`] = "1995-01-01";
+    baseParams["vote_count.gte"] = 100;
+  }
+  if (profile === "warm" || profile === "beautiful") {
+    baseParams.with_genres = media === "tv" ? "10751|18" : "10751|10749|18";
+    baseParams["vote_count.gte"] = 200;
+  }
 
   const fetches = pages.map(p =>
     M.discover(env, { ...baseParams, ...p }, lang).catch(() => ({ results: [] }))
@@ -855,6 +895,7 @@ async function surprise(req, env, ctx) {
       poster_path: d.poster_path,
       overview: sanitizeOverview(d.overview),
       runtime: d.runtime || (d.episode_run_time && d.episode_run_time[0]) || null,
+      original_language: d.original_language,
       _list: listIds.get(id) || null,
       _media: media,
     })).catch(() => null)
@@ -865,6 +906,23 @@ async function surprise(req, env, ctx) {
       if (f.runtime && f.runtime < 75) return false;
       if (profile === "short" && f.runtime && f.runtime > 95) return false;
     }
+    // Respect profile filters so list injection doesn't break the chip's promise
+    const fid = new Set((f.genre_ids || []).map(x => String(x)));
+    const lang_ = (f.original_language || "").toLowerCase();
+    if (profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
+    if (profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
+    if (profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
+    if (profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
+    if (profile === "lonely" && !["18","10749"].some(g => fid.has(g))) return false;
+    if (profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
+    if (profile === "latam" && !["es","pt"].includes(lang_)) return false;
+    if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
+    if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
     return true;
   });
   pool = [
@@ -872,15 +930,46 @@ async function surprise(req, env, ctx) {
     ...extraFromLists,
   ];
 
+  // Profile-respecting filter helper — applied to dedupe + scoring stage so
+  // discover blockbusters don't sneak past the strict /discover params.
+  const profileFilter = (f) => {
+    const fid = new Set((f.genre_ids || []).map(x => String(x)));
+    const lang_ = (f.original_language || "").toLowerCase();
+    if (profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
+    if (profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
+    if (profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
+    if (profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
+    if (profile === "lonely" && !["18","10749"].some(g => fid.has(g))) return false;
+    if (profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
+    if (profile === "latam" && !["es","pt"].includes(lang_)) return false;
+    if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
+    if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
+    return true;
+  };
   // De-dupe + drop excluded/profile leaks
   const seen = new Set();
   pool = pool.filter(f => {
     if (excludeSet.has(f.id)) return false;
     if (seen.has(f.id)) return false;
-    if (media === "movie" && profile === "short" && f.runtime && f.runtime > 95) return false;
+    if (media === "movie" && profile === "short" && f.runtime && f.runtime > 110) return false;
+    if (!profileFilter(f)) return false;
     seen.add(f.id);
     return true;
   });
+
+  // For niche profiles, kill the curated +4 boost so it doesn't promote
+  // blockbusters that happen to be in the static catalogue (Shawshank,
+  // Avengers, etc.) over the genre/language-fitting candidates.
+  const NICHE_PROFILES = new Set([
+    "horror","noir","weird","neon","rainy","lonely","warm","beautiful",
+    "trip","cult","lost-20s","latam","asian","classic","short"
+  ]);
+  const curatedWeight = NICHE_PROFILES.has(profile) ? 0 : 4;
 
   pool = pool.map(f => ({
     ...f,
@@ -889,7 +978,7 @@ async function surprise(req, env, ctx) {
       Math.min((f.popularity || 0) / 45, 2.5) +
       fitScore(f, surpriseMood) +
       (f._list ? 3 : 0) +
-      (M.curatedFor(f.id) ? 4 : 0) +
+      (M.curatedFor(f.id) ? curatedWeight : 0) +
       (Math.random() * 1.2),
   })).sort((a, b) => b._score - a._score);
   const listed = pool.filter(f => f._list);
