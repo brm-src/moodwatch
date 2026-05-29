@@ -50,8 +50,7 @@ html, body {
 }
 html { background: var(--charcoal); overflow-x: clip; scrollbar-width: none; -ms-overflow-style: none; }
 body.on-hero { background: transparent; }
-body.on-hero footer.bottom,
-body:not(.has-results) footer.bottom { display: none; }
+body.on-hero footer.bottom { padding-top: var(--s-2); padding-bottom: calc(var(--s-2) + env(safe-area-inset-bottom)); margin-top: 0; }
 
 /* Journey background: same hero still, blurred + dimmed.
    Replaces the flat bone-white paper for quiz/loading/results so the
@@ -122,6 +121,7 @@ body.has-journey-hero:not(.on-hero) .loader-text { color: var(--paper); }
 /* Loading/results retain the same dim treatment by default. */
 html::-webkit-scrollbar { width: 0; height: 0; display: none; }
 body { overflow-x: clip; min-height: 100dvh; display: flex; flex-direction: column; scrollbar-width: none; -ms-overflow-style: none; }
+body.on-hero { max-height: 100dvh; overflow-y: hidden; }
 body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 *::-webkit-scrollbar { width: 0; height: 0; display: none; }
 * { scrollbar-width: none; -ms-overflow-style: none; }
@@ -217,7 +217,8 @@ body.on-hero .site-top {
 /* ─── intro hero (full-bleed silent-film still) ─── */
 .hero {
   position: relative;
-  min-height: 100dvh;
+  min-height: 0;
+  flex: 1 1 auto;
   background-color: var(--charcoal);
   color: var(--paper);
   flex-direction: column;
