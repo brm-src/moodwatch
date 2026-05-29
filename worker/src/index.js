@@ -322,9 +322,9 @@ async function recommend(req, env, ctx) {
 
   // 2. If LB user provided, fetch their watchlist as TMDb IDs.
   // Letterboxd is movies only — skip for TV requests.
-  // Strategy: never use as a hard filter (intersection can be empty for niche moods).
-  // Instead: (a) prefer pool items that are in the watchlist, (b) inject high-fit
-  // watchlist items the discover pool didn't surface, (c) fall through gracefully.
+  // Strategy: when @ is given, watchlist BECOMES the pool. We score watchlist
+  // items by mood fit and return the top matches. Discover pool is only used
+  // as a fallback when watchlist is too small to yield 6 picks for this mood.
   let pool = allCandidates;
   let lbUsed = false;
   let watchlistIds = null;
@@ -335,20 +335,22 @@ async function recommend(req, env, ctx) {
         if (wlIds && wlIds.size > 0) {
           watchlistIds = wlIds;
           lbUsed = true;
-          // Inject watchlist items not already in the pool (cap to 24 random
-          // picks so we don't blow up TMDb details calls). They'll be scored
-          // alongside everything else; if they fit the mood they'll surface.
-          const have = new Set(allCandidates.map(c => c.id));
-          const missing = [...wlIds].filter(id => !have.has(id) && !excludeSet.has(id));
-          for (let i = missing.length - 1; i > 0; i--) {
+          // Enrich watchlist items in batches so we don't blow the subrequest
+          // budget. Cap at ~30 random items: that's plenty to filter down to
+          // 6 mood-fit picks. Items already in the discover pool are kept
+          // (they already have details), missing ones get a /details call.
+          const have = new Map(allCandidates.map(c => [c.id, c]));
+          const wlPicks = [...wlIds].filter(id => !excludeSet.has(id));
+          // shuffle so different sessions get different watchlist picks
+          for (let i = wlPicks.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [missing[i], missing[j]] = [missing[j], missing[i]];
+            [wlPicks[i], wlPicks[j]] = [wlPicks[j], wlPicks[i]];
           }
-          // Inject only 3 missing watchlist titles (was 8). Subrequest budget
-          // is tight — discover + enrichment alone consumes ~40 of the 50 cap.
-          // The wlBoost score (+5) still surfaces any pool item already in
-          // the watchlist, so we don't need a big injection here.
-          const extraFromWl = (await Promise.all(missing.slice(0, 3).map(id =>
+          const cap = 30;
+          const wlSlice = wlPicks.slice(0, cap);
+          const inPoolItems = wlSlice.filter(id => have.has(id)).map(id => have.get(id));
+          const missingIds = wlSlice.filter(id => !have.has(id));
+          const fetchedItems = (await Promise.all(missingIds.map(id =>
             M.details(env, id, lang).then(d => ({
               id: d.id,
               title: M.titleOf(d),
@@ -363,11 +365,12 @@ async function recommend(req, env, ctx) {
               runtime: d.runtime || null,
               original_language: d.original_language,
               _list: null,
-              _listOnly: true,
               _media: media,
             })).catch(() => null)
           ))).filter(Boolean);
-          pool = [...allCandidates, ...extraFromWl];
+          // Watchlist IS the pool. Discover pool is held in reserve as fallback
+          // (used only if final scoring leaves <6 picks, see below).
+          pool = [...inPoolItems, ...fetchedItems];
         }
       } catch (e) {
         console.log("LB fail:", e?.message);

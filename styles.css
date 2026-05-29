@@ -60,6 +60,28 @@ body.has-journey-hero {
   background-color: transparent;
 }
 body.has-journey-hero:not(.on-hero) { background: transparent; }
+/* On the intro: same image full-bleed (lightly tinted) so it shows
+   behind the header and the footer too — header/footer float on top. */
+body.on-hero::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--journey-hero, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+body.on-hero::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(20,22,15,0.55) 0%, rgba(20,22,15,0.25) 35%, rgba(20,22,15,0.55) 100%);
+  pointer-events: none;
+}
 body.has-journey-hero::before {
   content: "";
   position: fixed;
@@ -219,7 +241,7 @@ body.on-hero .site-top {
   position: relative;
   min-height: 0;
   flex: 1 1 auto;
-  background-color: var(--charcoal);
+  background-color: transparent;
   color: var(--paper);
   flex-direction: column;
   justify-content: flex-start;
@@ -232,14 +254,7 @@ body.on-hero .site-top {
   overflow: hidden;
 }
 .hero.active { display: flex; }
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(20,22,15,0.45) 0%, rgba(20,22,15,0.25) 35%, rgba(20,22,15,0.55) 100%);
-  pointer-events: none;
-}
+.hero::before { display: none; }
 .hero > * { position: relative; z-index: 1; }
 .hero h1 {
   font-family: var(--font-display);
