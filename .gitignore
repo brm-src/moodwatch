@@ -24,3 +24,9 @@ node_modules/
 .netlify/
 scripts/out/*.log
 .qa-reports/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

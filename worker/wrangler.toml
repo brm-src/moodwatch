@@ -2,6 +2,7 @@ name = "moodwatch-api"
 main = "src/index.js"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
+account_id = "d69466f4b3082fd1f506d41aca6ab1b2"
 
 # CORS / serving
 [observability]

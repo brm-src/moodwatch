@@ -836,7 +836,8 @@ async function surprise(req, env, ctx) {
   const sorts = ["vote_average.desc", "popularity.desc"];
   const pages = [];
   const pageMax = profile === "classic" ? 6 : (profile === "short" ? 10 : 25);
-  for (let i = 0; i < 6; i++) {
+  const curatedPages = !!(LISTS.find(l => l.slug === "curated-" + profile && (!l.media || l.media === media))?.ids?.length) ? 4 : 6;
+  for (let i = 0; i < curatedPages; i++) {
     pages.push({
       sort_by: sorts[Math.floor(Math.random() * sorts.length)],
       page: 1 + Math.floor(Math.random() * pageMax),
@@ -952,6 +953,35 @@ async function surprise(req, env, ctx) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffledListIds[i], shuffledListIds[j]] = [shuffledListIds[j], shuffledListIds[i]];
   }
+  // ── Curated pool injector ──
+  // Curated films are merged into the discover pool as boosted candidates.
+  // They don't replace discover: the system stays neutral, curated just gets priority.
+  const curatedList = LISTS.find(l => l.slug === "curated-" + profile && (!l.media || l.media === media));
+  const hasCuratedPool = !!(curatedList && curatedList.ids && curatedList.ids.length);
+  if (hasCuratedPool) {
+    const cIds = [...curatedList.ids].sort(() => Math.random() - 0.5).slice(0, 4);
+    const cEnriched = (await Promise.all(cIds.map(id =>
+      M.details(env, id, lang).then(d => ({
+        id: d.id,
+        title: M.titleOf(d),
+        release_date: M.dateOf(d),
+        vote_average: d.vote_average,
+        vote_count: d.vote_count,
+        popularity: d.popularity,
+        genre_ids: (d.genres || []).map(g => g.id),
+        genres: localizeGenres(d.genres || [], lang.slice(0,2)),
+        poster_path: d.poster_path,
+        overview: sanitizeOverview(d.overview),
+        runtime: d.runtime || (d.episode_run_time && d.episode_run_time[0]) || null,
+        original_language: d.original_language,
+        _list: curatedList.name,
+        _media: media,
+        _curated: true,
+      })).catch(() => null)
+    ))).filter(f => f && (!f.release_date || f.release_date <= today) && passesQualityFloor(f, surpriseMood));
+    pool = [...pool, ...cEnriched];
+  }
+
   const extraFromLists = (await Promise.all(shuffledListIds.slice(0, 8).map(id =>
     M.details(env, id, lang).then(d => ({
       id: d.id,
@@ -993,7 +1023,7 @@ async function surprise(req, env, ctx) {
     if (profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
     if (profile === "latam" && !["es","pt"].includes(lang_)) return false;
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
-    if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
+    if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979" && !bypassGenre) return false;
     if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
     // For bw profile, list-injected films must be in the hand-curated bw-cinema set.
     // Discover pool films are already filtered by with_keywords=3494 at TMDb level.
@@ -1001,7 +1031,7 @@ async function surprise(req, env, ctx) {
     return true;
   });
   pool = [
-    ...pool.map(f => ({ ...f, _list: listIds.get(f.id) || null })),
+    ...pool.map(f => ({ ...f, _list: f._list || listIds.get(f.id) || null })),
     ...extraFromLists,
   ];
 
@@ -1010,24 +1040,27 @@ async function surprise(req, env, ctx) {
   const profileFilter = (f) => {
     const fid = new Set((f.genre_ids || []).map(x => String(x)));
     const lang_ = (f.original_language || "").toLowerCase();
-    if (profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
-    if (profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
-    if (profile === "noir" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
-    if (profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
-    if (profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
-    if (profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
-    if (profile === "lonely" && !["18","10749"].some(g => fid.has(g))) return false;
-    if (profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
-    if (profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
-    if (profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
-    if (profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
-    if (profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
+    // Curated films skip genre restrictions — Cris already vetted them for this mood.
+    const bypassGenre = !!(f._curated);
+    if (!bypassGenre && profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
+    if (profile === "noir" && f.release_date && f.release_date.slice(0,4) > "1965" && !bypassGenre) return false;
+    if (!bypassGenre && profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "lonely" && !["18","10749"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
     if (profile === "latam" && !["es","pt"].includes(lang_)) return false;
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
-    if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
-    if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
-    // For bw profile, films not from bw-cinema must have passed the TMDb with_keywords filter
-    if (profile === "bw" && !bwCinemaIds.has(f.id)) return false;
+    if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979" && !bypassGenre) return false;
+    if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965" && !bypassGenre) return false;
+    // For bw profile, discover films must have passed the TMDb with_keywords filter.
+    // Curated BW films skip this check — Cris already vetted them.
+    if (profile === "bw" && !bwCinemaIds.has(f.id) && !bypassGenre) return false;
     return true;
   };
   // De-dupe + drop excluded/profile leaks
@@ -1056,7 +1089,8 @@ async function surprise(req, env, ctx) {
       (f.vote_average || 0) * 1.4 +
       Math.min((f.popularity || 0) / 45, 2.5) +
       fitScore(f, surpriseMood) +
-      (f._list ? 3 : 0) +
+      (f._list ? 1.0 : 0) +
+      (f._curated ? 2.0 : 0) +
       (M.curatedFor(f.id) ? curatedWeight : 0) +
       (Math.random() * 1.2),
   })).sort((a, b) => b._score - a._score);
