@@ -1754,7 +1754,7 @@
     const countryLabel = (cc) => {
       if (!cc || cc.length !== 2) return "";
       const flag = String.fromCodePoint(...[...cc.toUpperCase()].map(c => 0x1F1A5 + c.charCodeAt(0)));
-      return `${flag} ${cc.toUpperCase()}`;
+      return flag;
     };
     const showOriginal = f.original_title && f.original_title !== f.title;
     const specsParts = [

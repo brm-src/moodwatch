@@ -847,7 +847,7 @@ async function surprise(req, env, ctx) {
     // TMDB TV vote counts run much lower than movies. Lower the floor on TV
     // discovery, then let the scorer's popularity_floor + IMDB-tier boost
     // promote serious shows and demote nicho-only ones.
-    "vote_count.gte": profile === "weird" ? 80 : (media === "tv" ? 300 : 800),
+    "vote_count.gte": profile === "weird" ? 80 : profile === "short" ? 200 : (media === "tv" ? 300 : 800),
     "vote_average.gte": profile === "pace" ? 6.3 : 6.8,
     [`${dateKey}.lte`]: today,
     include_adult: "false",
@@ -882,6 +882,7 @@ async function surprise(req, env, ctx) {
   if (profile === "noir") {
     baseParams.with_genres = media === "tv" ? "80|9648" : "80|53|9648";
     baseParams["vote_count.gte"] = 200;
+    baseParams[`${dateKey}.lte`] = "1965-12-31";
   }
   if (profile === "rainy") {
     baseParams.with_genres = media === "tv" ? "18|80" : "18|80|53";
