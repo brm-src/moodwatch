@@ -1119,7 +1119,7 @@ html.theme-light .theme-toggle:hover {
 /* ─── results ─── */
 .section[data-step="results"] {
   max-width: min(1180px, 100vw);
-  padding-top: var(--s-2);
+  padding-top: var(--s-4);
 }
 #cards { display: flex; flex-direction: column; gap: 0; margin-top: var(--s-4); }
 @media (min-width: 900px) {
@@ -1221,6 +1221,18 @@ body.has-journey-hero:not(.on-hero) .restart {
 body.has-journey-hero:not(.on-hero) .card a.action.primary { background: var(--paper); color: var(--ink); border-color: var(--paper); }
 body.has-journey-hero:not(.on-hero) .card a.action:hover,
 body.has-journey-hero:not(.on-hero) .restart:hover { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+/* editorial layout: keep primary action visible on dark journey hero (paper bg, ink text) */
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .action.primary {
+  background: var(--paper); color: var(--ink); border-color: var(--paper);
+}
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .action.primary:hover {
+  background: var(--accent); color: var(--paper); border-color: var(--accent);
+}
+/* ensure subtle restart buttons are legible on dark hero backdrop */
+body.has-journey-hero:not(.on-hero) .restart.subtle {
+  opacity: 0.92;
+  border-color: rgba(237,231,218,0.48);
+}
 html.theme-light body.has-journey-hero:not(.on-hero) .card,
 html.theme-light body.has-journey-hero:not(.on-hero) .why-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .refine-panel,
@@ -2177,8 +2189,8 @@ html.theme-light .era-chip:hover {
 .has-programming-layout #cards {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  margin-top: var(--s-2);
+  gap: var(--s-3);
+  margin-top: var(--s-3);
 }
 
 /* ─── all cards lose their box backgrounds ─── */
