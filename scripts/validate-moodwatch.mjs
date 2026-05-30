@@ -25,6 +25,7 @@ assert(html.includes('quick-surprise'), 'homepage must render quick surprise fil
 assert(app.includes('renderWhy'), 'frontend must render why panel');
 assert(app.includes('quick-surprise'), 'frontend must wire quick surprise filters');
 assert(!app.includes('why_lists'), 'why panel must not expose editorial/internal list names');
+assert(!app.includes('from_list'), 'cards must not expose editorial/internal list names');
 
 assert(curated.includes('CURATED_GROUPS'), 'curated file must expose admin-friendly grouped data');
 
