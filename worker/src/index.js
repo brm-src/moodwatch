@@ -9,7 +9,7 @@ import {
   tmdbDetailsTV, tmdbProvidersTV, tmdbCreditsTV, tmdbDiscoverTV,
   sanitizeOverview, localizeGenres,
 } from "./tmdb.js";
-import { fetchWatchlistTmdbIds } from "./letterboxd.js";
+import { fetchWatchlistTmdbIds, scrapeListPage } from "./letterboxd.js";
 import { CURATED, curatedFor, CURATED_TV, curatedTvFor } from "./curated.js";
 import { matchLists } from "./lists.js";
 import { imdbTierBoost, imdbTierTier, selectTierForMood, IMDB_TIER_COUNTS } from "./imdb_tier.js";
@@ -1262,6 +1262,21 @@ export default {
         return json(out, {}, cors);
       } catch (e) {
         return json({ error: "verify", message: String(e?.message || e) }, { status: 500 }, cors);
+      }
+    }
+
+    if (url.pathname === "/lb-scrape") {
+      try {
+        const targetUrl = url.searchParams.get("url");
+        if (!targetUrl || !/^https?:\/\/letterboxd\.com\//i.test(targetUrl)) {
+          return json({ error: "missing or invalid url param — must be a letterboxd.com URL" }, { status: 400 }, cors);
+        }
+        const debug = url.searchParams.get("debug") === "1";
+        const out = await scrapeListPage(targetUrl, debug);
+        return json(out, {}, cors);
+      } catch (e) {
+        console.log("lb-scrape err:", e?.stack || e);
+        return json({ error: "scrape_failed", message: String(e?.message || e) }, { status: 500 }, cors);
       }
     }
 

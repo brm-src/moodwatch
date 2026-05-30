@@ -6,225 +6,589 @@
 <meta name="robots" content="noindex,nofollow">
 <title>moodwatch — mood lab</title>
 <style>
-  *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#12130f;color:#eee7da;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}body{background:radial-gradient(circle at 15% 8%,rgba(196,59,42,.25),transparent 28%),radial-gradient(circle at 82% 18%,rgba(216,207,188,.12),transparent 30%),linear-gradient(135deg,#15160f,#0b0c09 58%,#1b1512);padding:22px;color:#eee7da}.app{max-width:1480px;margin:0 auto}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.brand{font-family:Georgia,serif;font-size:30px;letter-spacing:-.05em}.brand em{color:#c43b2a;font-style:italic}.subtitle{max-width:760px;color:rgba(238,231,218,.68);line-height:1.45;margin:8px 0 0}.top-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.grid{display:grid;grid-template-columns:minmax(250px,.75fr) minmax(430px,1.25fr) minmax(360px,1fr);gap:14px;align-items:start}.panel{background:rgba(18,19,15,.72);border:1px solid rgba(238,231,218,.14);box-shadow:0 24px 80px rgba(0,0,0,.28);backdrop-filter:blur(18px);border-radius:24px;padding:16px}.panel h2,.panel h3{font-family:Georgia,serif;font-weight:500;letter-spacing:-.03em;margin:0 0 12px}.panel h2{font-size:24px}.panel h3{font-size:19px}.small{font-size:12px;color:rgba(238,231,218,.56);line-height:1.35}.btn{border:1px solid rgba(238,231,218,.22);background:rgba(238,231,218,.06);color:#eee7da;border-radius:999px;padding:10px 13px;transition:.16s ease}.btn:hover{background:rgba(238,231,218,.13);transform:translateY(-1px)}.btn.primary{background:#c43b2a;border-color:#c43b2a;color:#fff4ef}.btn.danger{border-color:rgba(196,59,42,.45);color:#ffb0a5}.btn.ghost{background:transparent}.field{display:grid;gap:7px;margin:0 0 12px}.field label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,231,218,.55)}input,textarea,select{width:100%;border:1px solid rgba(238,231,218,.16);background:rgba(238,231,218,.06);color:#eee7da;border-radius:14px;padding:11px 12px;outline:none}textarea{min-height:78px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:rgba(196,59,42,.85);box-shadow:0 0 0 3px rgba(196,59,42,.13)}select option{background:#15160f;color:#eee7da}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mood-list{display:grid;gap:9px;max-height:calc(100vh - 210px);overflow:auto;padding-right:3px}.mood-item{width:100%;text-align:left;border:1px solid rgba(238,231,218,.12);background:rgba(238,231,218,.045);color:#eee7da;border-radius:18px;padding:12px}.mood-item.active{border-color:rgba(196,59,42,.85);background:rgba(196,59,42,.16)}.mood-name{font-family:Georgia,serif;font-size:20px;letter-spacing:-.025em}.mood-meta{font-size:12px;color:rgba(238,231,218,.58);margin-top:4px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.chip{border:1px solid rgba(238,231,218,.18);border-radius:999px;padding:5px 8px;font-size:11px;color:rgba(238,231,218,.78);background:rgba(238,231,218,.045)}.chip.red{border-color:rgba(196,59,42,.4);color:#ffb0a5}.section{border-top:1px solid rgba(238,231,218,.1);padding-top:14px;margin-top:14px}.movie-form{display:grid;gap:10px}.movie-card{display:grid;gap:9px;border:1px solid rgba(238,231,218,.12);background:rgba(238,231,218,.045);border-radius:18px;padding:13px;margin-top:10px}.movie-title{font-family:Georgia,serif;font-size:19px}.movie-meta{font-size:12px;color:rgba(238,231,218,.55)}.movie-note{font-size:13px;color:rgba(238,231,218,.75);line-height:1.38}.movie-actions{display:flex;gap:8px;flex-wrap:wrap}.empty{border:1px dashed rgba(238,231,218,.18);border-radius:18px;padding:18px;color:rgba(238,231,218,.55);text-align:center}.search{margin-bottom:12px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{border:1px solid rgba(238,231,218,.12);background:rgba(238,231,218,.045);border-radius:16px;padding:11px}.stat strong{display:block;font-family:Georgia,serif;font-size:24px}.stat span{font-size:11px;color:rgba(238,231,218,.56);text-transform:uppercase;letter-spacing:.1em}.preview{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;max-height:280px;overflow:auto;background:rgba(0,0,0,.22);border:1px solid rgba(238,231,218,.12);border-radius:18px;padding:12px}.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);background:#eee7da;color:#15160f;border-radius:999px;padding:10px 15px;opacity:0;pointer-events:none;transition:.18s ease;box-shadow:0 18px 60px rgba(0,0,0,.35);z-index:9}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.importer{display:none}.mini-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.help{font-size:13px;line-height:1.45;color:rgba(238,231,218,.68)}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:rgba(238,231,218,.1);border:1px solid rgba(238,231,218,.12);padding:1px 5px;border-radius:7px}@media (max-width:1100px){.grid{grid-template-columns:1fr}.mood-list{max-height:none}.top{display:grid}.top-actions{justify-content:flex-start}}@media (max-width:620px){body{padding:12px}.row{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.panel{border-radius:18px;padding:13px}.brand{font-size:26px}}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:#12130f;color:#eee7da;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  body{background:radial-gradient(circle at 15% 8%,rgba(196,59,42,.22),transparent 28%),radial-gradient(circle at 82% 18%,rgba(216,207,188,.10),transparent 30%),linear-gradient(135deg,#15160f,#0b0c09 58%,#1b1512);padding:18px}
+  button,input,textarea,select{font:inherit}
+  button{cursor:pointer}
+  input,textarea,select{background:rgba(18,19,15,.8);border:1px solid rgba(238,231,218,.18);color:#eee7da;border-radius:10px;padding:9px 12px;width:100%}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:rgba(196,59,42,.55);box-shadow:0 0 0 3px rgba(196,59,42,.12)}
+  select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0h10L5 6Z' fill='%23eee7da'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+  textarea{resize:vertical;min-height:56px}
+
+  .app{max-width:1280px;margin:0 auto}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .brand{font-family:Georgia,serif;font-size:26px;letter-spacing:-.04em;white-space:nowrap}
+  .brand em{color:#c43b2a;font-style:italic}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+  .btn{border:1px solid rgba(238,231,218,.2);background:rgba(238,231,218,.06);color:#eee7da;border-radius:999px;padding:8px 14px;font-size:13px;transition:.16s ease;white-space:nowrap}
+  .btn:hover{background:rgba(238,231,218,.12)}
+  .btn.primary{background:#c43b2a;border-color:#c43b2a;color:#fff4ef}
+  .btn.primary:hover{background:#d94e3a}
+  .btn.ghost{background:transparent;border-color:transparent}
+  .btn.ghost:hover{background:rgba(238,231,218,.08)}
+  .btn.danger{border-color:rgba(196,59,42,.4);color:#ffb0a5}
+  .btn.small{padding:4px 10px;font-size:12px}
+
+  .grid{display:grid;grid-template-columns:320px 1fr;gap:14px;align-items:start}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+  .panel{background:rgba(18,19,15,.72);border:1px solid rgba(238,231,218,.12);box-shadow:0 20px 60px rgba(0,0,0,.26);backdrop-filter:blur(16px);border-radius:20px;padding:18px}
+  .panel h2{font-family:Georgia,serif;font-weight:500;letter-spacing:-.03em;font-size:22px;margin:0 0 12px}
+  .panel h3{font-family:Georgia,serif;font-size:16px;font-weight:500;margin:16px 0 8px;letter-spacing:-.02em}
+
+  .mood-selector{margin-bottom:14px}
+  .mood-selector select{font-size:15px;padding:10px 14px}
+  .mood-info{font-size:13px;color:rgba(238,231,218,.6);line-height:1.55;margin-bottom:10px}
+  .mood-info strong{color:#eee7da;font-weight:500}
+  .mood-profile{display:inline-block;background:rgba(196,59,42,.15);color:#e09080;border-radius:5px;padding:2px 7px;font-size:11px;letter-spacing:.04em;margin-left:4px}
+  .mood-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+  .chip{display:inline-block;background:rgba(238,231,218,.08);border-radius:6px;padding:3px 8px;font-size:11px;color:rgba(238,231,218,.65)}
+
+  .stats{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+  .stat{font-size:12px;color:rgba(238,231,218,.55)}
+  .stat strong{display:block;font-size:22px;color:#eee7da;font-family:Georgia,serif;font-weight:500}
+
+  .film-table{width:100%;margin-top:8px}
+  .film-row{display:grid;grid-template-columns:1fr 60px 60px 44px;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid rgba(238,231,218,.06);font-size:14px}
+  .film-row.header{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(238,231,218,.45);border-bottom-color:rgba(238,231,218,.12);padding-bottom:8px}
+  .film-row .title{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .film-row .note{grid-column:1/-1;font-size:12px;color:rgba(238,231,218,.48);margin-top:2px;line-height:1.4}
+  .film-row .imdb{font-size:11px;color:rgba(238,231,218,.35);text-align:center}
+  .empty-state{text-align:center;padding:30px 14px;color:rgba(238,231,218,.35);font-size:14px}
+
+  .inline-form{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid rgba(238,231,218,.08)}
+  .inline-form .field{flex:1;min-width:100px}
+  .inline-form .field.wide{flex:2;min-width:180px}
+  .inline-form label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(238,231,218,.5);margin-bottom:4px}
+  .inline-form input,.inline-form select,.inline-form textarea{font-size:13px;padding:7px 10px}
+
+  .csv-zone{border:2px dashed rgba(238,231,218,.14);border-radius:14px;padding:20px;text-align:center;margin-top:14px;transition:.16s ease}
+  .csv-zone:hover,.csv-zone.dragover{border-color:rgba(196,59,42,.35);background:rgba(196,59,42,.05)}
+  .csv-zone p{font-size:13px;color:rgba(238,231,218,.48);margin:0}
+  .csv-zone .kbd{background:rgba(238,231,218,.08);border-radius:5px;padding:2px 7px;font-size:12px}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(30,30,28,.94);border:1px solid rgba(238,231,218,.18);color:#eee7da;padding:10px 22px;border-radius:999px;font-size:13px;z-index:100;transition:transform .2s ease;pointer-events:none}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  summary{font-size:13px;color:rgba(238,231,218,.5);cursor:pointer;padding:6px 0;user-select:none}
+  summary:hover{color:rgba(238,231,218,.75)}
+  .advanced-fields{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:600px){.advanced-fields{grid-template-columns:1fr}}
+  .advanced-fields .field{min-width:0}
+  .advanced-fields .field.full{grid-column:1/-1}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <div>
-      <div class="brand">mood<em>watch</em> mood lab</div>
-      <p class="subtitle">Un tablero privado en tu navegador para armar moods: motivos, leitmotivs, modos, texturas y películas asociadas. Nada se sube: se guarda en este navegador hasta que exportes el JSON.</p>
-    </div>
+    <div class="brand">mood<em>watch</em> mood lab</div>
     <div class="top-actions">
-      <button class="btn" id="newMoodBtn">Nuevo mood</button>
-      <button class="btn" id="exportBtn">Exportar JSON</button>
-      <button class="btn ghost" id="importBtn">Importar</button>
-      <input class="importer" type="file" id="importFile" accept="application/json,.json">
+      <button class="btn primary" id="exportBtn">Exportar JSON</button>
+      <button class="btn" id="importBtn">Importar JSON</button>
+      <button class="btn" id="exportCsvBtn">Exportar CSV</button>
+      <button class="btn" id="clearAllBtn" style="border-color:rgba(196,59,42,.35);color:#ffb0a5;font-size:12px">Limpiar todo</button>
     </div>
   </header>
 
   <section class="grid">
+    <!-- LEFT: mood selector + info + stats -->
     <aside class="panel">
-      <h2>Mapa de moods</h2>
-      <input class="search" id="moodSearch" placeholder="Buscar por motivo, modo, película…">
+      <h2>Mood</h2>
+      <div class="mood-selector">
+        <select id="moodSelect"></select>
+      </div>
+      <div id="moodInfo" class="mood-info"></div>
+      <div id="moodChips" class="mood-chips"></div>
+
       <div class="stats" id="stats"></div>
-      <div class="mood-list" id="moodList"></div>
-    </aside>
 
-    <main class="panel">
-      <h2 id="editorTitle">Mood</h2>
-      <div class="row">
-        <div class="field"><label>Nombre del mood</label><input id="name" placeholder="Neón triste"></div>
-        <div class="field"><label>Modo</label><select id="mode"><option value="balanced">balanceado</option><option value="quick">rápido</option><option value="together">para ver con alguien</option><option value="list">rescatar watchlist</option><option value="essay">ensayo / lectura personal</option><option value="comfort">refugio</option><option value="damage">salir tocado</option></select></div>
-      </div>
-      <div class="row">
-        <div class="field"><label>Motivos</label><input id="motifs" placeholder="lluvia, hoteles, trenes, pasillos"></div>
-        <div class="field"><label>Leitmotivs</label><input id="leitmotifs" placeholder="teléfonos que no contestan, luces rojas"></div>
-      </div>
-      <div class="row">
-        <div class="field"><label>Texturas</label><input id="textures" placeholder="grano, humo, ciudad mojada, silencio"></div>
-        <div class="field"><label>Evitar</label><input id="avoid" placeholder="ironía barata, giros obvios, crueldad gratuita"></div>
-      </div>
-      <div class="field"><label>Lectura breve</label><textarea id="reading" placeholder="Qué tiene que sentirse cuando alguien cae en este mood."></textarea></div>
-      <div class="field"><label>Regla para recomendar</label><textarea id="rule" placeholder="Si la película tiene X + Y, entra. Si solo tiene estética pero no emoción, queda fuera."></textarea></div>
-      <div class="mini-actions">
-        <button class="btn primary" id="saveMoodBtn">Guardar mood</button>
-        <button class="btn danger" id="deleteMoodBtn">Eliminar mood</button>
-      </div>
-
-      <div class="section">
-        <h3>Películas asociadas</h3>
-        <p class="small">Agrega títulos a mano. Yo después hago la parte tediosa: buscar TMDb/IMDb, IDs, año correcto y conexión con la web.</p>
-        <div id="assignedMovies"></div>
-      </div>
-    </main>
-
-    <aside class="panel">
-      <h2>Agregar película</h2>
-      <div class="movie-form">
-        <div class="field"><label>Título</label><input id="movieTitle" placeholder="In the Mood for Love"></div>
-        <div class="row">
-          <div class="field"><label>Año</label><input id="movieYear" placeholder="2000" inputmode="numeric"></div>
-          <div class="field"><label>Director / pista</label><input id="movieHint" placeholder="Wong Kar-wai"></div>
+      <details style="margin-top:12px">
+        <summary>Editar perfil del mood</summary>
+        <div class="advanced-fields" id="advancedFields">
+          <div class="field full"><label>Lectura breve</label><textarea id="advReading" rows="2" placeholder="Qué tiene que sentirse..."></textarea></div>
+          <div class="field full"><label>Regla para recomendar</label><textarea id="advRule" rows="2" placeholder="Entra si..."></textarea></div>
+          <div class="field"><label>Motivos</label><input id="advMotifs" placeholder="lluvia, hoteles, trenes"></div>
+          <div class="field"><label>Leitmotivs</label><input id="advLeitmotifs" placeholder="teléfonos, luces rojas"></div>
+          <div class="field"><label>Texturas</label><input id="advTextures" placeholder="grano, humo"></div>
+          <div class="field"><label>Evitar</label><input id="advAvoid" placeholder="ironía barata"></div>
+          <button class="btn primary" id="saveAdvBtn" style="margin-top:6px">Guardar perfil</button>
         </div>
-        <div class="field"><label>Por qué calza</label><textarea id="movieNote" placeholder="No por romance: por espera, repetición, pasillos y deseo contenido."></textarea></div>
-        <button class="btn primary" id="addMovieBtn">Asociar al mood actual</button>
+      </details>
+    </aside>
+
+    <!-- RIGHT: films table + add form + CSV -->
+    <main class="panel">
+      <h2 id="tableTitle">Películas</h2>
+      <div class="film-table" id="filmTable"></div>
+
+      <h3>Agregar película</h3>
+      <div class="inline-form">
+        <div class="field wide"><label>Título *</label><input id="filmTitle" placeholder="In the Mood for Love"></div>
+        <div class="field" style="max-width:80px"><label>Año</label><input id="filmYear" placeholder="2000" inputmode="numeric"></div>
+        <div class="field" style="max-width:140px"><label>IMDb ID</label><input id="filmImdb" placeholder="tt0118694"></div>
+        <div class="field" style="max-width:160px"><label>Mood</label><select id="filmMood"></select></div>
+      </div>
+      <div class="inline-form" style="border-top:0;padding-top:0">
+        <div class="field wide"><label>Por qué calza</label><input id="filmNote" placeholder="No por romance: por espera, repetición, pasillos."></div>
+        <button class="btn primary" id="addFilmBtn" style="align-self:flex-end;margin-bottom:1px">Agregar</button>
       </div>
 
-      <div class="section">
-        <h3>Resumen exportable</h3>
-        <p class="help">Cuando juntes material, toca <span class="kbd">Exportar JSON</span> y me lo mandas. Con eso yo lo transformo a datos de producción.</p>
-        <div class="preview" id="preview"></div>
+      <div class="csv-zone" id="csvZone">
+        <p>Arrastra un CSV o <button class="btn ghost small" id="csvBtn" style="display:inline">selecciona archivo</button></p>
+        <p style="font-size:11px;margin-top:6px">Columnas esperadas: <span class="kbd">título</span> <span class="kbd">año</span> <span class="kbd">imdb_id</span> <span class="kbd">mood</span> <span class="kbd">nota</span> — El orden no importa, detecta por nombre.</p>
+        <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
       </div>
-    </aside>
+
+      <details style="margin-top:14px">
+        <summary>Importar desde URL de Letterboxd</summary>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <input id="lbUrl" placeholder="https://letterboxd.com/user/list/the-best-horror-films/" style="flex:1">
+          <button class="btn" id="lbFetchBtn">Extraer</button>
+        </div>
+        <p style="font-size:11px;color:rgba(238,231,218,.4);margin-top:5px">Pega la URL de una lista pública de Letterboxd. El servidor extrae títulos y años para que los asocies.</p>
+        <div id="lbStatus" style="font-size:12px;margin-top:6px"></div>
+      </details>
+    </main>
   </section>
 </div>
 <div class="toast" id="toast"></div>
+
 <script>
 (() => {
-  const STORAGE_KEY = 'moodwatch.moodLab.v1';
-  const $ = (id) => document.getElementById(id);
+  const STORAGE_KEY = 'moodwatch.moodLab.v2';
+  const $ = id => document.getElementById(id);
   const uid = () => Math.random().toString(36).slice(2, 10);
-  const csv = (s) => (s || '').split(',').map(x => x.trim()).filter(Boolean);
-  const slugify = (s) => (s || 'mood').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,54) || 'mood';
+  const csvSplit = s => (s||'').split(',').map(x => x.trim()).filter(Boolean);
+  const slugify = s => (s||'mood').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,54)||'mood';
+  const esc = s => String(s??'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
   const WEB_MOODS = [
-    {id:'quality',profile:'quality',name:'Apuesta segura',mode:'balanced',motifs:['prestigio','claridad narrativa','placer amplio'],leitmotifs:['una historia que sostiene la atención','confianza sin frialdad'],textures:['pulido','preciso','envolvente'],avoid:['experimento vacío','solemnidad automática'],reading:'Para cuando quieres algo bueno sin estudiar demasiado. Debe sentirse sólido, vivo y recomendable sin pedir disculpas.',rule:'Entra si combina oficio, emoción y acceso. Fuera si solo parece importante.'},
-    {id:'horror',profile:'horror',name:'Terror',mode:'damage',motifs:['amenaza','encierro','cuerpo','casa alterada'],leitmotifs:['algo mira desde fuera de campo','una regla que nadie entiende'],textures:['sombra','ruido bajo','piel fría'],avoid:['susto barato','crueldad gratuita'],reading:'Quiere miedo con atmósfera, no solo sobresalto. El terror tiene que dejar residuo después de terminar.',rule:'Entra si construye inquietud. Fuera si solo acumula golpes de sonido.'},
-    {id:'weird',profile:'weird',name:'Raro',mode:'essay',motifs:['lógica torcida','humor incómodo','rituales extraños'],leitmotifs:['objetos que parecen tener voluntad','personas actuando apenas fuera de lugar'],textures:['asimetría','silencio raro','color enfermo'],avoid:['rareza decorativa','ocurrencia vacía'],reading:'Para películas que no intentan caer bien. La rareza debe tener una necesidad interna, no ser adorno.',rule:'Entra si la película inventa sus propias reglas y las cumple.'},
-    {id:'short',profile:'short',name:'Corto',mode:'quick',motifs:['entrada rápida','cierre limpio','economía'],leitmotifs:['una idea fuerte sin grasa','ritmo directo'],textures:['ligero','afilado','compacto'],avoid:['relleno','epílogos eternos'],reading:'Para cuando hay poco tiempo pero no quieres algo descartable. Tiene que entrar rápido y dejar algo.',rule:'Entra si dura poco y aun así se siente completa.'},
-    {id:'latam',profile:'latam',name:'Latinoamericano',mode:'balanced',motifs:['familia','clase','territorio','memoria'],leitmotifs:['casas vividas','calles reconocibles','heridas heredadas'],textures:['calor','polvo','humedad','luz natural'],avoid:['postal turística','miseria usada como estética'],reading:'No busca cuota regional: busca una forma de mirar desde acá, con conflicto y vida propia.',rule:'Entra si el lugar cambia la película. Fuera si podría ocurrir en cualquier parte.'},
-    {id:'asian',profile:'asian',name:'Asiático',mode:'balanced',motifs:['ritual','venganza','familia','ciudad densa'],leitmotifs:['pasillos','comidas compartidas','violencia contenida'],textures:['neón','lluvia','quietud','precisión'],avoid:['exotismo superficial','imitación occidental sin pulso'],reading:'Para cine asiático donde la forma pesa tanto como la historia. Puede ser feroz, delicado o ambas cosas.',rule:'Entra si hay una sensibilidad reconocible, no solo procedencia.'},
-    {id:'classic',profile:'classic',name:'Clásico',mode:'comfort',motifs:['rostros','gestos','destino','elegancia'],leitmotifs:['miradas largas','puertas que se cierran','cartas o llamadas'],textures:['blanco y negro','grano','luz de estudio'],avoid:['pieza de museo sin emoción','respeto obligatorio'],reading:'Quiere antigüedad viva. La película puede tener décadas, pero debe respirar ahora.',rule:'Entra si sigue moviendo algo sin pedir contexto académico.'},
-    {id:'noir',profile:'noir',name:'Noir',mode:'damage',motifs:['culpa','dinero','deseo','traición'],leitmotifs:['humo','persianas','oficinas tarde','llamadas peligrosas'],textures:['contraste','calle mojada','voz cansada'],avoid:['parodia del género','pose detectivesca'],reading:'Un mundo moralmente torcido, con belleza cansada. Nadie sale limpio, pero todos dejan sombra.',rule:'Entra si hay fatalismo real. Fuera si solo usa sombrero y sombras.'},
-    {id:'rainy',profile:'rainy',name:'Lluvia',mode:'comfort',motifs:['refugio','calles mojadas','ventanas','espera'],leitmotifs:['gotas contra vidrio','luces reflejadas','ropa húmeda'],textures:['agua','gris','abrigo','ruido constante'],avoid:['melancolía de postal','tristeza automática'],reading:'Para quedarse dentro de una atmósfera. La lluvia no es clima: es estado mental.',rule:'Entra si la sensación de refugio o intemperie cambia la experiencia.'},
-    {id:'lonely',profile:'lonely',name:'Soledad',mode:'damage',motifs:['aislamiento','rutina','distancia','ciudad indiferente'],leitmotifs:['personas que no conectan','habitaciones demasiado grandes'],textures:['eco','luz baja','espacio vacío'],avoid:['autocompasión plana','cinismo fácil'],reading:'Busca estar a solas sin que la película lo explique demasiado. La soledad debe sentirse, no declararse.',rule:'Entra si el vacío tiene textura y no solo tristeza.'},
-    {id:'neon',profile:'neon',name:'Neón',mode:'balanced',motifs:['ciudad nocturna','autos','vidrios','deseo'],leitmotifs:['luces rojas','rostros en reflejos','música sintética'],textures:['lluvia','metal frío','color saturado'],avoid:['videoclip sin alma','acción limpia'],reading:'Quiere belleza urbana con una herida abajo. No basta que se vea estilizada: tiene que sentirse abandonada.',rule:'Entra si la forma visual sostiene melancolía. Fuera si el neón es solo decoración.'},
-    {id:'trip',profile:'trip',name:'Viaje mental',mode:'essay',motifs:['percepción rota','tiempo extraño','identidad dudosa'],leitmotifs:['espejos','repeticiones','sueños que contaminan'],textures:['distorsión','hipnosis','corte abrupto'],avoid:['confusión perezosa','final truco'],reading:'Para películas que mueven el piso. La confusión sirve solo si abre una experiencia, no si tapa un vacío.',rule:'Entra si altera la percepción con intención emocional o formal.'},
-    {id:'cult',profile:'cult',name:'Culto',mode:'essay',motifs:['obsesión','exceso','margen','placer culpable'],leitmotifs:['objetos fetiche','frases raras','comunidades pequeñas'],textures:['mugre','color fuerte','energía lateral'],avoid:['ironía superior','mal gusto sin gracia'],reading:'Tiene que parecer encontrado en una repisa rara, pero con pulso propio. Lo torpe también puede ser precioso.',rule:'Entra si su rareza genera cariño, incomodidad o devoción.'},
-    {id:'warm',profile:'warm',name:'Cálido',mode:'comfort',motifs:['cuidado','amistad','familia elegida','segunda oportunidad'],leitmotifs:['comidas','manos trabajando','habitaciones con luz'],textures:['madera','sol bajo','telas','voz suave'],avoid:['azúcar','lección moral obvia'],reading:'Busca abrigo sin simplificar la vida. Debe consolar sin tratar al espectador como niño.',rule:'Entra si hay ternura con conflicto real.'},
-    {id:'beautiful',profile:'beautiful',name:'Bello incómodo',mode:'balanced',motifs:['belleza','deseo','incomodidad','detalle'],leitmotifs:['composiciones quietas','gestos mínimos','objetos cargados'],textures:['luz cuidada','silencio','piel','tela'],avoid:['bonito vacío','publicidad disfrazada'],reading:'Quiere mirar algo hermoso, pero no anestesiado. La belleza tiene que rozar una grieta.',rule:'Entra si la imagen seduce y a la vez perturba.'},
-    {id:'pace',profile:'pace',name:'Pulso',mode:'quick',motifs:['movimiento','persecución','decisión','riesgo'],leitmotifs:['relojes','autos','puertas abiertas','cuerpos corriendo'],textures:['corte seco','músculo','tensión'],avoid:['acción inflada','ruido sin dirección'],reading:'Para cuando necesitas que la película avance. No se trata de velocidad: se trata de pulso.',rule:'Entra si cada escena empuja a la siguiente.'},
-    {id:'hurt',profile:'hurt',name:'Dolor elegante',mode:'damage',motifs:['duelo','amor imposible','pérdida','memoria'],leitmotifs:['cartas','camas vacías','despedidas contenidas'],textures:['suave','afilado','lento','frágil'],avoid:['manipulación lacrimógena','música que ordena llorar'],reading:'Quiere que duela, pero con dignidad. La emoción debe llegar por acumulación, no por presión.',rule:'Entra si deja una herida limpia. Fuera si empuja el llanto a la fuerza.'},
-    {id:'lost-20s',profile:'lost-20s',name:'Veinte perdidos',mode:'balanced',motifs:['amistades','trabajo precario','amor confuso','ciudad cara'],leitmotifs:['departamentos compartidos','mensajes sin respuesta','fiestas vacías'],textures:['ruido joven','desorden','luz de madrugada'],avoid:['nostalgia impostada','juventud de catálogo'],reading:'Para esa edad donde todo parece abierto y a la vez cerrado. Tiene que sentirse específico, no genérico.',rule:'Entra si captura deriva, deseo y ansiedad sin caricatura.'}
+    {id:'quality',profile:'quality',name:'Apuesta segura',mode:'balanced',motifs:['prestigio','claridad narrativa','placer amplio'],leitmotifs:['una historia que sostiene','confianza sin frialdad'],textures:['pulido','preciso','envolvente'],avoid:['experimento vacío','solemnidad automática'],reading:'Para cuando quieres algo bueno sin estudiar demasiado.',rule:'Entra si combina oficio, emoción y acceso.'},
+    {id:'horror',profile:'horror',name:'Terror',mode:'damage',motifs:['amenaza','encierro','cuerpo','casa alterada'],leitmotifs:['algo mira fuera de campo','regla que nadie entiende'],textures:['sombra','ruido bajo','piel fría'],avoid:['susto barato','crueldad gratuita'],reading:'Quiere miedo con atmósfera, no solo sobresalto.',rule:'Entra si construye inquietud.'},
+    {id:'weird',profile:'weird',name:'Raro',mode:'essay',motifs:['lógica torcida','humor incómodo','rituales extraños'],leitmotifs:['objetos con voluntad','personas apenas fuera de lugar'],textures:['asimetría','silencio raro','color enfermo'],avoid:['rareza decorativa'],reading:'Para películas que no intentan caer bien.',rule:'Entra si inventa sus propias reglas.'},
+    {id:'short',profile:'short',name:'Corto',mode:'quick',motifs:['entrada rápida','cierre limpio','economía'],leitmotifs:['idea fuerte sin grasa','ritmo directo'],textures:['ligero','afilado','compacto'],avoid:['relleno','epílogos eternos'],reading:'Para cuando hay poco tiempo pero no quieres algo descartable.',rule:'Entra si dura poco y se siente completa.'},
+    {id:'latam',profile:'latam',name:'Latinoamericano',mode:'balanced',motifs:['familia','clase','territorio','memoria'],leitmotifs:['casas vividas','calles reconocibles'],textures:['calor','polvo','luz natural'],avoid:['postal turística'],reading:'Busca una forma de mirar desde acá.',rule:'Entra si el lugar cambia la película.'},
+    {id:'asian',profile:'asian',name:'Asiático',mode:'balanced',motifs:['ritual','venganza','familia','ciudad densa'],leitmotifs:['pasillos','comidas','violencia contenida'],textures:['neón','lluvia','quietud','precisión'],avoid:['exotismo superficial'],reading:'Para cine asiático donde la forma pesa tanto como la historia.',rule:'Entra si hay sensibilidad reconocible.'},
+    {id:'classic',profile:'classic',name:'Clásico',mode:'comfort',motifs:['rostros','gestos','destino','elegancia'],leitmotifs:['miradas largas','puertas que se cierran'],textures:['blanco y negro','grano','luz de estudio'],avoid:['pieza de museo sin emoción'],reading:'Quiere antigüedad viva.',rule:'Entra si sigue moviendo algo sin pedir contexto académico.'},
+    {id:'noir',profile:'noir',name:'Noir',mode:'damage',motifs:['culpa','dinero','deseo','traición'],leitmotifs:['humo','persianas','oficinas tarde'],textures:['contraste','calle mojada','voz cansada'],avoid:['parodia del género'],reading:'Un mundo moralmente torcido, con belleza cansada.',rule:'Entra si hay fatalismo real.'},
+    {id:'rainy',profile:'rainy',name:'Lluvia',mode:'comfort',motifs:['refugio','calles mojadas','ventanas','espera'],leitmotifs:['gotas contra vidrio','luces reflejadas'],textures:['agua','gris','abrigo','ruido constante'],avoid:['melancolía de postal'],reading:'Para quedarse dentro de una atmósfera.',rule:'Entra si la sensación de refugio cambia la experiencia.'},
+    {id:'lonely',profile:'lonely',name:'Soledad',mode:'damage',motifs:['aislamiento','rutina','distancia','ciudad indiferente'],leitmotifs:['personas que no conectan','habitaciones grandes'],textures:['eco','luz baja','espacio vacío'],avoid:['autocompasión plana'],reading:'Busca estar a solas sin que lo explique demasiado.',rule:'Entra si el vacío tiene textura.'},
+    {id:'neon',profile:'neon',name:'Neón',mode:'balanced',motifs:['ciudad nocturna','autos','vidrios','deseo'],leitmotifs:['luces rojas','rostros en reflejos','música sintética'],textures:['lluvia','metal frío','color saturado'],avoid:['videoclip sin alma'],reading:'Quiere belleza urbana con una herida abajo.',rule:'Entra si la forma visual sostiene melancolía.'},
+    {id:'trip',profile:'trip',name:'Viaje mental',mode:'essay',motifs:['percepción rota','tiempo extraño','identidad dudosa'],leitmotifs:['espejos','repeticiones','sueños que contaminan'],textures:['distorsión','hipnosis','corte abrupto'],avoid:['confusión perezosa'],reading:'Para películas que mueven el piso.',rule:'Entra si altera la percepción con intención.'},
+    {id:'cult',profile:'cult',name:'Culto',mode:'essay',motifs:['obsesión','exceso','margen','placer culpable'],leitmotifs:['objetos fetiche','frases raras'],textures:['mugre','color fuerte','energía lateral'],avoid:['ironía superior'],reading:'Tiene que parecer encontrado en una repisa rara.',rule:'Entra si su rareza genera cariño o incomodidad.'},
+    {id:'warm',profile:'warm',name:'Cálido',mode:'comfort',motifs:['cuidado','amistad','familia elegida','segunda oportunidad'],leitmotifs:['comidas','manos trabajando','luz'],textures:['madera','sol bajo','telas','voz suave'],avoid:['azúcar','lección moral obvia'],reading:'Busca abrigo sin simplificar la vida.',rule:'Entra si hay ternura con conflicto real.'},
+    {id:'beautiful',profile:'beautiful',name:'Bello incómodo',mode:'balanced',motifs:['belleza','deseo','incomodidad','detalle'],leitmotifs:['composiciones quietas','gestos mínimos'],textures:['luz cuidada','silencio','piel','tela'],avoid:['bonito vacío'],reading:'Quiere mirar algo hermoso, pero no anestesiado.',rule:'Entra si la imagen seduce y perturba.'},
+    {id:'pace',profile:'pace',name:'Pulso',mode:'quick',motifs:['movimiento','persecución','decisión','riesgo'],leitmotifs:['relojes','autos','puertas abiertas'],textures:['corte seco','músculo','tensión'],avoid:['acción inflada'],reading:'Para cuando necesitas que la película avance.',rule:'Entra si cada escena empuja a la siguiente.'},
+    {id:'hurt',profile:'hurt',name:'Dolor elegante',mode:'damage',motifs:['duelo','amor imposible','pérdida','memoria'],leitmotifs:['cartas','camas vacías','despedidas'],textures:['suave','afilado','lento','frágil'],avoid:['manipulación lacrimógena'],reading:'Quiere que duela, pero con dignidad.',rule:'Entra si deja una herida limpia.'},
+    {id:'lost-20s',profile:'lost-20s',name:'Veinte perdidos',mode:'balanced',motifs:['amistades','trabajo precario','amor confuso','ciudad cara'],leitmotifs:['departamentos compartidos','mensajes sin respuesta'],textures:['ruido joven','desorden','luz de madrugada'],avoid:['nostalgia impostada'],reading:'Para esa edad donde todo parece abierto y cerrado.',rule:'Entra si captura deriva, deseo y ansiedad sin caricatura.'}
   ];
-  const sample = {
-    version: 2,
-    updated_at: new Date().toISOString(),
-    selected: 'quality',
-    moods: WEB_MOODS.map(m => ({...m, movies: []}))
+
+  const DEFAULT_SAMPLE = {
+    version:2, updated_at:new Date().toISOString(),
+    selected:'quality',
+    moods: WEB_MOODS.map(m => ({...m, movies:[]}))
   };
+
+  // ---- state ----
   let state = load();
 
   function load(){
     let data;
-    try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || sample; }
-    catch { data = sample; }
-    const moods = Array.isArray(data.moods) ? data.moods : [];
+    try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)); }
+    catch { data = null; }
+    if (!data || !Array.isArray(data.moods) || data.moods.length === 0) data = structuredClone(DEFAULT_SAMPLE);
+
+    const moods = data.moods || [];
     const byId = new Map(moods.map(m => [m.id, m]));
+
+    // Merge WEB_MOODS into existing: add missing, update profile fields, keep user movies
     for (const base of WEB_MOODS) {
-      if (!byId.has(base.id)) moods.push({...base, movies: []});
-      else byId.set(base.id, {...base, ...byId.get(base.id), profile: byId.get(base.id).profile || base.profile});
+      if (!byId.has(base.id)) {
+        moods.push({...base, movies:[]});
+      } else {
+        const existing = byId.get(base.id);
+        // Update editorial fields but preserve movies
+        byId.set(base.id, {...base, movies: existing.movies || [], profile: base.profile});
+      }
     }
     data.moods = moods.map(m => byId.get(m.id) || m);
     data.version = 2;
     data.selected = data.selected || 'quality';
+    if (!moods.find(m => m.id === data.selected)) data.selected = moods[0]?.id || 'quality';
     return data;
   }
-  function persist(){ state.updated_at = new Date().toISOString(); localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); render(); }
-  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),1700); }
+
+  function persist(silent){
+    state.updated_at = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (!silent) render();
+  }
+
+  function toast(msg){
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._timer); toast._timer = setTimeout(() => t.classList.remove('show'), 1700);
+  }
+
   function selectedMood(){ return state.moods.find(m => m.id === state.selected) || state.moods[0]; }
-  function moodPayloadFromForm(){
-    const name = $('name').value.trim() || 'Mood sin nombre';
-    const current = selectedMood();
-    return {id: current?.id || slugify(name), profile: current?.profile || current?.id || slugify(name), name, mode:$('mode').value, motifs:csv($('motifs').value), leitmotifs:csv($('leitmotifs').value), textures:csv($('textures').value), avoid:csv($('avoid').value), reading:$('reading').value.trim(), rule:$('rule').value.trim(), movies: current?.movies || []};
+
+  function allMovies(){
+    const all = [];
+    for (const m of state.moods) {
+      for (const f of (m.movies||[])) all.push({...f, moodId:m.id, moodName:m.name});
+    }
+    return all;
   }
-  function fillForm(m){
-    if(!m) return;
-    $('editorTitle').textContent = m.name || 'Mood';
-    $('name').value = m.name || '';
-    $('mode').value = m.mode || 'balanced';
-    $('motifs').value = (m.motifs || []).join(', ');
-    $('leitmotifs').value = (m.leitmotifs || []).join(', ');
-    $('textures').value = (m.textures || []).join(', ');
-    $('avoid').value = (m.avoid || []).join(', ');
-    $('reading').value = m.reading || '';
-    $('rule').value = m.rule || '';
+
+  // ---- render ----
+  function render(){
+    renderMoodSelect();
+    renderMoodInfo();
+    renderStats();
+    renderFilmTable();
+    renderMoodSelects();
   }
+
+  function renderMoodSelect(){
+    const sel = $('moodSelect');
+    sel.innerHTML = state.moods.map(m =>
+      `<option value="${m.id}" ${m.id===state.selected?'selected':''}>${esc(m.name)} <span style="color:rgba(238,231,218,.35)">· ${m.profile||m.id}</span></option>`
+    ).join('');
+    // Plain text fallback for the option text (HTML in option is ignored by browsers)
+    sel.innerHTML = state.moods.map(m =>
+      `<option value="${m.id}" ${m.id===state.selected?'selected':''}>${esc(m.name)} · ${esc(m.profile||m.id)}</option>`
+    ).join('');
+  }
+
+  function renderMoodSelects(){
+    // filmMood dropdown
+    const sel = $('filmMood');
+    if (!sel.dataset.bound) {
+      sel.innerHTML = state.moods.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+    }
+    // Keep in sync with selected
+    sel.value = state.selected;
+  }
+
+  function renderMoodInfo(){
+    const m = selectedMood();
+    if (!m) return;
+    $('moodInfo').innerHTML = `
+      <strong>${esc(m.name)}</strong>
+      <span class="mood-profile">${esc(m.profile||m.id)}</span>
+      <span style="color:rgba(238,231,218,.45);margin-left:8px;font-size:12px">modo: ${esc(m.mode||'balanced')}</span>
+      <br>${esc(m.reading||'')}
+    `;
+    // Chips
+    const allChips = [...(m.motifs||[]).map(x => `<span class="chip">${esc(x)}</span>`),
+                     ...(m.leitmotifs||[]).map(x => `<span class="chip" style="background:rgba(196,59,42,.12);color:#e09080">${esc(x)}</span>`)];
+    $('moodChips').innerHTML = allChips.join('');
+
+    // Advanced fields
+    $('advReading').value = m.reading || '';
+    $('advRule').value = m.rule || '';
+    $('advMotifs').value = (m.motifs||[]).join(', ');
+    $('advLeitmotifs').value = (m.leitmotifs||[]).join(', ');
+    $('advTextures').value = (m.textures||[]).join(', ');
+    $('advAvoid').value = (m.avoid||[]).join(', ');
+  }
+
   function renderStats(){
-    const films = state.moods.reduce((n,m)=>n+(m.movies?.length||0),0);
-    const motifs = new Set(state.moods.flatMap(m => [...(m.motifs||[]), ...(m.leitmotifs||[])]));
-    $('stats').innerHTML = `<div class="stat"><strong>${state.moods.length}</strong><span>moods</span></div><div class="stat"><strong>${films}</strong><span>películas</span></div><div class="stat"><strong>${motifs.size}</strong><span>motivos</span></div>`;
+    const films = state.moods.reduce((n,m) => n + (m.movies?.length||0), 0);
+    const withImdb = state.moods.reduce((n,m) => n + (m.movies||[]).filter(f => f.imdb_id).length, 0);
+    $('stats').innerHTML = `
+      <div class="stat"><strong>${state.moods.length}</strong><span>moods</span></div>
+      <div class="stat"><strong>${films}</strong><span>películas</span></div>
+      <div class="stat"><strong>${withImdb}</strong><span>con IMDb</span></div>
+    `;
   }
-  function renderMoodList(){
-    const q = $('moodSearch').value.trim().toLowerCase();
-    const moods = state.moods.filter(m => !q || JSON.stringify(m).toLowerCase().includes(q));
-    $('moodList').innerHTML = moods.map(m => `<button class="mood-item ${m.id===state.selected?'active':''}" data-pick="${m.id}"><div class="mood-name">${esc(m.name)}</div><div class="mood-meta">${esc(labelMode(m.mode))} · perfil web: ${esc(m.profile || m.id)} · ${(m.movies||[]).length} película${(m.movies||[]).length===1?'':'s'}</div><div class="chips">${(m.motifs||[]).slice(0,3).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}${(m.leitmotifs||[]).slice(0,2).map(x=>`<span class="chip red">${esc(x)}</span>`).join('')}</div></button>`).join('') || '<div class="empty">Nada encontrado.</div>';
-  }
-  function renderMovies(){
+
+  function renderFilmTable(){
     const m = selectedMood();
     const movies = m?.movies || [];
-    $('assignedMovies').innerHTML = movies.length ? movies.map((f,i)=>`<article class="movie-card"><div><div class="movie-title">${esc(f.title || 'Sin título')}</div><div class="movie-meta">${esc([f.year,f.hint].filter(Boolean).join(' · '))}</div></div>${f.note?`<div class="movie-note">${esc(f.note)}</div>`:''}<div class="movie-actions"><button class="btn ghost" data-edit-movie="${i}">Editar</button><button class="btn danger" data-remove-movie="${i}">Quitar</button></div></article>`).join('') : '<div class="empty">Este mood todavía no tiene películas.</div>';
-  }
-  function renderPreview(){
-    const m = selectedMood();
-    $('preview').textContent = JSON.stringify({schema:'moodwatch-curation-v1', selected_mood:m, all_moods:state.moods.map(({id,profile,name,mode,movies})=>({id,profile,name,mode,films:movies?.length||0}))}, null, 2);
-  }
-  function render(){ renderStats(); renderMoodList(); fillForm(selectedMood()); renderMovies(); renderPreview(); }
-  function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function labelMode(x){ return ({balanced:'balanceado',quick:'rápido',together:'para ver con alguien',list:'rescatar watchlist',essay:'ensayo / lectura personal',comfort:'refugio',damage:'salir tocado'}[x] || x || 'balanceado'); }
+    const title = m ? `${esc(m.name)} (${movies.length})` : 'Películas';
+    $('tableTitle').textContent = title;
 
-  $('newMoodBtn').addEventListener('click', () => {
-    const base = {id:'mood-'+uid(),profile:'custom',name:'Mood nuevo',mode:'balanced',motifs:[],leitmotifs:[],textures:[],avoid:[],reading:'',rule:'',movies:[]};
-    state.moods.unshift(base); state.selected = base.id; persist(); toast('Mood creado');
+    if (!movies.length) {
+      $('filmTable').innerHTML = '<div class="empty-state">Sin películas aún. Agrega una o sube un CSV.</div>';
+      return;
+    }
+
+    const rows = movies.map((f, i) => `
+      <div class="film-row">
+        <div>
+          <div class="title">${esc(f.title||'Sin título')}</div>
+          ${f.note ? `<div class="note">${esc(f.note)}</div>` : ''}
+        </div>
+        <div style="font-size:12px;color:rgba(238,231,218,.5);text-align:center">${esc(f.year||'—')}</div>
+        <div class="imdb">${f.imdb_id ? `<a href="https://www.imdb.com/title/${esc(f.imdb_id)}/" target="_blank" style="color:inherit">${esc(f.imdb_id)}</a>` : '—'}</div>
+        <div style="text-align:right">
+          <button class="btn ghost small" data-edit="${i}" title="Editar">✎</button>
+          <button class="btn ghost small" data-remove="${i}" title="Quitar" style="color:#ffb0a5">✕</button>
+        </div>
+      </div>
+    `).join('');
+
+    $('filmTable').innerHTML = `
+      <div class="film-row header">
+        <div>Título</div><div style="text-align:center">Año</div><div style="text-align:center">IMDb</div><div></div>
+      </div>
+      ${rows}
+    `;
+  }
+
+  function renderAll(){ render(); }
+
+  // ---- actions ----
+  $('moodSelect').addEventListener('change', () => {
+    state.selected = $('moodSelect').value;
+    persist();
   });
-  $('saveMoodBtn').addEventListener('click', () => {
-    const current = selectedMood(); if(!current) return;
-    const next = moodPayloadFromForm(); next.id = current.id;
-    state.moods = state.moods.map(m => m.id === current.id ? next : m);
-    persist(); toast('Mood guardado');
+
+  $('addFilmBtn').addEventListener('click', () => {
+    const title = $('filmTitle').value.trim();
+    if (!title) { toast('Falta el título'); return; }
+    const moodId = $('filmMood').value;
+    const mood = state.moods.find(m => m.id === moodId);
+    if (!mood) { toast('Selecciona un mood'); return; }
+    mood.movies = mood.movies || [];
+    mood.movies.push({
+      title,
+      year: $('filmYear').value.trim(),
+      imdb_id: $('filmImdb').value.trim(),
+      note: $('filmNote').value.trim()
+    });
+    ['filmTitle','filmYear','filmImdb','filmNote'].forEach(id => $(id).value = '');
+    toast(`Agregada a ${mood.name}`);
+    persist();
   });
-  $('deleteMoodBtn').addEventListener('click', () => {
-    const current = selectedMood(); if(!current) return;
-    if(state.moods.length === 1){ toast('Deja al menos un mood'); return; }
-    if(!confirm(`Eliminar “${current.name}”?`)) return;
-    state.moods = state.moods.filter(m => m.id !== current.id); state.selected = state.moods[0].id; persist(); toast('Mood eliminado');
+
+  $('filmTable').addEventListener('click', e => {
+    const m = selectedMood(); if (!m) return;
+    const rem = e.target.closest('[data-remove]');
+    const edit = e.target.closest('[data-edit]');
+    if (rem) {
+      const i = Number(rem.dataset.remove);
+      const f = m.movies[i];
+      m.movies.splice(i, 1);
+      toast(`Quitada: ${f.title}`);
+      persist();
+    }
+    if (edit) {
+      const i = Number(edit.dataset.edit);
+      const f = m.movies[i];
+      $('filmTitle').value = f.title || '';
+      $('filmYear').value = f.year || '';
+      $('filmImdb').value = f.imdb_id || '';
+      $('filmNote').value = f.note || '';
+      $('filmMood').value = state.selected;
+      m.movies.splice(i, 1);
+      toast('Editando — vuelve a agregar');
+      persist();
+    }
   });
-  $('moodList').addEventListener('click', (e) => { const b=e.target.closest('[data-pick]'); if(!b) return; state.selected=b.dataset.pick; persist(); });
-  $('moodSearch').addEventListener('input', renderMoodList);
-  $('addMovieBtn').addEventListener('click', () => {
-    const m = selectedMood(); if(!m) return;
-    const title = $('movieTitle').value.trim(); if(!title){ toast('Falta título'); return; }
-    m.movies = m.movies || [];
-    m.movies.push({title, year:$('movieYear').value.trim(), hint:$('movieHint').value.trim(), note:$('movieNote').value.trim()});
-    ['movieTitle','movieYear','movieHint','movieNote'].forEach(id => $(id).value=''); persist(); toast('Película asociada');
+
+  // Save advanced profile
+  $('saveAdvBtn').addEventListener('click', () => {
+    const m = selectedMood(); if (!m) return;
+    m.reading = $('advReading').value.trim();
+    m.rule = $('advRule').value.trim();
+    m.motifs = csvSplit($('advMotifs').value);
+    m.leitmotifs = csvSplit($('advLeitmotifs').value);
+    m.textures = csvSplit($('advTextures').value);
+    m.avoid = csvSplit($('advAvoid').value);
+    persist();
+    toast('Perfil guardado');
   });
-  $('assignedMovies').addEventListener('click', (e) => {
-    const m = selectedMood(); if(!m) return;
-    const rem = e.target.closest('[data-remove-movie]');
-    const edit = e.target.closest('[data-edit-movie]');
-    if(rem){ m.movies.splice(Number(rem.dataset.removeMovie),1); persist(); toast('Película quitada'); }
-    if(edit){ const f=m.movies[Number(edit.dataset.editMovie)]; if(!f) return; $('movieTitle').value=f.title||''; $('movieYear').value=f.year||''; $('movieHint').value=f.hint||''; $('movieNote').value=f.note||''; m.movies.splice(Number(edit.dataset.editMovie),1); persist(); toast('Edita y vuelve a asociar'); }
-  });
+
+  // Export JSON
   $('exportBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify({...state, schema:'moodwatch-curation-v1'}, null, 2)], {type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `moodwatch-mood-lab-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); toast('JSON descargado');
+    const blob = new Blob([JSON.stringify({...state, schema:'moodwatch-curation-v2'}, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `moodwatch-curation-${new Date().toISOString().slice(0,10)}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+    toast('JSON descargado');
   });
-  $('importBtn').addEventListener('click', () => $('importFile').click());
-  $('importFile').addEventListener('change', async (e) => {
-    const file = e.target.files?.[0]; if(!file) return;
+
+  // Import JSON
+  $('importBtn').addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.onchange = async () => {
+      const file = inp.files?.[0]; if (!file) return;
+      try {
+        const data = JSON.parse(await file.text());
+        if (!Array.isArray(data.moods)) throw new Error('bad shape');
+        // Merge: keep WEB_MOODS structure, import only movies
+        for (const imported of data.moods) {
+          const existing = state.moods.find(m => m.id === imported.id);
+          if (existing && imported.movies?.length) {
+            existing.movies = imported.movies;
+          }
+        }
+        persist();
+        toast('Importado — películas fusionadas');
+      } catch { toast('JSON inválido'); }
+    };
+    inp.click();
+  });
+
+  // Export CSV
+  $('exportCsvBtn').addEventListener('click', () => {
+    const rows = [['título','año','imdb_id','mood','nota']];
+    for (const m of state.moods) {
+      for (const f of (m.movies||[])) {
+        rows.push([f.title||'', f.year||'', f.imdb_id||'', m.name, f.note||'']);
+      }
+    }
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `moodwatch-films-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(a.href);
+    toast('CSV descargado');
+  });
+
+  // Clear all
+  $('clearAllBtn').addEventListener('click', () => {
+    if (!confirm('¿Borrar TODAS las películas de todos los moods? Los perfiles de mood se mantienen.')) return;
+    for (const m of state.moods) m.movies = [];
+    persist();
+    toast('Películas borradas');
+  });
+
+  // ---- CSV upload ----
+  const csvZone = $('csvZone');
+  const csvFile = $('csvFile');
+  $('csvBtn').addEventListener('click', () => csvFile.click());
+  csvZone.addEventListener('click', (e) => { if (e.target === csvZone || e.target.tagName === 'P') csvFile.click(); });
+  csvZone.addEventListener('dragover', e => { e.preventDefault(); csvZone.classList.add('dragover'); });
+  csvZone.addEventListener('dragleave', () => csvZone.classList.remove('dragover'));
+  csvZone.addEventListener('drop', e => {
+    e.preventDefault(); csvZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) processCsv(file);
+  });
+  csvFile.addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (file) processCsv(file);
+    csvFile.value = '';
+  });
+
+  function detectColumn(headers, aliases){
+    for (const h of headers) {
+      const hl = h.toLowerCase().trim();
+      for (const a of aliases) if (hl === a.toLowerCase()) return headers.indexOf(h);
+    }
+    return -1;
+  }
+
+  function processCsv(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result;
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { toast('CSV vacío o sin datos'); return; }
+
+      const headers = parseCsvLine(lines[0]);
+      const titleIdx = detectColumn(headers, ['título','titulo','title','película','pelicula','film','movie','nombre','name']);
+      const yearIdx = detectColumn(headers, ['año','ano','year','año de estreno']);
+      const imdbIdx = detectColumn(headers, ['imdb_id','imdb','imdb id','imdb-id','imdbid']);
+      const moodIdx = detectColumn(headers, ['mood','perfil','profile','categoría','categoria','category','estado de ánimo']);
+      const noteIdx = detectColumn(headers, ['nota','note','recomendación','recomendacion','recommendation','por qué','por que','why','razón','razon','descripción','descripcion']);
+
+      if (titleIdx === -1) { toast('No se detectó columna de título. Esperado: título, title, película, movie...'); return; }
+
+      const moodMap = {};
+      for (const m of state.moods) {
+        moodMap[m.name.toLowerCase()] = m.id;
+        moodMap[(m.profile||'').toLowerCase()] = m.id;
+        moodMap[m.id.toLowerCase()] = m.id;
+      }
+
+      let added = 0, skipped = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCsvLine(lines[i]);
+        const title = (cols[titleIdx]||'').trim();
+        if (!title) { skipped++; continue; }
+
+        const year = yearIdx >= 0 ? (cols[yearIdx]||'').trim() : '';
+        const imdb = imdbIdx >= 0 ? (cols[imdbIdx]||'').trim() : '';
+        const moodRaw = moodIdx >= 0 ? (cols[moodIdx]||'').trim().toLowerCase() : '';
+        const note = noteIdx >= 0 ? (cols[noteIdx]||'').trim() : '';
+
+        const moodId = moodMap[moodRaw] || state.selected;
+        const mood = state.moods.find(m => m.id === moodId);
+        if (!mood) { skipped++; continue; }
+
+        mood.movies = mood.movies || [];
+        mood.movies.push({title, year, imdb_id: imdb, note});
+        added++;
+      }
+
+      persist();
+      toast(`CSV: ${added} agregadas, ${skipped} saltadas`);
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  function parseCsvLine(line){
+    const result = [];
+    let current = '', inQuotes = false;
+    for (const ch of line) {
+      if (inQuotes) {
+        if (ch === '"') { inQuotes = false; }
+        else { current += ch; }
+      } else {
+        if (ch === '"') { inQuotes = true; }
+        else if (ch === ',') { result.push(current); current = ''; }
+        else { current += ch; }
+      }
+    }
+    result.push(current);
+    return result;
+  }
+
+  // ---- Letterboxd URL fetch ----
+  $('lbFetchBtn').addEventListener('click', async () => {
+    const url = $('lbUrl').value.trim();
+    if (!url || !url.includes('letterboxd.com')) { toast('Pega una URL válida de Letterboxd'); return; }
+    $('lbStatus').textContent = 'Consultando...';
+    $('lbFetchBtn').disabled = true;
     try {
-      const data = JSON.parse(await file.text());
-      if(!Array.isArray(data.moods)) throw new Error('bad shape');
-      state = {version:1, updated_at:new Date().toISOString(), selected:data.selected || data.moods[0]?.id, moods:data.moods};
-      persist(); toast('Importado');
-    } catch { toast('JSON inválido'); }
-    e.target.value = '';
+      const resp = await fetch(`https://moodwatch-api.brmcl.workers.dev/lb-scrape?url=${encodeURIComponent(url)}`);
+      const data = await resp.json();
+      if (data.error) { $('lbStatus').textContent = `Error: ${data.error}`; return; }
+      const films = data.films || [];
+      if (!films.length) { $('lbStatus').textContent = 'Lista vacía o no se pudo extraer.'; return; }
+
+      // Add films to current mood
+      const mood = selectedMood();
+      let added = 0;
+      for (const f of films) {
+        if (!f.title) continue;
+        mood.movies = mood.movies || [];
+        mood.movies.push({title: f.title, year: String(f.year||''), imdb_id: '', note: `Letterboxd: ${f.director||''}`.trim()});
+        added++;
+      }
+      persist();
+      $('lbStatus').textContent = `✓ ${added} películas extraídas de "${data.list_name||'la lista'}" y agregadas a ${mood.name}.`;
+      $('lbUrl').value = '';
+    } catch (e) {
+      $('lbStatus').textContent = `Error de conexión: ${e.message}`;
+    }
+    $('lbFetchBtn').disabled = false;
   });
-  document.addEventListener('keydown', (e) => {
-    if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); $('saveMoodBtn').click(); }
+
+  // Ctrl+S
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); $('saveAdvBtn').click(); }
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  // Init
   render();
 })();
 </script>

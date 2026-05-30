@@ -31,13 +31,9 @@ async function fetchHtml(url) {
 }
 
 function extractSlugs(html) {
-  // Letterboxd watchlist HTML wraps items in <ul class="poster-list"> ... </ul>.
-  // Earlier regex matched ANY /film/... link on the page, which included sidebar
-  // recommendations ("similar films", "popular this week", footer). That polluted
-  // the watchlist with films the user never added.
   const slugs = new Set();
   const listMatch = html.match(/<ul[^>]*class="[^"]*poster-list[^"]*"[^>]*>([\s\S]*?)<\/ul>/i);
-  const scope = listMatch ? listMatch[1] : html; // fallback to whole HTML if class changes
+  const scope = listMatch ? listMatch[1] : html;
   const reA = /\/film\/([a-z0-9][a-z0-9-]+)\/?/gi;
   let m;
   while ((m = reA.exec(scope))) slugs.add(m[1]);
@@ -56,7 +52,6 @@ async function slugToTmdbId(slug) {
   } catch { return null; }
 }
 
-// Kept for backwards compatibility (older callers used this directly).
 export async function slugsToTmdbIds(env, slugs) {
   const ids = new Set();
   const BATCH = 4;
@@ -69,13 +64,11 @@ export async function slugsToTmdbIds(env, slugs) {
 }
 
 export async function fetchWatchlistTmdbIds(env, user) {
-  // user already validated upstream as ^[a-z0-9_-]{1,30}$
   const userKey = `wl:${user}`;
   const seenSlugsKey = `wl:${user}:slugs`;
 
-  // 1. Load per-user union (1 KV read).
   let union = new Set();
-  let resolvedSlugs = new Set(); // slugs we've already attempted (success or null)
+  let resolvedSlugs = new Set();
   if (env.CACHE) {
     try {
       const raw = await env.CACHE.get(userKey, { type: "json" });
@@ -86,10 +79,8 @@ export async function fetchWatchlistTmdbIds(env, user) {
     } catch {}
   }
 
-  // 2. If union is healthy, return it without scraping at all (0 extra subrequests).
   if (union.size >= HEALTHY_UNION) return union;
 
-  // 3. Scrape a small page slice — usually just page 1.
   const newSlugs = [];
   for (let page = 1; page <= MAX_SCRAPE_PAGES; page++) {
     let html;
@@ -105,8 +96,6 @@ export async function fetchWatchlistTmdbIds(env, user) {
     if (slugs.length < PER_PAGE) break;
   }
 
-  // 4. Resolve a small budget of fresh slugs. Shuffle so we eventually cover
-  // the whole watchlist over multiple reloads instead of always the same N.
   for (let i = newSlugs.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [newSlugs[i], newSlugs[j]] = [newSlugs[j], newSlugs[i]];
@@ -123,7 +112,6 @@ export async function fetchWatchlistTmdbIds(env, user) {
     }
   }
 
-  // 5. Persist (1 KV write). Cap slug-set at 800 to avoid runaway value size.
   if (env.CACHE && (union.size > 0 || resolvedSlugs.size > 0)) {
     try {
       const slugArr = [...resolvedSlugs].slice(-800);
@@ -134,8 +122,123 @@ export async function fetchWatchlistTmdbIds(env, user) {
       );
     } catch {}
   }
-  // Suppress unused-var warning for the legacy slug key (reserved for future use).
   void seenSlugsKey;
-
   return union;
+}
+
+// ── list scraper for mood-lab ──
+export async function scrapeListPage(url, debug = false) {
+  const html = await fetchHtml(url);
+
+  // Extract list name
+  let listName = "";
+  const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
+  if (titleMatch) {
+    listName = titleMatch[1].replace(/, a list by.*$/i, "").replace(/ - Letterboxd$/i, "").replace(/&lrm;/g, "").replace(/&bull;/g, "").trim();
+  }
+  if (!listName) {
+    const h1Match = html.match(/<h1[^>]*>([^<]*)<\/h1>/i);
+    if (h1Match) listName = h1Match[1].replace(/&lrm;/g, "").replace(/&bull;/g, "").trim();
+  }
+
+  if (debug) {
+    const filmLinkMatches = html.match(/\/film\/([a-z0-9][a-z0-9-]+)\//gi) || [];
+    return {
+      list_name: listName,
+      debug: {
+        totalFilmLinks: filmLinkMatches.length,
+        uniqueFilmLinks: [...new Set(filmLinkMatches)].length,
+        firstLinks: filmLinkMatches.slice(0, 8)
+      }
+    };
+  }
+
+  // Extract films: find all unique film links with their visible text
+  const seen = new Set();
+  const films = [];
+
+  // The poster-list may be in <ul class="poster-list">, <section>, or grid div
+  // Use multiple strategies to find film entries
+
+  // Strategy 1: extract slugs + nearby alt/title text from poster-list section
+  const listMatch = html.match(/<ul[^>]*class="[^"]*poster-list[^"]*"[^>]*>([\s\S]*?)<\/ul>/i);
+  const scope = listMatch ? listMatch[1] : html;
+
+  // Helper to decode HTML entities
+  const decode = (s) => s.replace(/&#0*39;|&#x27;|&apos;|&rsquo;|&lsquo;/gi, "'")
+    .replace(/&#0*34;|&quot;/gi, '"')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&([a-z]+);/gi, '')  // strip remaining entities
+    .trim();
+
+  // Extract username from URL to filter out profile link
+  const urlMatch = url.match(/letterboxd\.com\/([a-z0-9_-]+)\//i);
+  const pageUser = urlMatch ? urlMatch[1].toLowerCase() : "";
+
+  // Find film links with their display text
+  const linkPattern = /<a[^>]*href="\/film\/([a-z0-9][a-z0-9-]+)\/?[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
+  let linkMatch;
+  const stopWords = new Set(["a","is","of","the","this","new","top","log","sign","create","in","account","pro","go","film","films","lists","list","watchlist","diary","reviews","activity","likes","network","stats","tags","rss","search","settings","privacy","terms"]);
+  while ((linkMatch = linkPattern.exec(scope))) {
+    const slug = linkMatch[1];
+    if (seen.has(slug)) continue;
+    if (stopWords.has(slug.toLowerCase()) || slug.length < 3 || slug.toLowerCase() === pageUser) continue;
+    seen.add(slug);
+
+    // Get the text content (strip HTML tags)
+    let title = linkMatch[2].replace(/<[^>]+>/g, "").trim();
+    title = decode(title);
+    if (!title || title.length < 2) {
+      title = slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    // Look for year in surrounding context
+    const pos = linkMatch.index;
+    const context = scope.substring(Math.max(0, pos - 80), Math.min(scope.length, pos + 400));
+    let year = "";
+    // Try " (2024)" pattern
+    const yearParen = context.match(/\((\d{4})\)/);
+    if (yearParen) year = yearParen[1];
+    // Try data-year or similar
+    if (!year) {
+      const dataYear = context.match(/data-year="(\d{4})"/i);
+      if (dataYear) year = dataYear[1];
+    }
+
+    films.push({ title, year, director: "" });
+  }
+
+  // Strategy 2: if no links found in scope, try img alt text
+  if (films.length === 0) {
+    const imgPattern = /<img[^>]*alt="([^"]+)"[^>]*>/gi;
+    let imgMatch;
+    while ((imgMatch = imgPattern.exec(scope))) {
+      const alt = imgMatch[1].trim();
+      if (!alt || /^\s*(?:Poster|Still|Frame|Image)?\s*$/i.test(alt) || seen.has(alt)) continue;
+      seen.add(alt);
+      films.push({ title: alt, year: "", director: "" });
+    }
+  }
+
+  // Strategy 3: broader search — any /film/ link in the whole page
+  if (films.length === 0) {
+    const reLink = /<a[^>]*href="\/film\/([a-z0-9][a-z0-9-]+)\/?[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
+    while ((linkMatch = reLink.exec(html))) {
+      const slug = linkMatch[1];
+      if (seen.has(slug) || stopWords.has(slug.toLowerCase()) || slug.length < 3) continue;
+      seen.add(slug);
+      let title = linkMatch[2].replace(/<[^>]+>/g, "").trim();
+      title = decode(title);
+      if (!title || title.length < 2) {
+        title = slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      }
+      films.push({ title, year: "", director: "" });
+      if (films.length >= 100) break;
+    }
+  }
+
+  return { list_name: listName, films };
 }
