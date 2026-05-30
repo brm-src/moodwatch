@@ -1598,9 +1598,15 @@
         ? `${newer.title} se siente más directa para esta noche. ${older.title} es la opción si quieres textura de otra época y más paciencia.`
         : `${newer.title} is the more immediate tonight pick. ${older.title} is the move if you want older texture and more patience.`;
     } else {
-      body = ES
-        ? `${a.title} es la entrada más limpia. ${heavier.title} es la opción si quieres más tensión, rareza o conversación después.`
-        : `${a.title} is the cleaner entry point. ${heavier.title} is the pick if you want more tension, strangeness, or after-talk.`;
+      if (heavier.id === a.id) {
+        body = ES
+          ? `${a.title} tiene peso y entrada limpia. Si quieres algo más ligero, prueba ${b.title}.`
+          : `${a.title} has weight and a clean entry. If you want something lighter, try ${b.title}.`;
+      } else {
+        body = ES
+          ? `${a.title} es la entrada más limpia. ${heavier.title} es la opción si quieres más tensión, rareza o conversación después.`
+          : `${a.title} is the cleaner entry point. ${heavier.title} is the pick if you want more tension, strangeness, or after-talk.`;
+      }
     }
     host.innerHTML = `
       <div class="compare-title">${escapeHtml(title)}</div>
@@ -1808,7 +1814,7 @@
       a.textContent = window.t("on_imdb");
       actions.appendChild(a);
     }
-    if (f.id) {
+    if (f.id && f.media !== "tv") {
       const a = document.createElement("a");
       a.href = `https://letterboxd.com/tmdb/${f.id}/`;
       a.target = "_blank"; a.rel = "noopener";
