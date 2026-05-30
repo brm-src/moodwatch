@@ -2217,7 +2217,8 @@
   function renderChips() {
     const host = $("#quick-surprise");
     if (!host) return;
-    const pool = [...CHIP_POOL].sort(() => Math.random() - 0.5).slice(0, 4);
+    // Three fit cleanly in the hero without clipped half-chips on common laptop heights.
+    const pool = [...CHIP_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
     host.innerHTML = "";
     for (const c of pool) {
       const b = document.createElement("button");

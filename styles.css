@@ -181,7 +181,7 @@ body.has-journey-hero:not(.on-hero) .loader-text { color: var(--paper); }
 /* Loading/results retain the same dim treatment by default. */
 html::-webkit-scrollbar { width: 0; height: 0; display: none; }
 body { overflow-x: clip; min-height: 100dvh; display: flex; flex-direction: column; scrollbar-width: none; -ms-overflow-style: none; }
-body.on-hero { max-height: 100dvh; overflow-y: hidden; }
+body.on-hero { padding-top: 0; max-height: 100dvh; overflow-y: hidden; }
 body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 *::-webkit-scrollbar { width: 0; height: 0; display: none; }
 * { scrollbar-width: none; -ms-overflow-style: none; }
@@ -322,8 +322,8 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   color: var(--paper);
   flex-direction: column;
   justify-content: flex-start;
-  gap: var(--s-3);
-  padding: var(--s-3) var(--s-3) var(--s-3);
+  gap: clamp(8px, 1.6vh, 16px);
+  padding: calc(56px + var(--s-3)) var(--s-3) var(--s-3);
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -336,14 +336,14 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
 .hero h1 {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(40px, 8.5vw, 96px);
+  font-size: clamp(40px, 6.6vw, 80px);
   line-height: 0.96;
   letter-spacing: -0.035em;
   max-width: 12ch;
   font-variation-settings: "opsz" 72;
   text-wrap: balance;
   text-shadow: 0 3px 28px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.9);
-  margin: 0 0 var(--s-3);
+  margin: 0 0 clamp(12px, 2vh, var(--s-3));
 }
 .hero {
   position: relative;
@@ -449,6 +449,8 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   color: var(--paper);
   margin-top: var(--s-1);
 }
+.hero-card-dark.hero-card { max-width: min(720px, 100%) !important; }
+.hero-card-dark .pill.big { max-width: 520px; }
 .hero-card-dark .pill { border-color: var(--paper); color: var(--paper); }
 .hero-card-dark .pill:hover { background: var(--paper); color: var(--ink); }
 .hero-card-dark .pill.primary { background: var(--paper); color: var(--ink); }
@@ -462,8 +464,8 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
 
 /* Surprise block: secondary CTA with random chips */
 .surprise-block {
-  margin-top: var(--s-2);
-  padding-top: var(--s-2);
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid rgba(237, 231, 218, 0.12);
 }
 .surprise-head {
@@ -549,7 +551,7 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   overflow-x: auto;
   overflow-y: visible;
   gap: 8px;
-  margin-top: var(--s-2);
+  margin-top: 8px;
   padding-bottom: 4px;
   scroll-snap-type: none;
   scrollbar-width: none;
@@ -569,7 +571,11 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: min(42vw, 280px);
+  overflow: hidden;
+  text-overflow: ellipsis;
   scroll-snap-align: none;
 }
 .quick-surprise button:hover { background: var(--paper); color: var(--ink); }
@@ -1457,7 +1463,7 @@ footer.bottom small a:hover { color: var(--accent); }
 
 /* ─── responsive ─── */
 @media (min-width: 720px) {
-  .hero { padding: var(--s-6) var(--s-5) var(--s-4); }
+  .hero { padding: calc(56px + clamp(32px, 6vh, 56px)) var(--s-5) var(--s-3); }
   .section { padding: var(--s-6) var(--s-3) var(--s-5); }
   .card { grid-template-columns: clamp(132px, 16vw, 176px) minmax(0, 1fr); gap: var(--s-3); }
   .lb-actions { flex-direction: row; }
