@@ -885,8 +885,23 @@
 
   // Build a short, reading-like synthesis of the user's answers.
   // Returns a 1–2 sentence paragraph (or "" if there's not enough signal).
-  function vibeReading(a, lang) {
+  function vibeReading(rawAnswers, lang) {
     const ES = lang === "es";
+    const mood = ritualToMood(rawAnswers || {});
+    const a = { ...(rawAnswers || {}) };
+    // The current question engine writes newer keys (aftertaste, appetite,
+    // session_mode, ink) while the reading copy was originally keyed to older
+    // axes. Project the backend mood back onto the reading layer so the
+    // “Tu mood” panel never collapses to just the ink sentence.
+    ["tone", "energy", "depth", "risk", "trust", "company", "runtime", "language_pref", "avoid", "decade"].forEach(k => {
+      if (!a[k] && mood[k]) a[k] = mood[k];
+    });
+    if (!a.depth && a.aftertaste === "haunted") a.depth = "uneasy";
+    if (!a.depth && a.aftertaste === "wrecked") a.depth = "ruined";
+    if (!a.depth && a.aftertaste === "held") a.depth = "warm";
+    if (!a.depth && a.aftertaste === "lighter") a.depth = "fun";
+    if (!a.tone && a.atmosphere && ["rain_neon", "cold_house", "storm_pressure", "ash_city", "skin_low_light"].includes(a.atmosphere)) a.tone = "dark";
+    if (!a.tone && a.atmosphere && ["warm_room", "open_sun", "gold_memory"].includes(a.atmosphere)) a.tone = "light";
     const sentences = [];
 
     // ── Sentence 1: where they're standing right now (state × depth)
@@ -944,7 +959,24 @@
         return ES ? "Vienes con ganas de que algo te abrace. Que la imagen sea cálida, que la voz se acerque, que nadie te pida demostrar nada."
                   : "You came wanting something to wrap around you. A warm image, a voice that comes close, no one asking you to prove anything.";
       }
-      return "";
+      if (a.appetite === "horror" || a.trust === "horror") {
+        return ES ? "Esta ruta pide tensión con forma: no ruido por ruido, sino una amenaza que tenga atmósfera y paciencia."
+                  : "This route asks for tension with shape: not noise for noise’s sake, but a threat with atmosphere and patience.";
+      }
+      if (a.appetite === "comfort" || a.session_mode === "together") {
+        return ES ? "La noche necesita una película que abra espacio para verla con calma: clara, conversable y sin castigar la atención."
+                  : "The night needs a film that makes room: clear, easy to sit with, and not punishing your attention.";
+      }
+      if (a.quality_vs_popularity === "hidden" || a.risk_taste === "gem") {
+        return ES ? "No estás pidiendo lo obvio. La ruta busca una buena película que todavía conserve algo de descubrimiento."
+                  : "You are not asking for the obvious. The route is looking for a good film that still feels like a discovery.";
+      }
+      if (a.quality_vs_popularity === "canon" || a.risk_taste === "classic") {
+        return ES ? "Hoy conviene apostar por algo probado: una película con reputación real, no solo una rareza lanzada al azar."
+                  : "Tonight calls for a proven bet: a film with real reputation, not just a random oddity.";
+      }
+      return ES ? "La ruta queda clara: una película buena primero, y recién después el ajuste fino del mood."
+                : "The route is clear: a good film first, then the finer mood fit.";
     })();
     if (opener) sentences.push(opener);
 
@@ -1015,7 +1047,7 @@
     if (a.ending === "closed") {
       tex.push(ES ? "un final que cierre" : "an ending that lands");
     }
-    if (a.aftertaste === "haunting") {
+    if (a.aftertaste === "haunted" || a.aftertaste === "wrecked") {
       tex.push(ES ? "algo que se quede pegado después" : "something that stays with you after");
     }
     if (tex.length) {
@@ -1291,6 +1323,9 @@
           pool = [...picked, ...sticky];
         }
       }
+      if (q.key === "session_mode" && state.path !== "lb") {
+        pool = pool.filter(o => o.value !== "list");
+      }
       pool.forEach((o, i) => {
         const b = document.createElement("button");
         b.className = "opt" + (o.sticky ? " opt-any" : "");
@@ -1539,13 +1574,37 @@
     host.innerHTML = "";
     if (!films || films.length < 2) { host.hidden = true; return; }
     const [a, b] = films;
-    const ar = Number(a.runtime || 0), br = Number(b.runtime || 0);
-    const faster = ar && br ? (ar <= br ? a : b) : a;
-    const reasonDeeper = (a.reason || "").length >= (b.reason || "").length ? a : b;
-    const deeper = reasonDeeper.id === faster.id ? (faster.id === a.id ? b : a) : reasonDeeper;
+    const ES = window.LANG === "es";
+    const mins = (f) => Number(f.runtime || 0);
+    const genres = (f) => (f.genres || []).map(x => String(x).toLowerCase());
+    const has = (f, ...xs) => genres(f).some(g => xs.some(x => g.includes(x)));
+    const newer = Number(a.year || 0) >= Number(b.year || 0) ? a : b;
+    const older = newer.id === a.id ? b : a;
+    const shorter = mins(a) && mins(b) ? (mins(a) <= mins(b) ? a : b) : a;
+    const heavier = has(a, "thriller", "terror", "horror", "crime", "drama") ? a : (has(b, "thriller", "terror", "horror", "crime", "drama") ? b : b);
+    const conversational = state.answers?.company === "shared" || state.answers?.session_mode === "together";
+    let title = window.t("compare_title");
+    let body;
+    if (conversational) {
+      body = ES
+        ? `${a.title} es la apuesta para conversar mientras ocurre. ${b.title} conviene si quieren una película que mande más que la sala.`
+        : `${a.title} is the easier room pick. ${b.title} is better if you want the film to take over the room.`;
+    } else if (mins(a) && mins(b) && Math.abs(mins(a) - mins(b)) >= 20) {
+      body = ES
+        ? `Si tienes menos energía, parte con ${shorter.title}: entra antes y pesa menos. Si quieres una sesión más larga, ${shorter.id === a.id ? b.title : a.title} tiene más espacio para crecer.`
+        : `If your energy is lower, start with ${shorter.title}: it gets moving sooner. If you want a fuller sit, ${shorter.id === a.id ? b.title : a.title} has more room to grow.`;
+    } else if (Number(a.year || 0) && Number(b.year || 0) && Math.abs(Number(a.year) - Number(b.year)) >= 15) {
+      body = ES
+        ? `${newer.title} se siente más directa para esta noche. ${older.title} es la opción si quieres textura de otra época y más paciencia.`
+        : `${newer.title} is the more immediate tonight pick. ${older.title} is the move if you want older texture and more patience.`;
+    } else {
+      body = ES
+        ? `${a.title} es la entrada más limpia. ${heavier.title} es la opción si quieres más tensión, rareza o conversación después.`
+        : `${a.title} is the cleaner entry point. ${heavier.title} is the pick if you want more tension, strangeness, or after-talk.`;
+    }
     host.innerHTML = `
-      <div class="compare-title">${escapeHtml(window.t("compare_title"))}</div>
-      <p>${escapeHtml((window.t("compare_body") || "").replace("{a}", faster.title || "").replace("{b}", deeper.title || ""))}</p>
+      <div class="compare-title">${escapeHtml(title)}</div>
+      <p>${escapeHtml(body)}</p>
     `;
     host.hidden = false;
   }
@@ -1960,10 +2019,35 @@
     } catch {}
   }
 
+
+  function applyTheme(theme) {
+    const next = theme === "light" ? "light" : "dark";
+    document.documentElement.classList.toggle("theme-light", next === "light");
+    document.documentElement.classList.toggle("theme-dark", next === "dark");
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", next === "light" ? "#ede7da" : "#14160f");
+    const btn = document.getElementById("theme-toggle");
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(next === "light"));
+      btn.querySelector(".theme-toggle-text")?.replaceChildren(document.createTextNode(window.t(next === "light" ? "theme_light" : "theme_dark")));
+    }
+    try { localStorage.setItem("moodwatch.theme", next); } catch {}
+  }
+  function initThemeToggle() {
+    let saved = "dark";
+    try { saved = localStorage.getItem("moodwatch.theme") || "dark"; } catch {}
+    applyTheme(saved);
+    document.getElementById("theme-toggle")?.addEventListener("click", () => {
+      const isLight = document.documentElement.classList.contains("theme-light");
+      applyTheme(isLight ? "dark" : "light");
+    });
+  }
+
   // ────────────────────────────────────────────────────────────
   // WIRE
   // ────────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", () => {
+    initThemeToggle();
     show("intro");
     loadRandomHero();
     $("#q-back").addEventListener("click", backQ);
