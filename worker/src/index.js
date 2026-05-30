@@ -727,7 +727,7 @@ async function recommend(req, env, ctx) {
   const finalSix = top.slice(0, 6);
   shuffleInPlace(finalSix);
   top.splice(0, 6, ...finalSix);
-  const enrichLimit = mood.runtime === "short" ? 12 : 8;
+  const enrichLimit = mood.runtime === "short" ? 14 : 10;
   const enrichedPool = await Promise.all(top.slice(0, enrichLimit).map(async (f) => {
     const [providers, credits, details] = await Promise.all([
       M.providers(env, f.id, country),
@@ -1031,7 +1031,7 @@ async function surprise(req, env, ctx) {
   })).sort((a, b) => b._score - a._score);
   const listed = pool.filter(f => f._list);
   const unlisted = pool.filter(f => !f._list);
-  const top = listed.length >= 6 ? listed.slice(0, 7) : [...listed, ...unlisted].slice(0, 8);
+  const top = listed.length >= 6 ? listed.slice(0, 9) : [...listed, ...unlisted].slice(0, 10);
 
   const enrichedRaw = await Promise.all(top.map(async (f) => {
     const [providers, credits, details] = await Promise.all([

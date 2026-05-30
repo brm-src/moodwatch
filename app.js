@@ -975,8 +975,7 @@
         return ES ? "Hoy conviene apostar por algo probado: una película con reputación real, no solo una rareza lanzada al azar."
                   : "Tonight calls for a proven bet: a film with real reputation, not just a random oddity.";
       }
-      return ES ? "La ruta queda clara: una película buena primero, y recién después el ajuste fino del mood."
-                : "The route is clear: a good film first, then the finer mood fit.";
+      return "";
     })();
     if (opener) sentences.push(opener);
 

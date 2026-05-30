@@ -160,7 +160,7 @@ body.has-journey-hero:not(.on-hero) .phrase input::placeholder { color: var(--pa
 body.has-journey-hero:not(.on-hero) .chip { color: var(--paper-3); border-color: rgba(237,231,218,0.25); }
 body.has-journey-hero:not(.on-hero) .chip:hover { color: var(--accent); border-color: var(--accent); }
 html.theme-light body.has-journey-hero:not(.on-hero) { color: var(--ink); }
-html.theme-light body.has-journey-hero::before { filter: blur(14px) saturate(.72) brightness(1.08); opacity: 0; }
+html.theme-light body.has-journey-hero::before { filter: blur(14px) saturate(.72) brightness(1.08); opacity: .18; }
 html.theme-light body.has-journey-hero:not(.on-hero)::before { opacity: .22; }
 html.theme-light body.has-journey-hero::after {
   background: linear-gradient(180deg, rgba(244,239,228,.90) 0%, rgba(244,239,228,.94) 58%, rgba(244,239,228,.98) 100%);
@@ -223,7 +223,7 @@ header.top {
   justify-content: space-between;
   gap: var(--s-3);
   padding: var(--s-2) clamp(16px, 4vw, 36px);
-  background: rgba(20, 18, 16, 0.72);
+  background: transparent;
   backdrop-filter: blur(14px) saturate(1.05);
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
   border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -345,40 +345,66 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   text-shadow: 0 3px 28px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.9);
   margin: 0 0 clamp(12px, 2vh, var(--s-3));
 }
-.hero {
-  .hero .hero-fig {
-    position: absolute;
-    top: 62px;
-    right: var(--s-3);
-    font-family: var(--font-body);
-    font-size: var(--t-mono);
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: rgba(20, 22, 15, 0.55);
-    border: 1px solid rgba(196, 59, 42, 0.45);
-    padding: 6px 10px;
-    border-radius: 999px;
-    backdrop-filter: blur(4px);
-    z-index: 3;
-    max-width: min(60vw, 320px);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: auto;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background .15s ease, border-color .15s ease;
-  }
-  .hero .hero-fig:hover {
-    background: rgba(20, 22, 15, 0.78);
-    border-color: var(--accent);
-  }
+/* Hero top-right cluster: film credit + dark/light toggle, same row */
+.hero-top-right {
+  position: absolute;
+  top: 62px;
+  right: var(--s-3);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero .hero-fig {
+  font-family: var(--font-body);
+  font-size: var(--t-mono);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(20, 22, 15, 0.55);
+  border: 1px solid rgba(196, 59, 42, 0.45);
+  padding: 6px 10px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  max-width: min(60vw, 320px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: auto;
+}
+.hero .hero-fig:hover {
+  background: rgba(20, 22, 15, 0.78);
+  border-color: var(--accent);
+}
+.hero .hero-fig a { color: inherit; text-decoration: none; }
+.hero .hero-fig a:hover { text-decoration: underline; }
+/* Theme toggle inside hero: match hero-fig badge style */
+.hero-top-right .theme-toggle {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  background: rgba(20, 22, 15, 0.55);
+  border: 1px solid rgba(196, 59, 42, 0.45);
+  color: var(--paper-3);
+  backdrop-filter: blur(4px);
+}
+.hero-top-right .theme-toggle:hover {
+  background: rgba(20, 22, 15, 0.78);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+.hero-top-right .theme-icon {
+  inset: 5px;
+  width: 20px;
+  height: 20px;
+}
 @media (max-width: 640px) {
-  .hero .hero-fig {
+  .hero-top-right {
     top: 10px;
     right: 10px;
+  }
+  .hero .hero-fig {
     font-size: 10px;
     padding: 4px 8px;
     max-width: 60vw;
@@ -1059,8 +1085,9 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
 /* ─── results ─── */
 .section[data-step="results"] {
   max-width: min(1180px, 100vw);
+  padding-top: var(--s-2);
 }
-#cards { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-3); }
+#cards { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-4); }
 @media (min-width: 900px) {
   #cards {
     display: grid;
@@ -1879,6 +1906,27 @@ html.theme-light body.on-hero .kofi {
   background: var(--paper);
   color: var(--ink);
   border-color: var(--paper);
+}
+/* Light mode: refine chips use paper-colored text by default which blends
+   into the light semi-transparent journey-hero backdrop. Override to ink. */
+html.theme-light .refine-chip,
+html.theme-light .feedback-reason {
+  color: var(--ink);
+  background: rgba(20,22,15,0.05);
+  border-color: rgba(20,22,15,0.22);
+}
+html.theme-light .refine-chip:hover,
+html.theme-light .feedback-reason:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+/* Light mode: era-chip borders (paper-3) are too faint. */
+html.theme-light .era-chip {
+  border-color: rgba(20,22,15,0.28);
+}
+html.theme-light .era-chip:hover {
+  border-color: var(--ink-soft);
 }
 .feedback-reasons {
   margin: 10px 0 12px;
