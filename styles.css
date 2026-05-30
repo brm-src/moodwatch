@@ -346,30 +346,35 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   margin: 0 0 clamp(12px, 2vh, var(--s-3));
 }
 .hero {
-  position: relative;
-}
-.hero .hero-fig {
-  position: absolute;
-  top: 62px;
-  right: var(--s-3);
-  font-family: var(--font-body);
-  font-size: var(--t-mono);
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(20, 22, 15, 0.55);
-  border: 1px solid rgba(196, 59, 42, 0.45);
-  padding: 6px 10px;
-  border-radius: 999px;
-  backdrop-filter: blur(4px);
-  z-index: 3;
-  max-width: min(60vw, 320px);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
-}
+  .hero .hero-fig {
+    position: absolute;
+    top: 62px;
+    right: var(--s-3);
+    font-family: var(--font-body);
+    font-size: var(--t-mono);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(20, 22, 15, 0.55);
+    border: 1px solid rgba(196, 59, 42, 0.45);
+    padding: 6px 10px;
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+    z-index: 3;
+    max-width: min(60vw, 320px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: auto;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .hero .hero-fig:hover {
+    background: rgba(20, 22, 15, 0.78);
+    border-color: var(--accent);
+  }
 @media (max-width: 640px) {
   .hero .hero-fig {
     top: 10px;
@@ -852,7 +857,7 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   margin-top: var(--s-3);
 }
 .rorschach button {
-  background: var(--charcoal);
+  background: #14160f;
   border: 1px solid var(--rule);
   padding: 0;
   cursor: pointer;
@@ -1404,6 +1409,50 @@ footer.bottom small {
 }
 footer.bottom small a { color: var(--paper-3); text-decoration: none; padding: 8px 4px; display: inline-block; }
 footer.bottom small a:hover { color: var(--accent); }
+
+/* ── footer light-mode overrides ── */
+html.theme-light footer.bottom {
+  background: var(--charcoal-2);
+  color: var(--ink-soft);
+}
+html.theme-light footer.bottom small {
+  color: var(--ink-soft);
+}
+html.theme-light footer.bottom small a {
+  color: var(--ink-soft);
+}
+html.theme-light footer.bottom small a:hover {
+  color: var(--accent);
+}
+html.theme-light .kofi {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+html.theme-light .kofi:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+html.theme-light .clear-taste {
+  color: var(--ink-soft);
+}
+html.theme-light .clear-taste:hover {
+  color: var(--accent);
+}
+html.theme-light body.on-hero footer.bottom {
+  background: transparent;
+}
+html.theme-light body.on-hero footer.bottom::before {
+  background: linear-gradient(180deg, transparent 0%, rgba(244,239,228,0.65) 30%, rgba(244,239,228,0.95) 100%);
+}
+html.theme-light body.on-hero footer.bottom small,
+html.theme-light body.on-hero footer.bottom small a {
+  color: var(--ink);
+}
+html.theme-light body.on-hero .kofi {
+  color: var(--ink);
+  border-color: var(--ink);
+}
 
 .editor-badge {
   align-self: flex-start;

@@ -2000,9 +2000,10 @@
       const hero = document.getElementById("hero");
       const fig = document.getElementById("hero-fig");
       if (fig && pick.caption) {
-        fig.textContent = pick.caption;
+        const q = encodeURIComponent(pick.caption);
+        fig.innerHTML = `<a href="https://www.justwatch.com/us/search?q=${q}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;display:block;">${pick.caption}</a>`;
         fig.hidden = false;
-        fig.title = pick.caption;
+        fig.title = `Where to watch: ${pick.caption}`;
       }
       if (hero) {
         const img = new Image();

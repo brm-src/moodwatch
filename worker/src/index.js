@@ -1265,6 +1265,30 @@ export default {
       }
     }
 
+    // ── Temporary: batch IMDb → TMDb ID lookup ──
+    if (url.pathname === "/batch-imdb") {
+      try {
+        const body = await req.json();
+        const ids = (body.ids || []).filter(id => /^tt\d{5,10}$/.test(id));
+        if (ids.length === 0) return json({ error: "no valid IMDb IDs" }, { status: 400 }, cors);
+        if (ids.length > 200) return json({ error: "max 200 ids per request" }, { status: 400 }, cors);
+        const out = {};
+        for (const imdbId of ids) {
+          try {
+            const findUrl = `https://api.themoviedb.org/3/find/${imdbId}?api_key=${env.TMDB_API_KEY}&external_source=imdb_id`;
+            const r = await fetch(findUrl);
+            if (!r.ok) { out[imdbId] = null; continue; }
+            const data = await r.json();
+            const movie = (data.movie_results || [])[0];
+            out[imdbId] = movie ? movie.id : null;
+          } catch { out[imdbId] = null; }
+        }
+        return json(out, {}, cors);
+      } catch (e) {
+        return json({ error: "batch_imdb", message: String(e?.message || e) }, { status: 500 }, cors);
+      }
+    }
+
     if (url.pathname === "/lb-scrape") {
       try {
         const targetUrl = url.searchParams.get("url");
