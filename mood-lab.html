@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>moodwatch — mood lab</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#12130f;color:#eee7da;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}body{background:radial-gradient(circle at 15% 8%,rgba(196,59,42,.25),transparent 28%),radial-gradient(circle at 82% 18%,rgba(216,207,188,.12),transparent 30%),linear-gradient(135deg,#15160f,#0b0c09 58%,#1b1512);padding:22px;color:#eee7da}.app{max-width:1480px;margin:0 auto}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.brand{font-family:Georgia,serif;font-size:30px;letter-spacing:-.05em}.brand em{color:#c43b2a;font-style:italic}.subtitle{max-width:760px;color:rgba(238,231,218,.68);line-height:1.45;margin:8px 0 0}.top-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.grid{display:grid;grid-template-columns:minmax(250px,.75fr) minmax(430px,1.25fr) minmax(360px,1fr);gap:14px;align-items:start}.panel{background:rgba(18,19,15,.72);border:1px solid rgba(238,231,218,.14);box-shadow:0 24px 80px rgba(0,0,0,.28);backdrop-filter:blur(18px);border-radius:24px;padding:16px}.panel h2,.panel h3{font-family:Georgia,serif;font-weight:500;letter-spacing:-.03em;margin:0 0 12px}.panel h2{font-size:24px}.panel h3{font-size:19px}.small{font-size:12px;color:rgba(238,231,218,.56);line-height:1.35}.btn{border:1px solid rgba(238,231,218,.22);background:rgba(238,231,218,.06);color:#eee7da;border-radius:999px;padding:10px 13px;transition:.16s ease}.btn:hover{background:rgba(238,231,218,.13);transform:translateY(-1px)}.btn.primary{background:#c43b2a;border-color:#c43b2a;color:#fff4ef}.btn.danger{border-color:rgba(196,59,42,.45);color:#ffb0a5}.btn.ghost{background:transparent}.field{display:grid;gap:7px;margin:0 0 12px}.field label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(238,231,218,.55)}input,textarea,select{width:100%;border:1px solid rgba(238,231,218,.16);background:rgba(238,231,218,.06);color:#eee7da;border-radius:14px;padding:11px 12px;outline:none}textarea{min-height:78px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:rgba(196,59,42,.85);box-shadow:0 0 0 3px rgba(196,59,42,.13)}select option{background:#15160f;color:#eee7da}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mood-list{display:grid;gap:9px;max-height:calc(100vh - 210px);overflow:auto;padding-right:3px}.mood-item{width:100%;text-align:left;border:1px solid rgba(238,231,218,.12);background:rgba(238,231,218,.045);color:#eee7da;border-radius:18px;padding:12px}.mood-item.active{border-color:rgba(196,59,42,.85);background:rgba(196,59,42,.16)}.mood-name{font-family:Georgia,serif;font-size:20px;letter-spacing:-.025em}.mood-meta{font-size:12px;color:rgba(238,231,218,.58);margin-top:4px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.chip{border:1px solid rgba(238,231,218,.18);border-radius:999px;padding:5px 8px;font-size:11px;color:rgba(238,231,218,.78);background:rgba(238,231,218,.045)}.chip.red{border-color:rgba(196,59,42,.4);color:#ffb0a5}.section{border-top:1px solid rgba(238,231,218,.1);padding-top:14px;margin-top:14px}.movie-form{display:grid;gap:10px}.movie-card{display:grid;gap:9px;border:1px solid rgba(238,231,218,.12);background:rgba(238,231,218,.045);border-radius:18px;padding:13px;margin-top:10px}.movie-title{font-family:Georgia,serif;font-size:19px}.movie-meta{font-size:12px;color:rgba(238,231,218,.55)}.movie-note{font-size:13px;color:rgba(238,231,218,.75);line-height:1.38}.movie-actions{display:flex;gap:8px;flex-wrap:wrap}.empty{border:1px dashed rgba(238,231,218,.18);border-radius:18px;padding:18px;color:rgba(238,231,218,.55);text-align:center}.search{margin-bottom:12px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{border:1px solid rgba(238,231,218,.12);background:rgba(238,231,218,.045);border-radius:16px;padding:11px}.stat strong{display:block;font-family:Georgia,serif;font-size:24px}.stat span{font-size:11px;color:rgba(238,231,218,.56);text-transform:uppercase;letter-spacing:.1em}.preview{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;max-height:280px;overflow:auto;background:rgba(0,0,0,.22);border:1px solid rgba(238,231,218,.12);border-radius:18px;padding:12px}.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);background:#eee7da;color:#15160f;border-radius:999px;padding:10px 15px;opacity:0;pointer-events:none;transition:.18s ease;box-shadow:0 18px 60px rgba(0,0,0,.35);z-index:9}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.importer{display:none}.mini-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.help{font-size:13px;line-height:1.45;color:rgba(238,231,218,.68)}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:rgba(238,231,218,.1);border:1px solid rgba(238,231,218,.12);padding:1px 5px;border-radius:7px}@media (max-width:1100px){.grid{grid-template-columns:1fr}.mood-list{max-height:none}.top{display:grid}.top-actions{justify-content:flex-start}}@media (max-width:620px){body{padding:12px}.row{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.panel{border-radius:18px;padding:13px}.brand{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand">mood<em>watch</em> mood lab</div>
+      <p class="subtitle">Un tablero privado en tu navegador para armar moods: motivos, leitmotivs, modos, texturas y películas asociadas. Nada se sube: se guarda en este navegador hasta que exportes el JSON.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="newMoodBtn">Nuevo mood</button>
+      <button class="btn" id="exportBtn">Exportar JSON</button>
+      <button class="btn ghost" id="importBtn">Importar</button>
+      <input class="importer" type="file" id="importFile" accept="application/json,.json">
+    </div>
+  </header>
+
+  <section class="grid">
+    <aside class="panel">
+      <h2>Mapa de moods</h2>
+      <input class="search" id="moodSearch" placeholder="Buscar por motivo, modo, película…">
+      <div class="stats" id="stats"></div>
+      <div class="mood-list" id="moodList"></div>
+    </aside>
+
+    <main class="panel">
+      <h2 id="editorTitle">Mood</h2>
+      <div class="row">
+        <div class="field"><label>Nombre del mood</label><input id="name" placeholder="Neón triste"></div>
+        <div class="field"><label>Modo</label><select id="mode"><option value="balanced">balanceado</option><option value="quick">rápido</option><option value="together">para ver con alguien</option><option value="list">rescatar watchlist</option><option value="essay">ensayo / lectura personal</option><option value="comfort">refugio</option><option value="damage">salir tocado</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Motivos</label><input id="motifs" placeholder="lluvia, hoteles, trenes, pasillos"></div>
+        <div class="field"><label>Leitmotivs</label><input id="leitmotifs" placeholder="teléfonos que no contestan, luces rojas"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Texturas</label><input id="textures" placeholder="grano, humo, ciudad mojada, silencio"></div>
+        <div class="field"><label>Evitar</label><input id="avoid" placeholder="ironía barata, giros obvios, crueldad gratuita"></div>
+      </div>
+      <div class="field"><label>Lectura breve</label><textarea id="reading" placeholder="Qué tiene que sentirse cuando alguien cae en este mood."></textarea></div>
+      <div class="field"><label>Regla para recomendar</label><textarea id="rule" placeholder="Si la película tiene X + Y, entra. Si solo tiene estética pero no emoción, queda fuera."></textarea></div>
+      <div class="mini-actions">
+        <button class="btn primary" id="saveMoodBtn">Guardar mood</button>
+        <button class="btn danger" id="deleteMoodBtn">Eliminar mood</button>
+      </div>
+
+      <div class="section">
+        <h3>Películas asociadas</h3>
+        <p class="small">Agrega títulos a mano. Yo después hago la parte tediosa: buscar TMDb/IMDb, IDs, año correcto y conexión con la web.</p>
+        <div id="assignedMovies"></div>
+      </div>
+    </main>
+
+    <aside class="panel">
+      <h2>Agregar película</h2>
+      <div class="movie-form">
+        <div class="field"><label>Título</label><input id="movieTitle" placeholder="In the Mood for Love"></div>
+        <div class="row">
+          <div class="field"><label>Año</label><input id="movieYear" placeholder="2000" inputmode="numeric"></div>
+          <div class="field"><label>Director / pista</label><input id="movieHint" placeholder="Wong Kar-wai"></div>
+        </div>
+        <div class="field"><label>Por qué calza</label><textarea id="movieNote" placeholder="No por romance: por espera, repetición, pasillos y deseo contenido."></textarea></div>
+        <button class="btn primary" id="addMovieBtn">Asociar al mood actual</button>
+      </div>
+
+      <div class="section">
+        <h3>Resumen exportable</h3>
+        <p class="help">Cuando juntes material, toca <span class="kbd">Exportar JSON</span> y me lo mandas. Con eso yo lo transformo a datos de producción.</p>
+        <div class="preview" id="preview"></div>
+      </div>
+    </aside>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+  const STORAGE_KEY = 'moodwatch.moodLab.v1';
+  const $ = (id) => document.getElementById(id);
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const csv = (s) => (s || '').split(',').map(x => x.trim()).filter(Boolean);
+  const slugify = (s) => (s || 'mood').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,54) || 'mood';
+  const sample = {
+    version: 1,
+    updated_at: new Date().toISOString(),
+    selected: 'neon-triste',
+    moods: [
+      {id:'neon-triste',name:'Neón triste',mode:'balanced',motifs:['ciudad nocturna','vidrios','autos','soledad acompañada'],leitmotifs:['luces rojas','personas mirando desde lejos'],textures:['lluvia','sintetizadores','metal frío'],avoid:['guiño posmoderno','acción limpia'],reading:'Quiere belleza urbana, pero con una herida abajo. No basta que se vea estilizada: tiene que sentirse abandonada.',rule:'Entra si la forma visual sostiene melancolía. Queda fuera si solo es neón decorativo.',movies:[{title:'Fallen Angels',year:'1995',hint:'Wong Kar-wai',note:'No por trama: por velocidad, noche, deseo torcido y gente que casi se encuentra.'},{title:'Drive',year:'2011',hint:'Nicolas Winding Refn',note:'Sirve cuando el mood pide romance mínimo y violencia seca.'}]},
+      {id:'calma-rota',name:'Calma rota',mode:'comfort',motifs:['casas silenciosas','verano raro','familias que no hablan'],leitmotifs:['comidas largas','ventanas abiertas','ruido de insectos'],textures:['luz tibia','quietud','amenaza baja'],avoid:['miserabilismo','shock barato'],reading:'Parece suave desde lejos, pero algo no encaja. Necesita paciencia, aire y una grieta emocional visible.',rule:'Entra si la película parece tranquila pero deja una incomodidad persistente.',movies:[{title:'The Swimmer',year:'1968',hint:'Frank Perry',note:'Brillo de tarde que se vuelve ruina psicológica.'}]},
+      {id:'mugre-luminosa',name:'Mugre luminosa',mode:'damage',motifs:['bares','calles malas','amistades rotas','dinero pequeño'],leitmotifs:['música que salva un rato','ropa gastada'],textures:['grano','sudor','humo','colores sucios'],avoid:['postal bonita','redención fácil'],reading:'Mundo vivido, algo dañado, pero no cínico. La película puede estar sucia; no puede estar muerta.',rule:'Entra si hay humanidad debajo de la mugre. Fuera si solo posa de decadente.',movies:[{title:'Mikey and Nicky',year:'1976',hint:'Elaine May',note:'Amistad tóxica, noche larga, cariño imposible.'}]}
+    ]
+  };
+  let state = load();
+
+  function load(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || sample; }
+    catch { return sample; }
+  }
+  function persist(){ state.updated_at = new Date().toISOString(); localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); render(); }
+  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),1700); }
+  function selectedMood(){ return state.moods.find(m => m.id === state.selected) || state.moods[0]; }
+  function moodPayloadFromForm(){
+    const name = $('name').value.trim() || 'Mood sin nombre';
+    const current = selectedMood();
+    return {id: current?.id || slugify(name), name, mode:$('mode').value, motifs:csv($('motifs').value), leitmotifs:csv($('leitmotifs').value), textures:csv($('textures').value), avoid:csv($('avoid').value), reading:$('reading').value.trim(), rule:$('rule').value.trim(), movies: current?.movies || []};
+  }
+  function fillForm(m){
+    if(!m) return;
+    $('editorTitle').textContent = m.name || 'Mood';
+    $('name').value = m.name || '';
+    $('mode').value = m.mode || 'balanced';
+    $('motifs').value = (m.motifs || []).join(', ');
+    $('leitmotifs').value = (m.leitmotifs || []).join(', ');
+    $('textures').value = (m.textures || []).join(', ');
+    $('avoid').value = (m.avoid || []).join(', ');
+    $('reading').value = m.reading || '';
+    $('rule').value = m.rule || '';
+  }
+  function renderStats(){
+    const films = state.moods.reduce((n,m)=>n+(m.movies?.length||0),0);
+    const motifs = new Set(state.moods.flatMap(m => [...(m.motifs||[]), ...(m.leitmotifs||[])]));
+    $('stats').innerHTML = `<div class="stat"><strong>${state.moods.length}</strong><span>moods</span></div><div class="stat"><strong>${films}</strong><span>películas</span></div><div class="stat"><strong>${motifs.size}</strong><span>motivos</span></div>`;
+  }
+  function renderMoodList(){
+    const q = $('moodSearch').value.trim().toLowerCase();
+    const moods = state.moods.filter(m => !q || JSON.stringify(m).toLowerCase().includes(q));
+    $('moodList').innerHTML = moods.map(m => `<button class="mood-item ${m.id===state.selected?'active':''}" data-pick="${m.id}"><div class="mood-name">${esc(m.name)}</div><div class="mood-meta">${esc(labelMode(m.mode))} · ${(m.movies||[]).length} película${(m.movies||[]).length===1?'':'s'}</div><div class="chips">${(m.motifs||[]).slice(0,3).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}${(m.leitmotifs||[]).slice(0,2).map(x=>`<span class="chip red">${esc(x)}</span>`).join('')}</div></button>`).join('') || '<div class="empty">Nada encontrado.</div>';
+  }
+  function renderMovies(){
+    const m = selectedMood();
+    const movies = m?.movies || [];
+    $('assignedMovies').innerHTML = movies.length ? movies.map((f,i)=>`<article class="movie-card"><div><div class="movie-title">${esc(f.title || 'Sin título')}</div><div class="movie-meta">${esc([f.year,f.hint].filter(Boolean).join(' · '))}</div></div>${f.note?`<div class="movie-note">${esc(f.note)}</div>`:''}<div class="movie-actions"><button class="btn ghost" data-edit-movie="${i}">Editar</button><button class="btn danger" data-remove-movie="${i}">Quitar</button></div></article>`).join('') : '<div class="empty">Este mood todavía no tiene películas.</div>';
+  }
+  function renderPreview(){
+    const m = selectedMood();
+    $('preview').textContent = JSON.stringify({schema:'moodwatch-curation-v1', selected_mood:m, all_moods:state.moods.map(({id,name,mode,movies})=>({id,name,mode,films:movies?.length||0}))}, null, 2);
+  }
+  function render(){ renderStats(); renderMoodList(); fillForm(selectedMood()); renderMovies(); renderPreview(); }
+  function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function labelMode(x){ return ({balanced:'balanceado',quick:'rápido',together:'para ver con alguien',list:'rescatar watchlist',essay:'ensayo / lectura personal',comfort:'refugio',damage:'salir tocado'}[x] || x || 'balanceado'); }
+
+  $('newMoodBtn').addEventListener('click', () => {
+    const base = {id:'mood-'+uid(),name:'Mood nuevo',mode:'balanced',motifs:[],leitmotifs:[],textures:[],avoid:[],reading:'',rule:'',movies:[]};
+    state.moods.unshift(base); state.selected = base.id; persist(); toast('Mood creado');
+  });
+  $('saveMoodBtn').addEventListener('click', () => {
+    const current = selectedMood(); if(!current) return;
+    const next = moodPayloadFromForm(); next.id = current.id;
+    state.moods = state.moods.map(m => m.id === current.id ? next : m);
+    persist(); toast('Mood guardado');
+  });
+  $('deleteMoodBtn').addEventListener('click', () => {
+    const current = selectedMood(); if(!current) return;
+    if(state.moods.length === 1){ toast('Deja al menos un mood'); return; }
+    if(!confirm(`Eliminar “${current.name}”?`)) return;
+    state.moods = state.moods.filter(m => m.id !== current.id); state.selected = state.moods[0].id; persist(); toast('Mood eliminado');
+  });
+  $('moodList').addEventListener('click', (e) => { const b=e.target.closest('[data-pick]'); if(!b) return; state.selected=b.dataset.pick; persist(); });
+  $('moodSearch').addEventListener('input', renderMoodList);
+  $('addMovieBtn').addEventListener('click', () => {
+    const m = selectedMood(); if(!m) return;
+    const title = $('movieTitle').value.trim(); if(!title){ toast('Falta título'); return; }
+    m.movies = m.movies || [];
+    m.movies.push({title, year:$('movieYear').value.trim(), hint:$('movieHint').value.trim(), note:$('movieNote').value.trim()});
+    ['movieTitle','movieYear','movieHint','movieNote'].forEach(id => $(id).value=''); persist(); toast('Película asociada');
+  });
+  $('assignedMovies').addEventListener('click', (e) => {
+    const m = selectedMood(); if(!m) return;
+    const rem = e.target.closest('[data-remove-movie]');
+    const edit = e.target.closest('[data-edit-movie]');
+    if(rem){ m.movies.splice(Number(rem.dataset.removeMovie),1); persist(); toast('Película quitada'); }
+    if(edit){ const f=m.movies[Number(edit.dataset.editMovie)]; if(!f) return; $('movieTitle').value=f.title||''; $('movieYear').value=f.year||''; $('movieHint').value=f.hint||''; $('movieNote').value=f.note||''; m.movies.splice(Number(edit.dataset.editMovie),1); persist(); toast('Edita y vuelve a asociar'); }
+  });
+  $('exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({...state, schema:'moodwatch-curation-v1'}, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `moodwatch-mood-lab-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); toast('JSON descargado');
+  });
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', async (e) => {
+    const file = e.target.files?.[0]; if(!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      if(!Array.isArray(data.moods)) throw new Error('bad shape');
+      state = {version:1, updated_at:new Date().toISOString(), selected:data.selected || data.moods[0]?.id, moods:data.moods};
+      persist(); toast('Importado');
+    } catch { toast('JSON inválido'); }
+    e.target.value = '';
+  });
+  document.addEventListener('keydown', (e) => {
+    if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); $('saveMoodBtn').click(); }
+  });
+  render();
+})();
+</script>
+</body>
+</html>
