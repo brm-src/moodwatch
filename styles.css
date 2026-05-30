@@ -254,14 +254,14 @@ body.on-hero .site-top {
   -webkit-backdrop-filter: none;
 }
 body.has-journey-hero:not(.on-hero) .site-top {
-  background: rgba(20,22,15,.54);
-  border-bottom-color: rgba(237,231,218,.10);
-  backdrop-filter: blur(18px) saturate(1.08);
-  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  background: rgba(20,22,15,.34);
+  border-bottom-color: rgba(237,231,218,.06);
+  backdrop-filter: blur(20px) saturate(1.12);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12);
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .site-top {
-  background: rgba(244,239,228,.68);
-  border-bottom-color: rgba(20,22,15,.10);
+  background: rgba(244,239,228,.54);
+  border-bottom-color: rgba(20,22,15,.06);
 }
 .brand-home {
   background: none;
@@ -280,12 +280,12 @@ html.theme-light body.has-journey-hero:not(.on-hero) .site-top {
 .brand-home em {
   font-style: italic;
   font-weight: 400;
-  color: var(--accent);
+  color: #f09878;
 }
 html.theme-light .brand-home { color: var(--ink); }
 html.theme-light .brand-home em { color: var(--accent-2); }
 html.theme-light body.on-hero .brand-home { color: var(--paper); text-shadow: 0 2px 18px rgba(0,0,0,.7); }
-html.theme-light body.on-hero .brand-home em { color: #ff6b55; }
+html.theme-light body.on-hero .brand-home em { color: #f09878; }
 body.has-journey-hero:not(.on-hero) .brand-home { color: var(--paper); text-shadow: 0 1px 16px rgba(0,0,0,.35); }
 html.theme-light body.has-journey-hero:not(.on-hero) .brand-home { color: var(--ink); text-shadow: none; }
 .brand-home:hover { opacity: 0.85; transform: translateY(-1px); }
@@ -405,37 +405,40 @@ html.theme-light .theme-toggle:hover {
   gap: 10px;
 }
 .hero .hero-fig {
-  font-family: var(--font-body);
-  font-size: var(--t-mono);
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(20, 22, 15, 0.55);
-  border: 1px solid rgba(196, 59, 42, 0.45);
-  padding: 6px 10px;
-  border-radius: 999px;
-  backdrop-filter: blur(4px);
-  max-width: min(60vw, 320px);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: rgba(237,231,218,.75);
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  backdrop-filter: none;
+  max-width: min(60vw, 340px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: auto;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
 }
 .hero .hero-fig:hover {
-  background: rgba(20, 22, 15, 0.78);
-  border-color: var(--accent);
+  color: var(--paper);
+  background: transparent;
+  border: none;
 }
 .hero .hero-fig a { color: inherit; text-decoration: none; }
-.hero .hero-fig a:hover { text-decoration: underline; }
+.hero .hero-fig a:hover { color: var(--paper); text-decoration: underline; }
 @media (max-width: 640px) {
   .hero-top-right {
     top: 10px;
     right: 54px;
   }
   .hero .hero-fig {
-    font-size: 10px;
-    padding: 4px 8px;
+    font-size: 0.68rem;
+    padding: 0;
     max-width: 60vw;
   }
 }
@@ -1185,13 +1188,13 @@ body.has-journey-hero:not(.on-hero) .why-chips span {
   border-color: rgba(237, 231, 218, 0.28);
 }
 body.has-journey-hero:not(.on-hero) .card {
-  background: linear-gradient(135deg, rgba(20,22,15,.62), rgba(20,22,15,.38));
-  border: 1px solid rgba(237,231,218,.18);
-  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(20,22,15,.48), rgba(20,22,15,.28));
+  border: 1px solid rgba(237,231,218,.12);
+  border-radius: 18px;
   padding: var(--s-3);
-  box-shadow: 0 24px 80px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
-  backdrop-filter: blur(20px) saturate(1.08);
-  -webkit-backdrop-filter: blur(20px) saturate(1.08);
+  box-shadow: 0 4px 24px rgba(0,0,0,.32), 0 24px 64px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter: blur(24px) saturate(1.12);
+  -webkit-backdrop-filter: blur(24px) saturate(1.12);
 }
 body.has-journey-hero:not(.on-hero) .card h3 .yr,
 body.has-journey-hero:not(.on-hero) .card .director,
@@ -1211,18 +1214,18 @@ html.theme-light body.has-journey-hero:not(.on-hero) .card,
 html.theme-light body.has-journey-hero:not(.on-hero) .why-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .refine-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .compare-panel {
-  background: linear-gradient(135deg, rgba(255,252,246,.74), rgba(234,226,210,.50));
-  border-color: rgba(20,22,15,.14);
+  background: linear-gradient(135deg, rgba(255,252,246,.64), rgba(234,226,210,.38));
+  border: 1px solid rgba(20,22,15,.08);
+  border-radius: 18px;
+  padding: var(--s-3);
   color: var(--ink);
-  box-shadow: 0 22px 70px rgba(66,48,24,.14), inset 0 1px 0 rgba(255,255,255,.55);
-  backdrop-filter: blur(22px) saturate(1.05);
-  -webkit-backdrop-filter: blur(22px) saturate(1.05);
+  box-shadow: 0 4px 20px rgba(66,48,24,.08), 0 16px 48px rgba(66,48,24,.10), inset 0 1px 0 rgba(255,255,255,.35);
+  backdrop-filter: blur(26px) saturate(1.08);
+  -webkit-backdrop-filter: blur(26px) saturate(1.08);
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .why-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .refine-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .compare-panel {
-  border-width: 1px;
-  border-radius: 22px;
   padding: 16px 18px 18px;
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .card h3 .yr,
