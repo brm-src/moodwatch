@@ -194,11 +194,56 @@
   // ---- state ----
   let state = load();
 
+  let _seedPromise = null;
+
+  function mergeSeed(seed){
+    const moods = seed.moods || [];
+    const byId = new Map(moods.map(m => [m.id, m]));
+    for (const base of WEB_MOODS) {
+      if (!byId.has(base.id)) {
+        moods.push({...base, movies:[]});
+      } else {
+        const existing = byId.get(base.id);
+        byId.set(base.id, {...base, movies: existing.movies || [], profile: base.profile});
+      }
+    }
+    seed.moods = moods.map(m => byId.get(m.id) || m);
+    seed.version = 2;
+    seed.selected = seed.selected || 'quality';
+    if (!moods.find(m => m.id === seed.selected)) seed.selected = moods[0]?.id || 'quality';
+    return seed;
+  }
+
   function load(){
     let data;
     try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)); }
     catch { data = null; }
-    if (!data || !Array.isArray(data.moods) || data.moods.length === 0) data = structuredClone(DEFAULT_SAMPLE);
+    if (!data || !Array.isArray(data.moods) || data.moods.length === 0) {
+      // First visit with empty localStorage — try to load seed JSON
+      if (!_seedPromise) {
+        _seedPromise = fetch('./mood-lab-seed.json?v=3')
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null);
+      }
+      // If seed hasn't resolved yet, use empty default temporarily
+      // (render() will be called again after seed loads via init())
+      if (!window._seedLoaded) {
+        data = structuredClone(DEFAULT_SAMPLE);
+        _seedPromise.then(seed => {
+          if (seed && Array.isArray(seed.moods) && seed.moods.length > 0) {
+            state = mergeSeed(seed);
+            persist(true);
+            window._seedLoaded = true;
+            render();
+            toast('668 películas cargadas');
+          } else {
+            window._seedLoaded = true;
+          }
+        });
+      } else {
+        data = structuredClone(DEFAULT_SAMPLE);
+      }
+    }
 
     const moods = data.moods || [];
     const byId = new Map(moods.map(m => [m.id, m]));
