@@ -11,7 +11,7 @@ import {
 } from "./tmdb.js";
 import { fetchWatchlistTmdbIds, scrapeListPage } from "./letterboxd.js";
 import { CURATED, curatedFor, CURATED_TV, curatedTvFor } from "./curated.js";
-import { matchLists } from "./lists.js";
+import { matchLists, LISTS } from "./lists.js";
 import { imdbTierBoost, imdbTierTier, selectTierForMood, IMDB_TIER_COUNTS } from "./imdb_tier.js";
 
 // Films that surface too aggressively when mood is light (QA #2 finding).
@@ -874,6 +874,8 @@ async function surprise(req, env, ctx) {
     baseParams[`${dateKey}.lte`] = "1965-12-31";
     baseParams["vote_count.gte"] = media === "tv" ? 100 : 200;
     baseParams["vote_average.gte"] = 7.0;
+    // TMDb keyword 3494 = "black and white"
+    baseParams.with_keywords = "3494";
   }
   if (profile === "horror") {
     baseParams.with_genres = media === "tv" ? "9648" : "27|53|9648";
@@ -932,6 +934,14 @@ async function surprise(req, env, ctx) {
   if (!allowsDocumentary(surpriseMood)) pool = pool.filter(f => !isDocumentaryLike(f));
   pool = pool.filter(f => passesQualityFloor(f, surpriseMood));
 
+  // bw profile: build a Set of hand-curated B&W film IDs from bw-cinema list.
+  // Used to gate list injections and final dedup so no color films leak through.
+  const bwCinemaIds = new Set();
+  if (profile === "bw") {
+    const bwList = LISTS.find(l => l.slug === "bw-cinema");
+    if (bwList) for (const id of (bwList.ids || [])) bwCinemaIds.add(id);
+  }
+
   const matched = matchLists(surpriseMood, media);
   const listIds = new Map();
   for (const m of matched) {
@@ -985,6 +995,9 @@ async function surprise(req, env, ctx) {
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
     if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
     if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
+    // For bw profile, list-injected films must be in the hand-curated bw-cinema set.
+    // Discover pool films are already filtered by with_keywords=3494 at TMDb level.
+    if (profile === "bw" && !bwCinemaIds.has(f.id)) return false;
     return true;
   });
   pool = [
@@ -1013,6 +1026,8 @@ async function surprise(req, env, ctx) {
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
     if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
     if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
+    // For bw profile, films not from bw-cinema must have passed the TMDb with_keywords filter
+    if (profile === "bw" && !bwCinemaIds.has(f.id)) return false;
     return true;
   };
   // De-dupe + drop excluded/profile leaks
@@ -1094,6 +1109,8 @@ async function surprise(req, env, ctx) {
     if (media === "movie" && profile === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
     if (profile === "classic" && f.year && f.year > "1979") return false;
     if (profile === "bw" && f.year && f.year > "1965") return false;
+    // For bw profile, extra guard: must be in bw-cinema or from keyword-filtered discover
+    if (profile === "bw" && !bwCinemaIds.has(f.id)) return false;
     if (profile === "noir" && f.year && f.year > "1965") return false;
     return true;
   }).slice(0, 4);
