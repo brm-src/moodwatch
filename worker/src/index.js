@@ -1009,22 +1009,23 @@ async function surprise(req, env, ctx) {
     // Respect profile filters so list injection doesn't break the chip's promise
     const fid = new Set((f.genre_ids || []).map(x => String(x)));
     const lang_ = (f.original_language || "").toLowerCase();
-    if (profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
-    if (profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
-    if (profile === "noir" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
-    if (profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
-    if (profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
-    if (profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
-    if (profile === "lonely" && !["18","10749"].some(g => fid.has(g))) return false;
-    if (profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
-    if (profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
-    if (profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
-    if (profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
-    if (profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
+    const bypassGenre = !!(f._curated);  // curated films skip genre restrictions
+    if (!bypassGenre && profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
+    if (profile === "noir" && f.release_date && f.release_date.slice(0,4) > "1965" && !bypassGenre) return false;
+    if (!bypassGenre && profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "lonely" && !["18","10749"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
     if (profile === "latam" && !["es","pt"].includes(lang_)) return false;
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
     if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979" && !bypassGenre) return false;
-    if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
+    if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965" && !bypassGenre) return false;
     // For bw profile, list-injected films must be in the hand-curated bw-cinema set.
     // Discover pool films are already filtered by with_keywords=3494 at TMDb level.
     if (profile === "bw" && !bwCinemaIds.has(f.id)) return false;
