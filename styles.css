@@ -1195,7 +1195,9 @@ html.theme-light body.has-journey-hero:not(.on-hero) .compare-panel {
   box-shadow: none;
   backdrop-filter: none;
 }
-html.theme-light body.has-journey-hero:not(.on-hero) .why-panel {
+html.theme-light body.has-journey-hero:not(.on-hero) .why-panel,
+html.theme-light body.has-journey-hero:not(.on-hero) .refine-panel,
+html.theme-light body.has-journey-hero:not(.on-hero) .compare-panel {
   border-width: 1px 0;
   padding: 14px 0 16px;
 }
