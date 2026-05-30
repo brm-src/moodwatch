@@ -2085,6 +2085,7 @@ html.theme-light .era-chip.is-active {
 
 
 /* ─── product controls: refine, compare, saved routes ─── */
+.why-panel,
 .refine-panel,
 .compare-panel {
   margin: var(--s-2) 0;
@@ -2094,7 +2095,13 @@ html.theme-light .era-chip.is-active {
   color: var(--paper);
   backdrop-filter: blur(8px);
 }
-.refine-panel[hidden], .compare-panel[hidden] { display: none; }
+.why-panel[hidden], .refine-panel[hidden], .compare-panel[hidden] { display: none; }
+.why-text {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin: 0;
+  color: var(--paper-2);
+}
 .refine-title,
 .compare-title,
 .feedback-reasons-title {
@@ -2423,13 +2430,31 @@ html.theme-light .era-chip:hover {
   text-decoration: none;
 }
 
+.has-programming-layout .card.is-program-alt .lb-action {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(237,231,218,0.16);
+  background: transparent;
+  color: var(--paper-3);
+  padding: 4px 10px;
+  border-radius: 0;
+  text-decoration: none;
+}
+.has-programming-layout .card.is-program-alt .lb-action:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
 .has-programming-layout .card.is-program-alt .action.primary:hover {
   background: var(--ink);
   color: var(--paper);
 }
 
-/* ─── hide noisy UI in editorial mode ─── */
-.has-programming-layout .poster-wrap .feedback { display: none !important; }
+/* ─── feedback overlay stays visible in editorial mode ─── */
 .has-programming-layout .card .title-link { color: inherit; text-decoration: none; }
 .has-programming-layout .card .title-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 
@@ -2440,10 +2465,10 @@ html.theme-light .era-chip:hover {
 .has-programming-layout .card.is-program-alt .taste-badge,
 .has-programming-layout .card.is-program-alt .editor-badge,
 .has-programming-layout .card.is-program-alt .overview,
-.has-programming-layout .card.is-program-alt .action:not(.primary) { display: none; }
+.has-programming-layout .card.is-program-alt .action:not(.primary):not(.lb-action) { display: none; }
 
 /* hide IMDB/details secondary actions everywhere in editorial mode */
-.has-programming-layout .card .action:not(.primary) { display: none; }
+.has-programming-layout .card .action:not(.primary):not(.lb-action) { display: none; }
 
 /* override card rank color when is-primary inside editorial */
 .has-programming-layout .card.is-primary-pick .card-rank { color: var(--accent); }
@@ -2517,6 +2542,15 @@ html.theme-light .has-programming-layout .card.is-program-alt .action.primary {
 }
 
 html.theme-light .has-programming-layout .card.is-program-alt .action.primary:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+html.theme-light .has-programming-layout .card.is-program-alt .lb-action {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+html.theme-light .has-programming-layout .card.is-program-alt .lb-action:hover {
   background: var(--ink);
   color: var(--paper);
 }

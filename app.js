@@ -1694,10 +1694,11 @@
   function renderWhy(data, moodLine) {
     const panel = $("#why-panel");
     if (!panel) return;
-    // Keep the results editorial and visual. The old explanatory box ("Tu mood" /
-    // "Me apoyé en...") added noise above the picks and exposed internal list names.
-    panel.hidden = true;
-    panel.innerHTML = "";
+    // Show the editorial reading + Rorschach analysis above the picks.
+    const ES = window.LANG === "es";
+    const line = moodLine || (ES ? "La mancha habló. Estas son las películas que calzan con lo que trajiste esta noche." : "The blot spoke. These are the films that match what you brought tonight.");
+    panel.innerHTML = `<p class="why-text">${escapeHtml(line)}</p>`;
+    panel.hidden = false;
   }
 
   function pickEditorialLabel(rank) {
@@ -1804,6 +1805,13 @@
       a.textContent = window.t("where_to_watch");
       actions.appendChild(a);
     }
+    // Letterboxd search link — shortcut to add to watchlist.
+    const lbSearch = `https://letterboxd.com/search/films?q=${encodeURIComponent([f.title, f.year].filter(Boolean).join(" "))}`;
+    const lbA = document.createElement("a");
+    lbA.href = lbSearch; lbA.target = "_blank"; lbA.rel = "noopener";
+    lbA.className = "action lb-action";
+    lbA.textContent = window.t("on_letterboxd");
+    actions.appendChild(lbA);
     // "Detalles" (TMDb) button removed — the film title now links to IMDb/TMDb.
     // "Ver" (IMDb) button is hidden via CSS for now (kept in code, set display:none).
     if (f.imdb) {
