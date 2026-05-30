@@ -1174,7 +1174,8 @@
       const el = steps[want];
       if (el) {
         const top = el.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({ top: Math.max(0, top - 8), behavior: "smooth" });
+        const headerOffset = 72;
+        window.scrollTo({ top: Math.max(0, top - headerOffset), behavior: "smooth" });
       }
     });
   }
