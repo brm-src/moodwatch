@@ -42,6 +42,25 @@ import { fitScore } from "./scorer.js";
 
 const SHORT_RUNTIME_MAX = 90;
 
+// ── filters used by recommend() and surprise() ──
+/** True when the mood explicitly asks for documentary / doc mode. */
+function allowsDocumentary(mood) {
+  if (!mood) return false;
+  return mood.trust === "doc" || mood.appetite === "doc";
+}
+/** True when a film belongs to the documentary genre (TMDb id 99). */
+function isDocumentaryLike(f) {
+  if (!f) return false;
+  const gs = new Set([...(f.genres || []), ...(f.genre_ids || [])].map(String));
+  return gs.has("99") || gs.has("documentary");
+}
+/** Minimum quality floor: vote_count >= 180 or vote_average >= 7.0. */
+function passesQualityFloor(f, _mood) {
+  const vc = f.vote_count ?? 0;
+  const va = f.vote_average ?? 0;
+  return vc >= 180 || va >= 7.0;
+}
+
 // Per-media TMDb helper bundle. Keeps movie path identical when media === "movie".
 function mediaApi(media) {
   if (media === "tv") {

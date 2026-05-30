@@ -545,11 +545,12 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
 
 .quick-surprise {
   display: flex;
-  flex-wrap: wrap;
-  overflow: visible;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: visible;
   gap: 8px;
   margin-top: var(--s-2);
-  padding-bottom: 2px;
+  padding-bottom: 4px;
   scroll-snap-type: none;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -568,8 +569,7 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
-  flex: 1 1 calc(50% - 8px);
-  min-width: min(100%, 168px);
+  flex: 0 0 auto;
   scroll-snap-align: none;
 }
 .quick-surprise button:hover { background: var(--paper); color: var(--ink); }
