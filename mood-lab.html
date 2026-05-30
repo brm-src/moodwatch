@@ -88,21 +88,48 @@
   const uid = () => Math.random().toString(36).slice(2, 10);
   const csv = (s) => (s || '').split(',').map(x => x.trim()).filter(Boolean);
   const slugify = (s) => (s || 'mood').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,54) || 'mood';
+  const WEB_MOODS = [
+    {id:'quality',profile:'quality',name:'Apuesta segura',mode:'balanced',motifs:['prestigio','claridad narrativa','placer amplio'],leitmotifs:['una historia que sostiene la atención','confianza sin frialdad'],textures:['pulido','preciso','envolvente'],avoid:['experimento vacío','solemnidad automática'],reading:'Para cuando quieres algo bueno sin estudiar demasiado. Debe sentirse sólido, vivo y recomendable sin pedir disculpas.',rule:'Entra si combina oficio, emoción y acceso. Fuera si solo parece importante.'},
+    {id:'horror',profile:'horror',name:'Terror',mode:'damage',motifs:['amenaza','encierro','cuerpo','casa alterada'],leitmotifs:['algo mira desde fuera de campo','una regla que nadie entiende'],textures:['sombra','ruido bajo','piel fría'],avoid:['susto barato','crueldad gratuita'],reading:'Quiere miedo con atmósfera, no solo sobresalto. El terror tiene que dejar residuo después de terminar.',rule:'Entra si construye inquietud. Fuera si solo acumula golpes de sonido.'},
+    {id:'weird',profile:'weird',name:'Raro',mode:'essay',motifs:['lógica torcida','humor incómodo','rituales extraños'],leitmotifs:['objetos que parecen tener voluntad','personas actuando apenas fuera de lugar'],textures:['asimetría','silencio raro','color enfermo'],avoid:['rareza decorativa','ocurrencia vacía'],reading:'Para películas que no intentan caer bien. La rareza debe tener una necesidad interna, no ser adorno.',rule:'Entra si la película inventa sus propias reglas y las cumple.'},
+    {id:'short',profile:'short',name:'Corto',mode:'quick',motifs:['entrada rápida','cierre limpio','economía'],leitmotifs:['una idea fuerte sin grasa','ritmo directo'],textures:['ligero','afilado','compacto'],avoid:['relleno','epílogos eternos'],reading:'Para cuando hay poco tiempo pero no quieres algo descartable. Tiene que entrar rápido y dejar algo.',rule:'Entra si dura poco y aun así se siente completa.'},
+    {id:'latam',profile:'latam',name:'Latinoamericano',mode:'balanced',motifs:['familia','clase','territorio','memoria'],leitmotifs:['casas vividas','calles reconocibles','heridas heredadas'],textures:['calor','polvo','humedad','luz natural'],avoid:['postal turística','miseria usada como estética'],reading:'No busca cuota regional: busca una forma de mirar desde acá, con conflicto y vida propia.',rule:'Entra si el lugar cambia la película. Fuera si podría ocurrir en cualquier parte.'},
+    {id:'asian',profile:'asian',name:'Asiático',mode:'balanced',motifs:['ritual','venganza','familia','ciudad densa'],leitmotifs:['pasillos','comidas compartidas','violencia contenida'],textures:['neón','lluvia','quietud','precisión'],avoid:['exotismo superficial','imitación occidental sin pulso'],reading:'Para cine asiático donde la forma pesa tanto como la historia. Puede ser feroz, delicado o ambas cosas.',rule:'Entra si hay una sensibilidad reconocible, no solo procedencia.'},
+    {id:'classic',profile:'classic',name:'Clásico',mode:'comfort',motifs:['rostros','gestos','destino','elegancia'],leitmotifs:['miradas largas','puertas que se cierran','cartas o llamadas'],textures:['blanco y negro','grano','luz de estudio'],avoid:['pieza de museo sin emoción','respeto obligatorio'],reading:'Quiere antigüedad viva. La película puede tener décadas, pero debe respirar ahora.',rule:'Entra si sigue moviendo algo sin pedir contexto académico.'},
+    {id:'noir',profile:'noir',name:'Noir',mode:'damage',motifs:['culpa','dinero','deseo','traición'],leitmotifs:['humo','persianas','oficinas tarde','llamadas peligrosas'],textures:['contraste','calle mojada','voz cansada'],avoid:['parodia del género','pose detectivesca'],reading:'Un mundo moralmente torcido, con belleza cansada. Nadie sale limpio, pero todos dejan sombra.',rule:'Entra si hay fatalismo real. Fuera si solo usa sombrero y sombras.'},
+    {id:'rainy',profile:'rainy',name:'Lluvia',mode:'comfort',motifs:['refugio','calles mojadas','ventanas','espera'],leitmotifs:['gotas contra vidrio','luces reflejadas','ropa húmeda'],textures:['agua','gris','abrigo','ruido constante'],avoid:['melancolía de postal','tristeza automática'],reading:'Para quedarse dentro de una atmósfera. La lluvia no es clima: es estado mental.',rule:'Entra si la sensación de refugio o intemperie cambia la experiencia.'},
+    {id:'lonely',profile:'lonely',name:'Soledad',mode:'damage',motifs:['aislamiento','rutina','distancia','ciudad indiferente'],leitmotifs:['personas que no conectan','habitaciones demasiado grandes'],textures:['eco','luz baja','espacio vacío'],avoid:['autocompasión plana','cinismo fácil'],reading:'Busca estar a solas sin que la película lo explique demasiado. La soledad debe sentirse, no declararse.',rule:'Entra si el vacío tiene textura y no solo tristeza.'},
+    {id:'neon',profile:'neon',name:'Neón',mode:'balanced',motifs:['ciudad nocturna','autos','vidrios','deseo'],leitmotifs:['luces rojas','rostros en reflejos','música sintética'],textures:['lluvia','metal frío','color saturado'],avoid:['videoclip sin alma','acción limpia'],reading:'Quiere belleza urbana con una herida abajo. No basta que se vea estilizada: tiene que sentirse abandonada.',rule:'Entra si la forma visual sostiene melancolía. Fuera si el neón es solo decoración.'},
+    {id:'trip',profile:'trip',name:'Viaje mental',mode:'essay',motifs:['percepción rota','tiempo extraño','identidad dudosa'],leitmotifs:['espejos','repeticiones','sueños que contaminan'],textures:['distorsión','hipnosis','corte abrupto'],avoid:['confusión perezosa','final truco'],reading:'Para películas que mueven el piso. La confusión sirve solo si abre una experiencia, no si tapa un vacío.',rule:'Entra si altera la percepción con intención emocional o formal.'},
+    {id:'cult',profile:'cult',name:'Culto',mode:'essay',motifs:['obsesión','exceso','margen','placer culpable'],leitmotifs:['objetos fetiche','frases raras','comunidades pequeñas'],textures:['mugre','color fuerte','energía lateral'],avoid:['ironía superior','mal gusto sin gracia'],reading:'Tiene que parecer encontrado en una repisa rara, pero con pulso propio. Lo torpe también puede ser precioso.',rule:'Entra si su rareza genera cariño, incomodidad o devoción.'},
+    {id:'warm',profile:'warm',name:'Cálido',mode:'comfort',motifs:['cuidado','amistad','familia elegida','segunda oportunidad'],leitmotifs:['comidas','manos trabajando','habitaciones con luz'],textures:['madera','sol bajo','telas','voz suave'],avoid:['azúcar','lección moral obvia'],reading:'Busca abrigo sin simplificar la vida. Debe consolar sin tratar al espectador como niño.',rule:'Entra si hay ternura con conflicto real.'},
+    {id:'beautiful',profile:'beautiful',name:'Bello incómodo',mode:'balanced',motifs:['belleza','deseo','incomodidad','detalle'],leitmotifs:['composiciones quietas','gestos mínimos','objetos cargados'],textures:['luz cuidada','silencio','piel','tela'],avoid:['bonito vacío','publicidad disfrazada'],reading:'Quiere mirar algo hermoso, pero no anestesiado. La belleza tiene que rozar una grieta.',rule:'Entra si la imagen seduce y a la vez perturba.'},
+    {id:'pace',profile:'pace',name:'Pulso',mode:'quick',motifs:['movimiento','persecución','decisión','riesgo'],leitmotifs:['relojes','autos','puertas abiertas','cuerpos corriendo'],textures:['corte seco','músculo','tensión'],avoid:['acción inflada','ruido sin dirección'],reading:'Para cuando necesitas que la película avance. No se trata de velocidad: se trata de pulso.',rule:'Entra si cada escena empuja a la siguiente.'},
+    {id:'hurt',profile:'hurt',name:'Dolor elegante',mode:'damage',motifs:['duelo','amor imposible','pérdida','memoria'],leitmotifs:['cartas','camas vacías','despedidas contenidas'],textures:['suave','afilado','lento','frágil'],avoid:['manipulación lacrimógena','música que ordena llorar'],reading:'Quiere que duela, pero con dignidad. La emoción debe llegar por acumulación, no por presión.',rule:'Entra si deja una herida limpia. Fuera si empuja el llanto a la fuerza.'},
+    {id:'lost-20s',profile:'lost-20s',name:'Veinte perdidos',mode:'balanced',motifs:['amistades','trabajo precario','amor confuso','ciudad cara'],leitmotifs:['departamentos compartidos','mensajes sin respuesta','fiestas vacías'],textures:['ruido joven','desorden','luz de madrugada'],avoid:['nostalgia impostada','juventud de catálogo'],reading:'Para esa edad donde todo parece abierto y a la vez cerrado. Tiene que sentirse específico, no genérico.',rule:'Entra si captura deriva, deseo y ansiedad sin caricatura.'}
+  ];
   const sample = {
-    version: 1,
+    version: 2,
     updated_at: new Date().toISOString(),
-    selected: 'neon-triste',
-    moods: [
-      {id:'neon-triste',name:'Neón triste',mode:'balanced',motifs:['ciudad nocturna','vidrios','autos','soledad acompañada'],leitmotifs:['luces rojas','personas mirando desde lejos'],textures:['lluvia','sintetizadores','metal frío'],avoid:['guiño posmoderno','acción limpia'],reading:'Quiere belleza urbana, pero con una herida abajo. No basta que se vea estilizada: tiene que sentirse abandonada.',rule:'Entra si la forma visual sostiene melancolía. Queda fuera si solo es neón decorativo.',movies:[{title:'Fallen Angels',year:'1995',hint:'Wong Kar-wai',note:'No por trama: por velocidad, noche, deseo torcido y gente que casi se encuentra.'},{title:'Drive',year:'2011',hint:'Nicolas Winding Refn',note:'Sirve cuando el mood pide romance mínimo y violencia seca.'}]},
-      {id:'calma-rota',name:'Calma rota',mode:'comfort',motifs:['casas silenciosas','verano raro','familias que no hablan'],leitmotifs:['comidas largas','ventanas abiertas','ruido de insectos'],textures:['luz tibia','quietud','amenaza baja'],avoid:['miserabilismo','shock barato'],reading:'Parece suave desde lejos, pero algo no encaja. Necesita paciencia, aire y una grieta emocional visible.',rule:'Entra si la película parece tranquila pero deja una incomodidad persistente.',movies:[{title:'The Swimmer',year:'1968',hint:'Frank Perry',note:'Brillo de tarde que se vuelve ruina psicológica.'}]},
-      {id:'mugre-luminosa',name:'Mugre luminosa',mode:'damage',motifs:['bares','calles malas','amistades rotas','dinero pequeño'],leitmotifs:['música que salva un rato','ropa gastada'],textures:['grano','sudor','humo','colores sucios'],avoid:['postal bonita','redención fácil'],reading:'Mundo vivido, algo dañado, pero no cínico. La película puede estar sucia; no puede estar muerta.',rule:'Entra si hay humanidad debajo de la mugre. Fuera si solo posa de decadente.',movies:[{title:'Mikey and Nicky',year:'1976',hint:'Elaine May',note:'Amistad tóxica, noche larga, cariño imposible.'}]}
-    ]
+    selected: 'quality',
+    moods: WEB_MOODS.map(m => ({...m, movies: []}))
   };
   let state = load();
 
   function load(){
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || sample; }
-    catch { return sample; }
+    let data;
+    try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || sample; }
+    catch { data = sample; }
+    const moods = Array.isArray(data.moods) ? data.moods : [];
+    const byId = new Map(moods.map(m => [m.id, m]));
+    for (const base of WEB_MOODS) {
+      if (!byId.has(base.id)) moods.push({...base, movies: []});
+      else byId.set(base.id, {...base, ...byId.get(base.id), profile: byId.get(base.id).profile || base.profile});
+    }
+    data.moods = moods.map(m => byId.get(m.id) || m);
+    data.version = 2;
+    data.selected = data.selected || 'quality';
+    return data;
   }
   function persist(){ state.updated_at = new Date().toISOString(); localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); render(); }
   function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),1700); }
@@ -110,7 +137,7 @@
   function moodPayloadFromForm(){
     const name = $('name').value.trim() || 'Mood sin nombre';
     const current = selectedMood();
-    return {id: current?.id || slugify(name), name, mode:$('mode').value, motifs:csv($('motifs').value), leitmotifs:csv($('leitmotifs').value), textures:csv($('textures').value), avoid:csv($('avoid').value), reading:$('reading').value.trim(), rule:$('rule').value.trim(), movies: current?.movies || []};
+    return {id: current?.id || slugify(name), profile: current?.profile || current?.id || slugify(name), name, mode:$('mode').value, motifs:csv($('motifs').value), leitmotifs:csv($('leitmotifs').value), textures:csv($('textures').value), avoid:csv($('avoid').value), reading:$('reading').value.trim(), rule:$('rule').value.trim(), movies: current?.movies || []};
   }
   function fillForm(m){
     if(!m) return;
@@ -132,7 +159,7 @@
   function renderMoodList(){
     const q = $('moodSearch').value.trim().toLowerCase();
     const moods = state.moods.filter(m => !q || JSON.stringify(m).toLowerCase().includes(q));
-    $('moodList').innerHTML = moods.map(m => `<button class="mood-item ${m.id===state.selected?'active':''}" data-pick="${m.id}"><div class="mood-name">${esc(m.name)}</div><div class="mood-meta">${esc(labelMode(m.mode))} · ${(m.movies||[]).length} película${(m.movies||[]).length===1?'':'s'}</div><div class="chips">${(m.motifs||[]).slice(0,3).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}${(m.leitmotifs||[]).slice(0,2).map(x=>`<span class="chip red">${esc(x)}</span>`).join('')}</div></button>`).join('') || '<div class="empty">Nada encontrado.</div>';
+    $('moodList').innerHTML = moods.map(m => `<button class="mood-item ${m.id===state.selected?'active':''}" data-pick="${m.id}"><div class="mood-name">${esc(m.name)}</div><div class="mood-meta">${esc(labelMode(m.mode))} · perfil web: ${esc(m.profile || m.id)} · ${(m.movies||[]).length} película${(m.movies||[]).length===1?'':'s'}</div><div class="chips">${(m.motifs||[]).slice(0,3).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}${(m.leitmotifs||[]).slice(0,2).map(x=>`<span class="chip red">${esc(x)}</span>`).join('')}</div></button>`).join('') || '<div class="empty">Nada encontrado.</div>';
   }
   function renderMovies(){
     const m = selectedMood();
@@ -141,14 +168,14 @@
   }
   function renderPreview(){
     const m = selectedMood();
-    $('preview').textContent = JSON.stringify({schema:'moodwatch-curation-v1', selected_mood:m, all_moods:state.moods.map(({id,name,mode,movies})=>({id,name,mode,films:movies?.length||0}))}, null, 2);
+    $('preview').textContent = JSON.stringify({schema:'moodwatch-curation-v1', selected_mood:m, all_moods:state.moods.map(({id,profile,name,mode,movies})=>({id,profile,name,mode,films:movies?.length||0}))}, null, 2);
   }
   function render(){ renderStats(); renderMoodList(); fillForm(selectedMood()); renderMovies(); renderPreview(); }
   function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function labelMode(x){ return ({balanced:'balanceado',quick:'rápido',together:'para ver con alguien',list:'rescatar watchlist',essay:'ensayo / lectura personal',comfort:'refugio',damage:'salir tocado'}[x] || x || 'balanceado'); }
 
   $('newMoodBtn').addEventListener('click', () => {
-    const base = {id:'mood-'+uid(),name:'Mood nuevo',mode:'balanced',motifs:[],leitmotifs:[],textures:[],avoid:[],reading:'',rule:'',movies:[]};
+    const base = {id:'mood-'+uid(),profile:'custom',name:'Mood nuevo',mode:'balanced',motifs:[],leitmotifs:[],textures:[],avoid:[],reading:'',rule:'',movies:[]};
     state.moods.unshift(base); state.selected = base.id; persist(); toast('Mood creado');
   });
   $('saveMoodBtn').addEventListener('click', () => {
@@ -197,6 +224,7 @@
   document.addEventListener('keydown', (e) => {
     if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); $('saveMoodBtn').click(); }
   });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   render();
 })();
 </script>
