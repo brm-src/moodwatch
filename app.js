@@ -2217,8 +2217,10 @@
   function renderChips() {
     const host = $("#quick-surprise");
     if (!host) return;
-    // Three fit cleanly in the hero without clipped half-chips on common laptop heights.
-    const pool = [...CHIP_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
+    // Keep the landing clean: three readable chips, no half-cut carousel.
+    const shuffled = [...CHIP_POOL].sort(() => Math.random() - 0.5);
+    const compact = shuffled.filter(c => (((window.t && window.t(c.key)) || c.profile).length <= 24));
+    const pool = (compact.length >= 3 ? compact : shuffled).slice(0, 3);
     host.innerHTML = "";
     for (const c of pool) {
       const b = document.createElement("button");

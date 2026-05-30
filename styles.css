@@ -571,8 +571,7 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
-  flex: 1 1 auto;
-  min-width: 0;
+  flex: 0 0 auto;
   max-width: min(42vw, 280px);
   overflow: hidden;
   text-overflow: ellipsis;
