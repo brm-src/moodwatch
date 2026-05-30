@@ -2207,7 +2207,6 @@
     { profile: "horror",     key: "chip_horror" },
     { profile: "horror",     key: "chip_dread" },
     { profile: "classic",    key: "chip_classic" },
-    { profile: "classic",    key: "chip_old" },
     { profile: "quality",    key: "chip_quality" },
     { profile: "rainy",      key: "chip_rainy" },
     { profile: "lonely",     key: "chip_lonely" },
