@@ -160,10 +160,12 @@ body.has-journey-hero:not(.on-hero) .phrase input::placeholder { color: var(--pa
 body.has-journey-hero:not(.on-hero) .chip { color: var(--paper-3); border-color: rgba(237,231,218,0.25); }
 body.has-journey-hero:not(.on-hero) .chip:hover { color: var(--accent); border-color: var(--accent); }
 html.theme-light body.has-journey-hero:not(.on-hero) { color: var(--ink); }
-html.theme-light body.has-journey-hero::before { filter: blur(14px) saturate(.72) brightness(1.08); opacity: .18; }
-html.theme-light body.has-journey-hero:not(.on-hero)::before { opacity: .22; }
+html.theme-light body.has-journey-hero::before { filter: blur(22px) saturate(.78) brightness(1.05); opacity: .28; }
+html.theme-light body.has-journey-hero:not(.on-hero)::before { opacity: .42; }
 html.theme-light body.has-journey-hero::after {
-  background: linear-gradient(180deg, rgba(244,239,228,.90) 0%, rgba(244,239,228,.94) 58%, rgba(244,239,228,.98) 100%);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(196,59,42,.12) 0%, transparent 28%),
+    linear-gradient(180deg, rgba(244,239,228,.72) 0%, rgba(244,239,228,.82) 50%, rgba(244,239,228,.94) 100%);
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .section,
 html.theme-light body.has-journey-hero:not(.on-hero) .q-title,
@@ -237,6 +239,13 @@ header.top {
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
+.site-controls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
 body { padding-top: 56px; }
 body.on-hero .site-top {
   background: transparent;
@@ -265,6 +274,8 @@ body.on-hero .site-top {
 }
 html.theme-light .brand-home { color: var(--ink); }
 html.theme-light .brand-home em { color: var(--accent-2); }
+html.theme-light body.on-hero .brand-home { color: var(--paper); text-shadow: 0 2px 18px rgba(0,0,0,.7); }
+html.theme-light body.on-hero .brand-home em { color: #ff6b55; }
 .brand-home:hover { opacity: 0.85; transform: translateY(-1px); }
 .brand-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .kicker {
@@ -275,24 +286,30 @@ html.theme-light .brand-home em { color: var(--accent-2); }
   letter-spacing: 0.22em;
   color: var(--paper-3);
 }
-@media (max-width: 480px) { .kicker { display: none; } }
+@media (max-width: 480px) { .kicker { display: none; } .site-controls { gap: 0; } }
 .theme-toggle {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   padding: 6px;
-  border: none;
+  border: 1px solid rgba(237,231,218,0.24);
   border-radius: 50%;
-  background: transparent;
-  color: var(--paper-3);
+  background: rgba(20,22,15,0.42);
+  color: var(--paper);
   cursor: pointer;
   flex-shrink: 0;
-  transition: color .3s ease, background .3s ease;
+  box-shadow: 0 10px 28px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(18px) saturate(1.12);
+  -webkit-backdrop-filter: blur(18px) saturate(1.12);
+  transition: color .3s ease, background .3s ease, border-color .3s ease, transform .18s ease, box-shadow .3s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .theme-toggle:hover {
   color: var(--paper);
-  background: rgba(237,231,218,0.08);
+  background: rgba(20,22,15,0.68);
+  border-color: rgba(237,231,218,0.44);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.10);
 }
 .theme-toggle:focus-visible {
   outline: 2px solid var(--accent);
@@ -311,8 +328,17 @@ html.theme-light .brand-home em { color: var(--accent-2); }
 /* light mode: sun visible, moon hidden */
 html.theme-light .theme-icon-moon { opacity: 0; transform: rotate(90deg) scale(.5); }
 html.theme-light .theme-icon-sun  { opacity: 1; transform: rotate(0) scale(1); }
-html.theme-light .theme-toggle { color: var(--ink-soft); }
-html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22,15,0.06); }
+html.theme-light .theme-toggle {
+  color: var(--ink);
+  background: rgba(244,239,228,0.72);
+  border-color: rgba(20,22,15,0.18);
+  box-shadow: 0 12px 32px rgba(50,38,22,.16), inset 0 1px 0 rgba(255,255,255,.62);
+}
+html.theme-light .theme-toggle:hover {
+  color: var(--accent-2);
+  background: rgba(244,239,228,0.92);
+  border-color: rgba(20,22,15,0.30);
+}
 @media (max-width: 480px) { .theme-toggle { width: 32px; height: 32px; padding: 5px; }
   .theme-icon { inset: 5px; width: 22px; height: 22px; } }
 
@@ -360,7 +386,7 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
 .hero-top-right {
   position: absolute;
   top: var(--s-2);
-  right: clamp(16px, 4vw, 36px);
+  right: calc(clamp(16px, 4vw, 36px) + 48px);
   z-index: 4;
   display: flex;
   align-items: center;
@@ -390,30 +416,10 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
 }
 .hero .hero-fig a { color: inherit; text-decoration: none; }
 .hero .hero-fig a:hover { text-decoration: underline; }
-/* Theme toggle inside hero: match hero-fig badge style */
-.hero-top-right .theme-toggle {
-  width: 34px;
-  height: 34px;
-  padding: 5px;
-  background: rgba(20, 22, 15, 0.55);
-  border: 1px solid rgba(196, 59, 42, 0.45);
-  color: var(--paper-3);
-  backdrop-filter: blur(4px);
-}
-.hero-top-right .theme-toggle:hover {
-  background: rgba(20, 22, 15, 0.78);
-  border-color: var(--accent);
-  color: var(--paper);
-}
-.hero-top-right .theme-icon {
-  inset: 5px;
-  width: 24px;
-  height: 24px;
-}
 @media (max-width: 640px) {
   .hero-top-right {
     top: 10px;
-    right: 10px;
+    right: 54px;
   }
   .hero .hero-fig {
     font-size: 10px;
@@ -1166,10 +1172,13 @@ body.has-journey-hero:not(.on-hero) .why-chips span {
   border-color: rgba(237, 231, 218, 0.28);
 }
 body.has-journey-hero:not(.on-hero) .card {
-  background: rgba(20,22,15,.45);
-  border: 1px solid rgba(237,231,218,.16);
+  background: linear-gradient(135deg, rgba(20,22,15,.62), rgba(20,22,15,.38));
+  border: 1px solid rgba(237,231,218,.18);
+  border-radius: 24px;
   padding: var(--s-3);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 24px 80px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter: blur(20px) saturate(1.08);
+  -webkit-backdrop-filter: blur(20px) saturate(1.08);
 }
 body.has-journey-hero:not(.on-hero) .card h3 .yr,
 body.has-journey-hero:not(.on-hero) .card .director,
@@ -1189,17 +1198,19 @@ html.theme-light body.has-journey-hero:not(.on-hero) .card,
 html.theme-light body.has-journey-hero:not(.on-hero) .why-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .refine-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .compare-panel {
-  background: transparent;
-  border-color: rgba(20,22,15,.16);
+  background: linear-gradient(135deg, rgba(255,252,246,.74), rgba(234,226,210,.50));
+  border-color: rgba(20,22,15,.14);
   color: var(--ink);
-  box-shadow: none;
-  backdrop-filter: none;
+  box-shadow: 0 22px 70px rgba(66,48,24,.14), inset 0 1px 0 rgba(255,255,255,.55);
+  backdrop-filter: blur(22px) saturate(1.05);
+  -webkit-backdrop-filter: blur(22px) saturate(1.05);
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .why-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .refine-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .compare-panel {
-  border-width: 1px 0;
-  padding: 14px 0 16px;
+  border-width: 1px;
+  border-radius: 22px;
+  padding: 16px 18px 18px;
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .card h3 .yr,
 html.theme-light body.has-journey-hero:not(.on-hero) .card .director,
@@ -1216,17 +1227,9 @@ html.theme-light body.has-journey-hero:not(.on-hero) .restart {
   border-color: var(--ink);
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .card a.action.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-html.theme-light body.has-journey-hero:not(.on-hero) #cards .card {
-  border: 0;
-  border-top: 1px solid rgba(20,22,15,.16);
-}
-html.theme-light body.has-journey-hero:not(.on-hero) #cards .card:nth-child(1),
-html.theme-light body.has-journey-hero:not(.on-hero) #cards .card:nth-child(2) {
-  border-top: 0;
-}
+html.theme-light body.has-journey-hero:not(.on-hero) #cards .card,
 html.theme-light body.has-journey-hero:not(.on-hero) #cards .card.is-primary-pick {
-  border-top: 1px solid rgba(20,22,15,.16);
-  border-bottom: 1px solid rgba(20,22,15,.16);
+  border: 1px solid rgba(20,22,15,.14);
 }
 html.theme-light .section[data-step="results"] .q-title em {
   font-style: normal;
@@ -1238,7 +1241,13 @@ html.theme-light .section[data-step="results"] .q-title em {
   gap: var(--s-3);
   border-top: 1px solid var(--rule);
   padding-top: var(--s-3);
+  transition: transform .24s ease, box-shadow .24s ease, background .24s ease;
 }
+body.has-journey-hero:not(.on-hero) #cards {
+  display: grid;
+  gap: clamp(18px, 3vw, 28px);
+}
+body.has-journey-hero:not(.on-hero) #cards .card:hover { transform: translateY(-2px); }
 .card:first-child { border-top: 0; padding-top: 0; }
 .card .poster {
   width: 100%;
@@ -1246,6 +1255,17 @@ html.theme-light .section[data-step="results"] .q-title em {
   object-fit: cover;
   background: var(--paper-2);
   display: block;
+  border-radius: 14px;
+  box-shadow: 0 18px 42px rgba(0,0,0,.28);
+}
+.poster-wrap { position: relative; }
+.poster-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
+  pointer-events: none;
 }
 .card .meta {
   display: flex;
@@ -1585,6 +1605,16 @@ html.theme-light body.on-hero .kofi {
   gap: clamp(20px, 4vw, 34px);
   padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 36px) clamp(24px, 4vw, 34px);
   align-items: start;
+  position: relative;
+  overflow: hidden;
+}
+.card.is-primary-pick::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 14% 18%, rgba(196,59,42,.16), transparent 34%);
+  opacity: .85;
 }
 .card.is-primary-pick .poster-wrap,
 .card.is-primary-pick .meta {
