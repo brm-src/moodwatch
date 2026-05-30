@@ -200,6 +200,7 @@ function surpriseMoodForProfile(profile) {
     latam:     { language_pref: "spanish", risk: "discover" },
     asian:     { language_pref: "asian", quality: "high" },
     noir:      { tone: "dark", first_act: "thriller_horror", trust: "thriller", quality: "high" },
+    old:       { decade: "old", quality: "high" },
     "lost-20s":{ appetite: "lost-20s", depth: "thoughtful", state: "pensive", memory: "regret" },
   };
   return presets[p] || presets.quality;
