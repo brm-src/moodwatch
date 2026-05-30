@@ -965,6 +965,7 @@ async function surprise(req, env, ctx) {
     const lang_ = (f.original_language || "").toLowerCase();
     if (profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
     if (profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
+    if (profile === "noir" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
     if (profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
     if (profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
     if (profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
@@ -991,6 +992,7 @@ async function surprise(req, env, ctx) {
     const lang_ = (f.original_language || "").toLowerCase();
     if (profile === "horror" && !["27","53","9648"].some(g => fid.has(g))) return false;
     if (profile === "noir" && !["80","53","9648","18"].some(g => fid.has(g))) return false;
+    if (profile === "noir" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
     if (profile === "weird" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
     if (profile === "neon" && !["28","878","80","53"].some(g => fid.has(g))) return false;
     if (profile === "rainy" && !["18","80","53"].some(g => fid.has(g))) return false;
@@ -1083,6 +1085,7 @@ async function surprise(req, env, ctx) {
   const enriched = enrichedRaw.filter(f => {
     if (media === "movie" && profile === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
     if (profile === "classic" && f.year && f.year > "1979") return false;
+    if (profile === "noir" && f.year && f.year > "1965") return false;
     return true;
   }).slice(0, 4);
 
