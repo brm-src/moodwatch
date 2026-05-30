@@ -853,7 +853,11 @@ async function surprise(req, env, ctx) {
     include_adult: "false",
   };
   if (media === "movie") baseParams["with_runtime.gte"] = 75;
-  if (profile === "short" && media === "movie") baseParams["with_runtime.lte"] = SHORT_RUNTIME_MAX;
+  if (profile === "short") {
+    baseParams["vote_count.gte"] = 100;
+    baseParams["vote_average.gte"] = 6.2;
+    if (media === "movie") baseParams["with_runtime.lte"] = SHORT_RUNTIME_MAX;
+  }
   if (profile === "weird") {
     baseParams["vote_count.lte"] = 1500;
     baseParams["vote_count.gte"] = 60;
