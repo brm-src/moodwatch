@@ -1788,7 +1788,7 @@
       ${f.from_list && !f.curated_note ? `<span class="list-badge">${window.t("from_list")} · ${escapeHtml(f.from_list)}</span>` : ""}
       ${f.from_feedback ? `<span class="taste-badge">${window.t("from_feedback")}</span>` : ""}`;
     if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 220));
-    if (f.reason) meta.appendChild(expandableText(f.reason, "reason", 180));
+
     if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 280));
     const actions = document.createElement("div");
     actions.className = "actions";

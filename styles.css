@@ -350,7 +350,7 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
 }
 .hero .hero-fig {
   position: absolute;
-  top: var(--s-3);
+  top: 62px;
   right: var(--s-3);
   font-family: var(--font-body);
   font-size: var(--t-mono);
