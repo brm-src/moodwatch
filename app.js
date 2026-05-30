@@ -1694,10 +1694,28 @@
   function renderWhy(data, moodLine) {
     const panel = $("#why-panel");
     if (!panel) return;
-    // Show the editorial reading + Rorschach analysis above the picks.
     const ES = window.LANG === "es";
-    const line = moodLine || (ES ? "La mancha habló. Estas son las películas que calzan con lo que trajiste esta noche." : "The blot spoke. These are the films that match what you brought tonight.");
-    panel.innerHTML = `<p class="why-text">${escapeHtml(line)}</p>`;
+    const inkRaw = inkReading(state.answers.ink, ES);
+
+    // Build the editorial body (vibeReading without the ink sentence).
+    const inkSplitter = ES ? "Y la tinta lo confirma:" : "And the ink confirms it:";
+    const idx = moodLine ? moodLine.lastIndexOf(inkSplitter) : -1;
+    const editorialBody = idx >= 0 ? moodLine.slice(0, idx).trim() : (moodLine || "");
+    const inkBody = inkRaw || (idx >= 0 ? moodLine.slice(idx).trim() : "");
+
+    let html = "";
+    // Inkblot reading — the "psychoanalysis" block
+    if (inkBody) {
+      html += `<blockquote class="ink-reading"><p>${escapeHtml(inkBody)}</p></blockquote>`;
+    }
+    // Editorial analysis — how we got to the picks
+    if (editorialBody) {
+      html += `<p class="why-text">${escapeHtml(editorialBody)}</p>`;
+    }
+    if (!html) {
+      html = `<p class="why-text">${escapeHtml(ES ? "La mancha habló. Estas son las películas que calzan con lo que trajiste esta noche." : "The blot spoke. These are the films that match what you brought tonight.")}</p>`;
+    }
+    panel.innerHTML = html;
     panel.hidden = false;
   }
 
