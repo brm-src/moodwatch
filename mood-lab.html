@@ -192,55 +192,14 @@
   };
 
   // ---- state ----
-  let _seedPromise = null;
-
-  function mergeSeed(seed){
-    const moods = seed.moods || [];
-    const byId = new Map(moods.map(m => [m.id, m]));
-    for (const base of WEB_MOODS) {
-      if (!byId.has(base.id)) {
-        moods.push({...base, movies:[]});
-      } else {
-        const existing = byId.get(base.id);
-        byId.set(base.id, {...base, movies: existing.movies || [], profile: base.profile});
-      }
-    }
-    seed.moods = moods.map(m => byId.get(m.id) || m);
-    seed.version = 2;
-    seed.selected = seed.selected || 'quality';
-    if (!moods.find(m => m.id === seed.selected)) seed.selected = moods[0]?.id || 'quality';
-    return seed;
-  }
+  let state = null;
 
   function load(){
     let data;
     try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)); }
     catch { data = null; }
     if (!data || !Array.isArray(data.moods) || data.moods.length === 0) {
-      // First visit with empty localStorage — try to load seed JSON
-      if (!_seedPromise) {
-        _seedPromise = fetch('./mood-lab-seed.json?v=3')
-          .then(r => r.ok ? r.json() : null)
-          .catch(() => null);
-      }
-      // If seed hasn't resolved yet, use empty default temporarily
-      // (render() will be called again after seed loads via init())
-      if (!window._seedLoaded) {
-        data = structuredClone(DEFAULT_SAMPLE);
-        _seedPromise.then(seed => {
-          if (seed && Array.isArray(seed.moods) && seed.moods.length > 0) {
-            state = mergeSeed(seed);
-            persist(true);
-            window._seedLoaded = true;
-            render();
-            toast('668 películas cargadas');
-          } else {
-            window._seedLoaded = true;
-          }
-        });
-      } else {
-        data = structuredClone(DEFAULT_SAMPLE);
-      }
+      data = structuredClone(DEFAULT_SAMPLE);
     }
 
     const moods = data.moods || [];
@@ -263,7 +222,36 @@
     return data;
   }
 
-  let state = load();
+  async function loadSeed(){
+    try {
+      const r = await fetch('./mood-lab-seed.json?v=3');
+      if (!r.ok) return;
+      const seed = await r.json();
+      if (!seed || !Array.isArray(seed.moods) || !seed.moods.length) return;
+      state = {
+        version: 2,
+        updated_at: new Date().toISOString(),
+        selected: seed.selected || 'quality',
+        moods: []
+      };
+      const byId = new Map();
+      // First pass: seed movies
+      for (const sm of seed.moods) {
+        const base = WEB_MOODS.find(w => w.id === sm.id);
+        const movies = sm.movies || [];
+        byId.set(sm.id, {...(base || {}), id: sm.id, movies});
+      }
+      // Second pass: fill missing moods from WEB_MOODS
+      for (const base of WEB_MOODS) {
+        if (!byId.has(base.id)) byId.set(base.id, {...base, movies: []});
+      }
+      state.moods = WEB_MOODS.map(w => byId.get(w.id) || {...w, movies: []});
+      if (!state.moods.find(m => m.id === state.selected)) state.selected = state.moods[0]?.id || 'quality';
+      persist(true);
+      render();
+      try { toast('668 películas cargadas'); } catch {}
+    } catch {}
+  }
 
   function persist(silent){
     state.updated_at = new Date().toISOString();
@@ -634,6 +622,9 @@
   });
 
   // Init
+  state = load();
+  const totalMovies = state.moods.reduce((n, m) => n + (m.movies?.length || 0), 0);
+  if (totalMovies === 0) loadSeed();
   render();
 })();
 </script>
