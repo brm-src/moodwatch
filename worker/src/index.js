@@ -490,6 +490,13 @@ async function recommend(req, env, ctx) {
     return true;
   });
 
+  // QA: documentary/music docs were leaking into normal movie nights (e.g.
+  // celebrity docs). Only allow them when the user explicitly asks for doc mode.
+  if (!allowsDocumentary(mood)) {
+    pool = pool.filter(f => !isDocumentaryLike(f));
+  }
+  pool = pool.filter(f => passesQualityFloor(f, mood));
+
   // Hard language_pref filter — applied to ALL sources (not just /discover).
   // QA found that tier injection + curated + watchlist were leaking other
   // languages even when user picked "Spanish only" / "Asian only" / etc.
@@ -775,6 +782,7 @@ async function recommend(req, env, ctx) {
       const ol = (f.original_language || "").toLowerCase();
       if (ol && !allowed.has(ol)) return false;
     }
+    if (!allowsDocumentary(mood) && isDocumentaryLike(f)) return false;
     return true;
   }).slice(0, 4);
 
@@ -890,6 +898,8 @@ async function surprise(req, env, ctx) {
     ? { ...x, title: x.name || x.title, release_date: x.first_air_date || x.release_date, _media: "tv" }
     : { ...x, _media: "movie" }
   ));
+  if (!allowsDocumentary(surpriseMood)) pool = pool.filter(f => !isDocumentaryLike(f));
+  pool = pool.filter(f => passesQualityFloor(f, surpriseMood));
 
   const matched = matchLists(surpriseMood, media);
   const listIds = new Map();
