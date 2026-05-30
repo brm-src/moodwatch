@@ -2026,11 +2026,6 @@
     document.documentElement.classList.toggle("theme-dark", next === "dark");
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", next === "light" ? "#ede7da" : "#14160f");
-    const btn = document.getElementById("theme-toggle");
-    if (btn) {
-      btn.setAttribute("aria-pressed", String(next === "light"));
-      btn.querySelector(".theme-toggle-text")?.replaceChildren(document.createTextNode(window.t(next === "light" ? "theme_light" : "theme_dark")));
-    }
     try { localStorage.setItem("moodwatch.theme", next); } catch {}
   }
   function initThemeToggle() {

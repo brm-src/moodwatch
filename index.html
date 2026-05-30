@@ -31,7 +31,7 @@
 <meta name="twitter:image" content="https://brm-src.github.io/moodwatch/assets/og-cover.jpg">
 
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%2314160f'/><text x='32' y='44' font-size='40' text-anchor='middle' fill='%23c43b2a' font-family='serif' font-style='italic'>m</text></svg>">
-<link rel="stylesheet" href="./styles.css?v=qa-polish-20260529">
+<link rel="stylesheet" href="./styles.css?v=theme-icon-20260529">
 </head>
 <body>
 
@@ -40,10 +40,22 @@
     mood<em>watch</em>
   </button>
   <span class="kicker" data-i18n="kicker"></span>
-  <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle light mode"
-          data-i18n-attr="aria-label:theme_toggle_label,title:theme_toggle_label" title="Toggle light mode">
-    <span class="theme-toggle-dot" aria-hidden="true"></span>
-    <span class="theme-toggle-text" data-i18n="theme_dark">Dark</span>
+  <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch light/dark mode"
+          data-i18n-attr="aria-label:theme_toggle_label,title:theme_toggle_label" title="Switch light/dark mode">
+    <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/>
+      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+    <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
   </button>
 </header>
 <main>
@@ -319,7 +331,7 @@
 <script>
   window.MOODWATCH_API = "https://moodwatch-api.brmcl.workers.dev";
 </script>
-<script src="./i18n.js?v=qa-polish-20260529"></script>
-<script src="./app.js?v=qa-polish-20260529"></script>
+<script src="./i18n.js?v=theme-icon-20260529"></script>
+<script src="./app.js?v=theme-icon-20260529"></script>
 </body>
 </html>
