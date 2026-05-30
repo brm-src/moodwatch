@@ -230,7 +230,7 @@ header.top {
   right: 0;
   z-index: 40;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
   padding: var(--s-2) clamp(16px, 4vw, 36px);
@@ -266,13 +266,14 @@ html.theme-light body.has-journey-hero:not(.on-hero) .site-top {
 .brand-home {
   background: none;
   border: 0;
-  padding: 4px 6px;
+  padding: 3px 6px;
   margin-left: -6px;
   cursor: pointer;
   font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 1.15rem;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  font-size: 1.34rem;
+  line-height: 1;
+  letter-spacing: -0.025em;
   color: var(--paper);
   border-radius: 6px;
   transition: opacity .15s ease, transform .15s ease;
@@ -394,30 +395,31 @@ html.theme-light .theme-toggle:hover {
   text-shadow: 0 3px 28px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.9);
   margin: 0 0 clamp(12px, 2vh, var(--s-3));
 }
-/* Hero top-right cluster: film credit + dark/light toggle, aligned with the left logo */
+/* Hero top-right cluster: film credit aligned to the header grid, just left of the theme toggle */
 .hero-top-right {
-  position: absolute;
-  top: var(--s-2);
-  right: calc(clamp(16px, 4vw, 36px) + 48px);
-  z-index: 4;
+  position: fixed;
+  top: calc(var(--s-2) + 9px);
+  right: calc(clamp(16px, 4vw, 36px) + 54px);
+  z-index: 41;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 .hero .hero-fig {
   font-family: var(--font-body);
-  font-size: 0.68rem;
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 700;
   font-style: normal;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(237,231,218,.55);
+  color: #f09878;
   background: transparent;
   border: none;
   padding: 0;
   border-radius: 0;
   backdrop-filter: none;
-  max-width: min(60vw, 340px);
+  max-width: min(58vw, 520px);
+  text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -452,7 +454,7 @@ html.theme-light .theme-toggle:hover {
 .hero h1 em {
   font-style: italic;
   font-weight: 400;
-  color: var(--paper-3);
+  color: #f09878;
 }
 .hero-card {
   background: var(--paper);
@@ -1587,18 +1589,19 @@ html.theme-light .clear-taste:hover {
   color: var(--accent);
 }
 html.theme-light body.on-hero footer.bottom {
-  background: transparent;
+  background: var(--paper);
+  border-top: 1px solid rgba(20,22,15,.16);
 }
 html.theme-light body.on-hero footer.bottom::before {
-  background: linear-gradient(180deg, transparent 0%, rgba(244,239,228,0.65) 30%, rgba(244,239,228,0.95) 100%);
+  display: none;
 }
 html.theme-light body.on-hero footer.bottom small,
 html.theme-light body.on-hero footer.bottom small a {
-  color: var(--ink);
+  color: var(--ink-soft);
 }
 html.theme-light body.on-hero .kofi {
   color: var(--ink);
-  border-color: var(--ink);
+  border-color: rgba(20,22,15,.7);
 }
 
 .editor-badge {
