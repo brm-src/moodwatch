@@ -192,8 +192,6 @@
   };
 
   // ---- state ----
-  let state = load();
-
   let _seedPromise = null;
 
   function mergeSeed(seed){
@@ -264,6 +262,8 @@
     if (!moods.find(m => m.id === data.selected)) data.selected = moods[0]?.id || 'quality';
     return data;
   }
+
+  let state = load();
 
   function persist(silent){
     state.updated_at = new Date().toISOString();
