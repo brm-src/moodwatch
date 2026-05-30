@@ -201,6 +201,7 @@ function surpriseMoodForProfile(profile) {
     asian:     { language_pref: "asian", quality: "high" },
     noir:      { tone: "dark", first_act: "thriller_horror", trust: "thriller", quality: "high" },
     old:       { decade: "old", quality: "high" },
+    bw:        { appetite: "classic_bw", decade: "old", quality: "high", trust: "classic_bw" },
     "lost-20s":{ appetite: "lost-20s", depth: "thoughtful", state: "pensive", memory: "regret" },
   };
   return presets[p] || presets.quality;
@@ -869,6 +870,11 @@ async function surprise(req, env, ctx) {
     baseParams[`${dateKey}.lte`] = "1979-12-31";
     baseParams["vote_count.gte"] = media === "tv" ? 120 : 250;
   }
+  if (profile === "bw") {
+    baseParams[`${dateKey}.lte`] = "1965-12-31";
+    baseParams["vote_count.gte"] = media === "tv" ? 100 : 200;
+    baseParams["vote_average.gte"] = 7.0;
+  }
   if (profile === "horror") {
     baseParams.with_genres = media === "tv" ? "9648" : "27|53|9648";
     baseParams["vote_count.gte"] = 200;
@@ -978,6 +984,7 @@ async function surprise(req, env, ctx) {
     if (profile === "latam" && !["es","pt"].includes(lang_)) return false;
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
     if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
+    if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
     return true;
   });
   pool = [
@@ -1005,6 +1012,7 @@ async function surprise(req, env, ctx) {
     if (profile === "latam" && !["es","pt"].includes(lang_)) return false;
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
     if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979") return false;
+    if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965") return false;
     return true;
   };
   // De-dupe + drop excluded/profile leaks
@@ -1023,7 +1031,7 @@ async function surprise(req, env, ctx) {
   // Avengers, etc.) over the genre/language-fitting candidates.
   const NICHE_PROFILES = new Set([
     "horror","noir","weird","neon","rainy","lonely","warm","beautiful",
-    "trip","cult","lost-20s","latam","asian","classic","short"
+    "trip","cult","lost-20s","latam","asian","classic","short","bw"
   ]);
   const curatedWeight = NICHE_PROFILES.has(profile) ? 0 : 4;
 
@@ -1085,6 +1093,7 @@ async function surprise(req, env, ctx) {
   const enriched = enrichedRaw.filter(f => {
     if (media === "movie" && profile === "short" && f.runtime && f.runtime > SHORT_RUNTIME_MAX) return false;
     if (profile === "classic" && f.year && f.year > "1979") return false;
+    if (profile === "bw" && f.year && f.year > "1965") return false;
     if (profile === "noir" && f.year && f.year > "1965") return false;
     return true;
   }).slice(0, 4);

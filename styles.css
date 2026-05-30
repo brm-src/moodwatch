@@ -2167,3 +2167,418 @@ html.theme-light .era-chip:hover {
   opacity: .78;
   border-color: rgba(237,231,218,0.35);
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   EDITORIAL PROGRAMMING LAYOUT
+   One protagonist card + three sober alternates.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ─── container: turn off 2-col grid, use single-column editorial flow ─── */
+.has-programming-layout #cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: var(--s-2);
+}
+
+/* ─── all cards lose their box backgrounds ─── */
+.has-programming-layout .card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+/* ─── PRIMARY PICK – poster editorial ─── */
+.has-programming-layout .card.is-primary-pick {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--s-4);
+  padding: 0 0 var(--s-5);
+  margin-bottom: var(--s-4);
+  border-bottom: 1px solid var(--rule);
+  box-shadow: none;
+  border-color: var(--rule);
+}
+
+.has-programming-layout .card.is-primary-pick .poster-wrap {
+  flex: 0 0 clamp(200px, 38%, 320px);
+  min-width: 0;
+}
+
+.has-programming-layout .card.is-primary-pick .poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 0;
+  filter: none;
+  box-shadow: none;
+}
+
+.has-programming-layout .card.is-primary-pick .meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.has-programming-layout .card.is-primary-pick .card-rank {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--s-1);
+}
+
+.has-programming-layout .card.is-primary-pick h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.has-programming-layout .card.is-primary-pick .director-line {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.has-programming-layout .card.is-primary-pick .specs {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.has-programming-layout .card.is-primary-pick .editor-badge {
+  display: inline-block;
+  margin-top: var(--s-2);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 4px 10px;
+  border-radius: 2px;
+  align-self: flex-start;
+}
+
+.has-programming-layout .card.is-primary-pick .overview {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-top: var(--s-2);
+  max-width: 56ch;
+}
+
+/* primary pick actions: only Where to watch visible, rest hidden */
+.has-programming-layout .card.is-primary-pick .actions {
+  margin-top: var(--s-3);
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.has-programming-layout .card.is-primary-pick .action.primary {
+  font-family: var(--font-body);
+  font-size: var(--t-mono);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 18px;
+  border-radius: 0;
+  text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+}
+
+.has-programming-layout .card.is-primary-pick .action.primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+/* ─── PROGRAM ALTERNATES (NO. 02–04) – list items ─── */
+.has-programming-layout .card.is-program-alt {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.has-programming-layout .card.is-program-alt:last-of-type {
+  border-bottom: none;
+}
+
+.has-programming-layout .card.is-program-alt .poster-wrap {
+  flex: 0 0 80px;
+  min-width: 0;
+}
+
+.has-programming-layout .card.is-program-alt .poster {
+  width: 80px;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 0;
+  filter: none;
+  box-shadow: none;
+}
+
+.has-programming-layout .card.is-program-alt .meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.has-programming-layout .card.is-program-alt .card-rank {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.has-programming-layout .card.is-program-alt h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--ink);
+}
+
+.has-programming-layout .card.is-program-alt .director-line {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.has-programming-layout .card.is-program-alt .specs {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* alt actions: inline, minimal, only Where to watch */
+.has-programming-layout .card.is-program-alt .actions {
+  margin-top: 6px;
+  display: flex;
+  gap: var(--s-2);
+}
+
+.has-programming-layout .card.is-program-alt .action.primary {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  padding: 4px 10px;
+  border-radius: 0;
+  text-decoration: none;
+}
+
+.has-programming-layout .card.is-program-alt .action.primary:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ─── hide noisy UI in editorial mode ─── */
+.has-programming-layout .poster-wrap .feedback { display: none !important; }
+.has-programming-layout .card .title-link { color: inherit; text-decoration: none; }
+.has-programming-layout .card .title-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* hide alt-title, reason, imdb/details links, list-badge, taste-badge in alts */
+.has-programming-layout .card.is-program-alt .alt-title,
+.has-programming-layout .card.is-program-alt .reason,
+.has-programming-layout .card.is-program-alt .list-badge,
+.has-programming-layout .card.is-program-alt .taste-badge,
+.has-programming-layout .card.is-program-alt .editor-badge,
+.has-programming-layout .card.is-program-alt .overview,
+.has-programming-layout .card.is-program-alt .action:not(.primary) { display: none; }
+
+/* hide IMDB/details secondary actions everywhere in editorial mode */
+.has-programming-layout .card .action:not(.primary) { display: none; }
+
+/* override card rank color when is-primary inside editorial */
+.has-programming-layout .card.is-primary-pick .card-rank { color: var(--accent); }
+
+/* ─── mobile: stack primary pick vertically ─── */
+@media (max-width: 720px) {
+  .has-programming-layout .card.is-primary-pick {
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .has-programming-layout .card.is-primary-pick .poster-wrap {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .has-programming-layout .card.is-primary-pick .poster {
+    aspect-ratio: 3/4;
+  }
+
+  .has-programming-layout .card.is-primary-pick h3 {
+    font-size: 1.5rem;
+  }
+
+  .has-programming-layout .card.is-program-alt .poster-wrap {
+    flex: 0 0 64px;
+  }
+
+  .has-programming-layout .card.is-program-alt .poster {
+    width: 64px;
+  }
+
+  .has-programming-layout .card.is-program-alt h3 {
+    font-size: 1rem;
+  }
+}
+
+/* ─── Light mode editorial overrides ─── */
+html.theme-light .has-programming-layout .card {
+  background: transparent;
+}
+
+html.theme-light .has-programming-layout .card.is-primary-pick {
+  border-color: rgba(20,22,15,0.12);
+}
+
+html.theme-light .has-programming-layout .card.is-program-alt {
+  border-color: rgba(20,22,15,0.08);
+}
+
+html.theme-light .has-programming-layout .card.is-primary-pick h3,
+html.theme-light .has-programming-layout .card.is-program-alt h3 {
+  color: var(--ink);
+}
+
+html.theme-light .has-programming-layout .card.is-primary-pick .action.primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+html.theme-light .has-programming-layout .card.is-primary-pick .action.primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+html.theme-light .has-programming-layout .card.is-program-alt .action.primary {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+html.theme-light .has-programming-layout .card.is-program-alt .action.primary:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ─── journey-hero backdrop: keep cards readable on the semi-transparent layer ─── */
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card {
+  background: transparent;
+  border-color: rgba(237,231,218,0.15);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick h3,
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt h3 {
+  color: var(--paper);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .director-line,
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .director-line {
+  color: var(--paper-2);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .specs,
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .specs,
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .card-rank {
+  color: var(--paper-3);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .overview {
+  color: var(--paper-2);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .action.primary {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--paper);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .action.primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .action.primary {
+  color: var(--paper);
+  border-color: rgba(237,231,218,0.55);
+}
+
+body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .action.primary:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* light mode journey-hero */
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick {
+  border-color: rgba(20,22,15,0.1);
+}
+
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt {
+  border-color: rgba(20,22,15,0.06);
+}
+
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick h3,
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt h3 {
+  color: var(--ink);
+}
+
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .director-line,
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .director-line,
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .overview {
+  color: var(--ink-soft);
+}
+
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-primary-pick .specs,
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .specs,
+html.theme-light body.has-journey-hero:not(.on-hero) .has-programming-layout .card.is-program-alt .card-rank {
+  color: var(--muted);
+}

@@ -1615,6 +1615,11 @@
     host.hidden = false;
   }
 
+  function setResultsEditorialMode(hasFilms) {
+    const results = document.querySelector('[data-step="results"]');
+    if (results) results.classList.toggle("has-programming-layout", !!hasFilms);
+  }
+
   function renderResults(data) {
     // Wire era chips (memphid: "no quiero pelis tan antiguas").
     const chipsEl = document.getElementById("era-chips");
@@ -1676,9 +1681,11 @@
         const b = document.createElement("button"); b.type = "button"; b.className = "refine-chip"; b.textContent = window.t(label); b.addEventListener("click", () => applyRefine(act)); relax.appendChild(b);
       });
       cards.appendChild(relax);
+      setResultsEditorialMode(false);
     } else {
       stopLoader();
-      data.films.forEach((f, i) => cards.appendChild(filmCard(f, i + 1)));
+      setResultsEditorialMode(true);
+      data.films.slice(0, 4).forEach((f, i) => cards.appendChild(filmCard(f, i + 1)));
       renderComparePanel(data.films);
       pushShown(data.films.map(f => f.id).filter(Boolean));
     }
@@ -1693,9 +1700,16 @@
     panel.innerHTML = "";
   }
 
+  function pickEditorialLabel(rank) {
+    const keys = ["pick_main", "pick_also", "pick_risk", "pick_comfort"];
+    const key = keys[Math.max(0, Math.min(rank - 1, keys.length - 1))];
+    const label = window.t(key);
+    return label || (rank === 1 ? "NO. 01" : window.t("pick_n").replace("{n}", String(rank).padStart(2, "0")));
+  }
+
   function filmCard(f, rank) {
     const c = document.createElement("article");
-    c.className = "card" + (rank === 1 ? " is-primary-pick" : "");
+    c.className = "card" + (rank === 1 ? " is-primary-pick" : " is-program-alt");
     c._filmId = f.id;
     const taste = getTaste(f.id);
     if (taste === "liked") c.classList.add("is-liked");
@@ -1771,16 +1785,16 @@
       ? `<a href="${escapeHtml(titleHref)}" target="_blank" rel="noopener" class="title-link">${escapeHtml(f.title || "")}</a>`
       : escapeHtml(f.title || "");
     meta.innerHTML = `
-      <span class="card-rank">${rank === 1 ? window.t("pick_main") : window.t("pick_n").replace("{n}", String(rank).padStart(2, "0"))}</span>
-      <h3>${titleHtml} ${f.year ? `<span class="yr">(${f.year})</span>` : ""}</h3>
+      <span class="card-rank">${escapeHtml(pickEditorialLabel(rank))}</span>
+      <h3>${titleHtml}</h3>
       ${showOriginal ? `<div class="alt-title">${escapeHtml(f.original_title)}</div>` : ""}
-      ${f.director ? `<div class="director">${escapeHtml(f.director)}</div>` : ""}
-      <div class="specs">${specsParts.join(" — ")}</div>
-      ${f.curated_note ? `<span class="editor-badge">${window.t("editor_pick")}</span>` : ""}
+      <div class="director-line">${[f.director ? escapeHtml(f.director) : "", f.year ? escapeHtml(String(f.year)) : ""].filter(Boolean).join(" · ")}</div>
+      <div class="specs">${specsParts.join(" · ")}</div>
+      ${f.curated_note && rank === 1 ? `<span class="editor-badge">${window.t("editor_pick")}</span>` : ""}
       ${f.from_feedback ? `<span class="taste-badge">${window.t("from_feedback")}</span>` : ""}`;
-    if (f.curated_note) meta.appendChild(expandableText(f.curated_note, "note", 220));
+    if (f.curated_note && rank === 1) meta.appendChild(expandableText(f.curated_note, "note", 220));
 
-    if (f.overview) meta.appendChild(expandableText(f.overview, "overview", 280));
+    if (f.overview && rank === 1) meta.appendChild(expandableText(f.overview, "overview", 360));
     const actions = document.createElement("div");
     actions.className = "actions";
     if (f.justwatch) {
@@ -1799,14 +1813,8 @@
       a.textContent = window.t("on_imdb");
       actions.appendChild(a);
     }
-    if (f.id && f.media !== "tv") {
-      const a = document.createElement("a");
-      a.href = `https://letterboxd.com/tmdb/${f.id}/`;
-      a.target = "_blank"; a.rel = "noopener";
-      a.className = "action lb";
-      a.innerHTML = `<span class="lb-dots" aria-hidden="true"><span style="background:#00e054"></span><span style="background:#40bcf4"></span><span style="background:#ff8000"></span></span><span>${window.t("on_letterboxd")}</span>`;
-      actions.appendChild(a);
-    }
+    // Keep the visible surface quiet: title link + Where to watch only.
+    // Letterboxd is intentionally not shown as a competing action.
     meta.appendChild(actions);
     c.appendChild(meta);
     return c;
@@ -2192,6 +2200,7 @@
     { profile: "horror",     key: "chip_horror" },
     { profile: "horror",     key: "chip_dread" },
     { profile: "classic",    key: "chip_classic" },
+    { profile: "bw",         key: "chip_old" },
     { profile: "quality",    key: "chip_quality" },
     { profile: "rainy",      key: "chip_rainy" },
     { profile: "lonely",     key: "chip_lonely" },

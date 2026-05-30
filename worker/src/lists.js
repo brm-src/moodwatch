@@ -112,6 +112,17 @@ export const LISTS = [
     ids: [9552, 207, 655, 797, 346, 18148, 62, 780, 147, 238, 240, 348, 28],
   },
   {
+    slug: "bw-cinema",
+    name: "Black & White cinema",
+    signature: { appetite: "classic_bw", decade: "old", trust: "classic_bw" },
+    ids: [
+      389, 539, 289, 15, 346, 424, 490, 548, 147, 5156, 599, 975, 996, 963,
+      901, 3082, 914, 935, 1480, 3112, 654, 832, 19, 1092, 1578, 985, 10377,
+      11220, 696, 1398, 797, 422, 439, 11878, 3782, 12493, 4662, 80038, 614,
+      655, 780, 18148, 62, 238, 240, 348, 28, 9552, 207,
+    ],
+  },
+  {
     slug: "menos-de-dos-horas",
     name: "Under two hours, no filler",
     signature: { runtime: ["short", "medium"] },
