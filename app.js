@@ -1687,17 +1687,10 @@
   function renderWhy(data, moodLine) {
     const panel = $("#why-panel");
     if (!panel) return;
-    const hasMood = !!(moodLine && moodLine.trim());
-    // Keep this human. Internal/editorial list names are noisy and read like debug output.
-    if (state.lastMode === "surprise" || !hasMood) {
-      panel.hidden = true; panel.innerHTML = ""; return;
-    }
-    panel.hidden = false;
-    const moodLabel = window.t("mood_label") || window.t("why_title");
-    panel.innerHTML = [
-      `<div class="why-title">${escapeHtml(moodLabel)}</div>`,
-      `<p class="why-mood">${escapeHtml(moodLine)}</p>`
-    ].join("");
+    // Keep the results editorial and visual. The old explanatory box ("Tu mood" /
+    // "Me apoyé en...") added noise above the picks and exposed internal list names.
+    panel.hidden = true;
+    panel.innerHTML = "";
   }
 
   function filmCard(f, rank) {
