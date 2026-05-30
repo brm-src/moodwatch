@@ -24,7 +24,7 @@ assert(lists.includes('latam-pulse'), 'missing latin american list');
 assert(html.includes('quick-surprise'), 'homepage must render quick surprise filter buttons');
 assert(app.includes('renderWhy'), 'frontend must render why panel');
 assert(app.includes('quick-surprise'), 'frontend must wire quick surprise filters');
-assert(app.includes('f.reason'), 'cards must render per-film recommendation reason');
+assert(!app.includes('why_lists'), 'why panel must not expose editorial/internal list names');
 
 assert(curated.includes('CURATED_GROUPS'), 'curated file must expose admin-friendly grouped data');
 

@@ -178,6 +178,15 @@ html.theme-light body.has-journey-hero:not(.on-hero) .dots span { background: rg
 html.theme-light body.has-journey-hero:not(.on-hero) .dots span.cur { background: var(--ink); }
 html { overflow-x: clip; scrollbar-width: none; -ms-overflow-style: none; }
 body.has-journey-hero:not(.on-hero) .loader-text { color: var(--paper); }
+html.theme-light body.has-journey-hero:not(.on-hero) .loader {
+  border-color: rgba(20,22,15,.22);
+}
+html.theme-light body.has-journey-hero:not(.on-hero) .loader-text {
+  color: var(--ink);
+}
+html.theme-light body.has-journey-hero:not(.on-hero) .loader-icon {
+  color: var(--accent-2);
+}
 /* Loading/results retain the same dim treatment by default. */
 html::-webkit-scrollbar { width: 0; height: 0; display: none; }
 body { overflow-x: clip; min-height: 100dvh; display: flex; flex-direction: column; scrollbar-width: none; -ms-overflow-style: none; }
@@ -254,6 +263,8 @@ body.on-hero .site-top {
   font-weight: 400;
   color: var(--accent);
 }
+html.theme-light .brand-home { color: var(--ink); }
+html.theme-light .brand-home em { color: var(--accent-2); }
 .brand-home:hover { opacity: 0.85; transform: translateY(-1px); }
 .brand-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .kicker {
@@ -1133,7 +1144,14 @@ html.theme-light .theme-toggle:hover { color: var(--ink); background: rgba(20,22
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
-.why-panel p { margin-top: 8px; color: var(--ink-soft); font-family: var(--font-display); font-style: italic; }
+.why-panel p {
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-style: normal;
+  line-height: 1.55;
+  max-width: 78ch;
+}
 
 /* On dark journey background, flip the why-panel tokens so the reading is legible. */
 body.has-journey-hero:not(.on-hero) .why-panel {
@@ -1171,9 +1189,15 @@ html.theme-light body.has-journey-hero:not(.on-hero) .card,
 html.theme-light body.has-journey-hero:not(.on-hero) .why-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .refine-panel,
 html.theme-light body.has-journey-hero:not(.on-hero) .compare-panel {
-  background: rgba(244,239,228,.86);
-  border-color: rgba(20,22,15,.18);
+  background: transparent;
+  border-color: rgba(20,22,15,.16);
   color: var(--ink);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+html.theme-light body.has-journey-hero:not(.on-hero) .why-panel {
+  border-width: 1px 0;
+  padding: 14px 0 16px;
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .card h3 .yr,
 html.theme-light body.has-journey-hero:not(.on-hero) .card .director,
@@ -1190,6 +1214,22 @@ html.theme-light body.has-journey-hero:not(.on-hero) .restart {
   border-color: var(--ink);
 }
 html.theme-light body.has-journey-hero:not(.on-hero) .card a.action.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+html.theme-light body.has-journey-hero:not(.on-hero) #cards .card {
+  border: 0;
+  border-top: 1px solid rgba(20,22,15,.16);
+}
+html.theme-light body.has-journey-hero:not(.on-hero) #cards .card:nth-child(1),
+html.theme-light body.has-journey-hero:not(.on-hero) #cards .card:nth-child(2) {
+  border-top: 0;
+}
+html.theme-light body.has-journey-hero:not(.on-hero) #cards .card.is-primary-pick {
+  border-top: 1px solid rgba(20,22,15,.16);
+  border-bottom: 1px solid rgba(20,22,15,.16);
+}
+html.theme-light .section[data-step="results"] .q-title em {
+  font-style: normal;
+  color: var(--ink);
+}
 .card {
   display: grid;
   grid-template-columns: 132px 1fr;
@@ -1227,9 +1267,10 @@ html.theme-light body.has-journey-hero:not(.on-hero) .card a.action.primary { ba
   letter-spacing: -0.015em;
   color: var(--accent);
   font-variation-settings: "opsz" 36;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   word-break: normal;
-  hyphens: auto;
+  hyphens: none;
+  text-wrap: balance;
 }
 .card h3 .yr {
   font-style: italic;
@@ -1536,6 +1577,36 @@ html.theme-light body.on-hero .kofi {
   .results-actions .pill { width: auto; }
 }
 
+/* Primary pick should breathe: it is the main recommendation, not a cramped list row. */
+.card.is-primary-pick {
+  grid-template-columns: clamp(124px, 20vw, 176px) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 34px);
+  padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 36px) clamp(24px, 4vw, 34px);
+  align-items: start;
+}
+.card.is-primary-pick .poster-wrap,
+.card.is-primary-pick .meta {
+  margin-top: clamp(4px, 1vw, 10px);
+}
+@media (min-width: 900px) {
+  #cards .card.is-primary-pick {
+    grid-column: 1 / -1;
+    grid-template-columns: clamp(150px, 17vw, 190px) minmax(0, 1fr);
+  }
+  #cards .card.is-primary-pick + .card {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--s-3);
+  }
+}
+@media (max-width: 430px) {
+  .card.is-primary-pick {
+    grid-template-columns: 104px minmax(0, 1fr);
+    padding: 24px 16px 20px;
+    gap: 16px;
+  }
+  .card.is-primary-pick h3 { font-size: 1.38rem; }
+}
+
 /* ─── responsive ─── */
 @media (min-width: 720px) {
   .hero { padding: calc(56px + clamp(32px, 6vh, 56px)) var(--s-5) var(--s-3); }
@@ -1609,33 +1680,59 @@ html.theme-light body.on-hero .kofi {
   margin: 0 0 var(--s-3);
 }
 .era-chips {
-  display: flex;
-  gap: var(--s-1);
+  display: inline-flex;
+  gap: 3px;
   flex-wrap: wrap;
   min-width: 0;
+  padding: 3px;
+  border: 1px solid rgba(237,231,218,0.18);
+  border-radius: 999px;
+  background: rgba(20,22,15,0.38);
+  box-shadow: inset 0 1px 0 rgba(237,231,218,0.06);
+  backdrop-filter: blur(8px);
 }
 .era-chip {
-  font-family: var(--font-display);
-  font-size: var(--t-small);
-  letter-spacing: 0.04em;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.17em;
   text-transform: uppercase;
-  padding: 6px 14px;
+  min-height: 32px;
+  padding: 8px 13px;
   border-radius: 999px;
   background: transparent;
-  color: var(--ink-soft);
-  border: 1px solid var(--paper-3);
+  color: var(--paper-3);
+  border: 0;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background .18s ease, color .18s ease, opacity .18s ease, transform .18s ease;
   white-space: nowrap;
+  opacity: .68;
 }
 .era-chip:hover {
-  color: var(--ink);
-  border-color: var(--ink-soft);
+  color: var(--paper);
+  background: rgba(237,231,218,0.08);
+  opacity: 1;
 }
 .era-chip.is-active {
+  background: rgba(237,231,218,0.94);
+  color: var(--ink);
+  opacity: 1;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.24);
+}
+html.theme-light .era-chips {
+  background: rgba(20,22,15,0.06);
+  border-color: rgba(20,22,15,0.14);
+}
+html.theme-light .era-chip {
+  color: var(--ink-soft);
+}
+html.theme-light .era-chip:hover {
+  color: var(--ink);
+  background: rgba(20,22,15,0.07);
+}
+html.theme-light .era-chip.is-active {
   background: var(--ink);
   color: var(--paper);
-  border-color: var(--ink);
 }
 .era-refresh {
   margin-left: auto;

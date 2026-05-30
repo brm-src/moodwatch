@@ -1686,24 +1686,17 @@
   function renderWhy(data, moodLine) {
     const panel = $("#why-panel");
     if (!panel) return;
-    const lists = data?.matched_lists || [];
     const hasMood = !!(moodLine && moodLine.trim());
-    const hasLists = lists.length > 0;
-    // In surprise mode (no quiz answers) there's nothing meaningful to show here.
-    // Hide the panel altogether instead of rendering an empty box with just a title.
-    if (state.lastMode === "surprise" || (!hasMood && !hasLists)) {
+    // Keep this human. Internal/editorial list names are noisy and read like debug output.
+    if (state.lastMode === "surprise" || !hasMood) {
       panel.hidden = true; panel.innerHTML = ""; return;
     }
     panel.hidden = false;
     const moodLabel = window.t("mood_label") || window.t("why_title");
-    const parts = [`<div class="why-title">${escapeHtml(moodLabel)}</div>`];
-    if (hasMood) {
-      parts.push(`<p class="why-mood">${escapeHtml(moodLine)}</p>`);
-    }
-    if (hasLists) {
-      parts.push(`<p class="why-lists">${window.t("why_lists")} ${lists.map(escapeHtml).join(" · ")}</p>`);
-    }
-    panel.innerHTML = parts.join("");
+    panel.innerHTML = [
+      `<div class="why-title">${escapeHtml(moodLabel)}</div>`,
+      `<p class="why-mood">${escapeHtml(moodLine)}</p>`
+    ].join("");
   }
 
   function filmCard(f, rank) {

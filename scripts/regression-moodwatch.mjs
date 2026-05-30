@@ -9,7 +9,7 @@ const index = read('worker/src/index.js');
 const mood = read('worker/src/mood.js');
 const scorer = read('worker/src/scorer.js');
 
-assert(app.includes('if (f.reason) meta.appendChild'), 'cards must render per-film reason text');
+assert(!app.includes('why_lists'), 'results must not show internal/editorial list-name copy');
 assert(app.includes('params.set("media", useLB ? "movie" : resolveMedia(state.media));'), 'Letterboxd recommend must force movie media');
 assert(app.includes(`$("#path-lb").addEventListener("click", () => {
       state.path = "lb";
