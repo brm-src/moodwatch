@@ -281,12 +281,12 @@ html.theme-light body.has-journey-hero:not(.on-hero) .site-top {
 .brand-home em {
   font-style: italic;
   font-weight: 400;
-  color: #f09878;
+  color: #e85d04;
 }
 html.theme-light .brand-home { color: var(--ink); }
 html.theme-light .brand-home em { color: var(--accent-2); }
 html.theme-light body.on-hero .brand-home { color: var(--paper); text-shadow: 0 2px 18px rgba(0,0,0,.7); }
-html.theme-light body.on-hero .brand-home em { color: #f09878; }
+html.theme-light body.on-hero .brand-home em { color: #e85d04; }
 body.has-journey-hero:not(.on-hero) .brand-home { color: var(--paper); text-shadow: 0 1px 16px rgba(0,0,0,.35); }
 html.theme-light body.has-journey-hero:not(.on-hero) .brand-home { color: var(--ink); text-shadow: none; }
 .brand-home:hover { opacity: 0.85; transform: translateY(-1px); }
@@ -412,7 +412,7 @@ html.theme-light .theme-toggle:hover {
   font-style: normal;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #f09878;
+  color: #e85d04;
   background: transparent;
   border: none;
   padding: 0;
@@ -454,7 +454,7 @@ html.theme-light .theme-toggle:hover {
 .hero h1 em {
   font-style: italic;
   font-weight: 400;
-  color: #f09878;
+  color: #e85d04;
 }
 .hero-card {
   background: var(--paper);
