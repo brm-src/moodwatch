@@ -2102,19 +2102,6 @@ html.theme-light .era-chip.is-active {
   margin: 0;
   color: var(--paper-2);
 }
-.ink-reading {
-  margin: 0 0 var(--s-2);
-  padding: 10px 14px;
-  border-left: 3px solid var(--accent);
-  background: rgba(232,93,4,0.08);
-  font-style: italic;
-  color: var(--paper);
-}
-.ink-reading p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
 .refine-title,
 .compare-title,
 .feedback-reasons-title {

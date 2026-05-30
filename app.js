@@ -1666,7 +1666,7 @@
     const moodLine = reading || data?.why?.headline || "";
     state.lastData = data;
     state.lastMoodLine = moodLine;
-    renderWhy(data, moodLine);
+    renderWhy(data, moodLine, data.films);
     renderRefinePanel(data);
     const cards = $("#cards");
     cards.innerHTML = "";
@@ -1686,37 +1686,129 @@
       stopLoader();
       setResultsEditorialMode(true);
       data.films.slice(0, 4).forEach((f, i) => cards.appendChild(filmCard(f, i + 1)));
-      renderComparePanel(data.films);
+      // Compare panel replaced by integrated editorial note above.
+      // renderComparePanel(data.films);
       pushShown(data.films.map(f => f.id).filter(Boolean));
     }
     show("results");
   }
-  function renderWhy(data, moodLine) {
+  function renderWhy(data, moodLine, films) {
     const panel = $("#why-panel");
     if (!panel) return;
     const ES = window.LANG === "es";
-    const inkRaw = inkReading(state.answers.ink, ES);
+    const answers = state.answers || {};
 
-    // Build the editorial body (vibeReading without the ink sentence).
-    const inkSplitter = ES ? "Y la tinta lo confirma:" : "And the ink confirms it:";
-    const idx = moodLine ? moodLine.lastIndexOf(inkSplitter) : -1;
-    const editorialBody = idx >= 0 ? moodLine.slice(0, idx).trim() : (moodLine || "");
-    const inkBody = inkRaw || (idx >= 0 ? moodLine.slice(idx).trim() : "");
-
-    let html = "";
-    // Inkblot reading — the "psychoanalysis" block
-    if (inkBody) {
-      html += `<blockquote class="ink-reading"><p>${escapeHtml(inkBody)}</p></blockquote>`;
-    }
-    // Editorial analysis — how we got to the picks
-    if (editorialBody) {
-      html += `<p class="why-text">${escapeHtml(editorialBody)}</p>`;
-    }
-    if (!html) {
-      html = `<p class="why-text">${escapeHtml(ES ? "La mancha habló. Estas son las películas que calzan con lo que trajiste esta noche." : "The blot spoke. These are the films that match what you brought tonight.")}</p>`;
-    }
-    panel.innerHTML = html;
+    // ── Build integrated editorial: inkblot + film picks in one paragraph ──
+    const text = buildEditorialNote(answers, films, ES);
+    panel.innerHTML = `<p class="why-text">${escapeHtml(text)}</p>`;
     panel.hidden = false;
+  }
+
+  // Build a single editorial paragraph that weaves the inkblot reading
+  // together with the actual film picks — not generic, not split in two.
+  function buildEditorialNote(answers, films, ES) {
+    const ink = answers.ink;
+    let inkMood = null;
+    try { inkMood = ink ? JSON.parse(ink) : null; } catch { inkMood = null; }
+
+    // ── Inkblot kernel (1 short sentence, stripped of framing) ──
+    const inkKernel = (() => {
+      if (!inkMood) return "";
+      if (inkMood.dense && inkMood.symmetry)  return ES ? "una mancha densa y simétrica — pedías peso, pero ordenado" : "a dense, symmetric blot — you wanted weight, but contained";
+      if (inkMood.dense && inkMood.chaotic)   return ES ? "una mancha densa y agitada — venías lleno" : "a dense, agitated blot — you came full";
+      if (inkMood.dense)                       return ES ? "una mancha densa — andabas buscando algo que ocupe" : "a dense blot — you were looking for something substantial";
+      if (inkMood.sparse && inkMood.symmetry)  return ES ? "una mancha limpia y simétrica — querías aire" : "a clean, symmetric blot — you wanted air";
+      if (inkMood.sparse)                      return ES ? "una mancha mínima — lo poco te dice más" : "a minimal blot — less tells you more";
+      if (inkMood.broken && inkMood.chaotic)   return ES ? "una mancha rota y dispersa — dejaste entrar el desorden" : "a broken, scattered blot — you let disorder in";
+      if (inkMood.broken)                      return ES ? "una mancha asimétrica — algo no encajaba" : "an asymmetric blot — something wasn't fitting";
+      if (inkMood.chaotic)                     return ES ? "una mancha agitada — no buscabas calma" : "an agitated blot — you weren't looking for calm";
+      if (inkMood.tone === "dark")             return ES ? "una mancha oscura — dispuesto a entrar" : "a dark blot — willing to step in";
+      if (inkMood.tone === "light")            return ES ? "una mancha clara — venías a soltar" : "a light blot — you came to let go";
+      return "";
+    })();
+
+    // ── Film traits for contrast ──
+    const mins = (f) => Number(f.runtime || 0);
+    const genres = (f) => (f.genres || []).map(g => String(g).toLowerCase());
+    const hasGenre = (f, ...xs) => genres(f).some(g => xs.some(x => g.includes(x)));
+    const isHeavy = (f) => hasGenre(f, "horror", "thriller", "crime", "drama", "war");
+    const isLight = (f) => hasGenre(f, "comedy", "romance", "family", "animation", "music");
+
+    // Pick two films to talk about (first + best contrast)
+    const a = films && films[0];
+    const b = films && films.length >= 2 ? films[1] : null;
+    if (!a && !b) {
+      return ES ? "La mancha habló. Estas son las películas que calzan con lo que trajiste esta noche."
+                : "The blot spoke. These are the films that match what you brought tonight.";
+    }
+
+    const aTitle = a?.title || "";
+    const bTitle = b?.title || "";
+    const aYear = a?.year || "";
+    const bYear = b?.year || "";
+    const aMins = mins(a);
+    const bMins = mins(b);
+
+    // Build the note sentence by sentence
+    const parts = [];
+
+    // 1. Inkblot insight (if we have it)
+    if (inkKernel) {
+      parts.push(ES ? `Elegiste ${inkKernel}.` : `You chose ${inkKernel}.`);
+    }
+
+    // 2. Bridge to film picks
+    if (b) {
+      // Two-pick contrast
+      const yearDiff = Math.abs(Number(aYear || 0) - Number(bYear || 0));
+      const timeDiff = aMins && bMins ? Math.abs(aMins - bMins) : 0;
+      const aHeavy = isHeavy(a);
+      const bHeavy = isHeavy(b);
+      const genreContrast = (aHeavy && !bHeavy) || (!aHeavy && bHeavy);
+      const toneWord = inkMood?.tone === "dark" ? (ES ? "noche" : "night") : (ES ? "sesión" : "session");
+
+      // Pick the most interesting contrast axis
+      if (genreContrast) {
+        const heavy = aHeavy ? a : b;
+        const light = aHeavy ? b : a;
+        parts.push(ES
+          ? `Para esta ${toneWord}, ${heavy.title} (${heavy.year}) carga el peso y ${light.title} (${light.year}) te da la salida.`
+          : `For this ${toneWord}, ${heavy.title} (${heavy.year}) carries the weight and ${light.title} (${light.year}) gives you the exit.`);
+      } else if (yearDiff >= 30) {
+        const old = Number(aYear) < Number(bYear) ? a : b;
+        const newer = old === a ? b : a;
+        parts.push(ES
+          ? `${newer.title} (${newer.year}) es la entrada directa. ${old.title} (${old.year}) está ahí si quieres textura de otra época.`
+          : `${newer.title} (${newer.year}) is the direct entry. ${old.title} (${old.year}) is there if you want older texture.`);
+      } else if (timeDiff >= 25) {
+        const short = aMins <= bMins ? a : b;
+        const long = short === a ? b : a;
+        parts.push(ES
+          ? `${short.title} (${short.year}, ${short.runtime} min) entra antes. ${long.title} (${long.year}, ${long.runtime} min) pide más sillón.`
+          : `${short.title} (${short.year}, ${short.runtime} min) gets in sooner. ${long.title} (${long.year}, ${long.runtime} min) asks for more seat.`);
+      } else {
+        // Default: first is the anchor, second is the alternative
+        parts.push(ES
+          ? `${aTitle} (${aYear}) es la apuesta principal. ${bTitle} (${bYear}) es el giro si querís cambiar de aire.`
+          : `${aTitle} (${aYear}) is the main bet. ${bTitle} (${bYear}) is the turn if you want different air.`);
+      }
+    } else {
+      // Single film
+      parts.push(ES
+        ? `${aTitle} (${aYear}) es lo que la mancha pidió.`
+        : `${aTitle} (${aYear}) is what the blot asked for.`);
+    }
+
+    // 3. Close — tie back to the mood or leave open
+    if (inkMood?.tone === "dark") {
+      parts.push(ES ? "Que la sala se haga chica." : "Let the room get small.");
+    } else if (inkMood?.tone === "light") {
+      parts.push(ES ? "Sin apuro. La noche es larga." : "No rush. The night is long.");
+    } else {
+      parts.push(ES ? "Las dos saben lo que hacen." : "Both know what they're doing.");
+    }
+
+    return parts.join(" ");
   }
 
   function pickEditorialLabel(rank) {
