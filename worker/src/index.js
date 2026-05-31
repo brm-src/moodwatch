@@ -877,8 +877,9 @@ async function surprise(req, env, ctx) {
     baseParams[`${dateKey}.lte`] = "1965-12-31";
     baseParams["vote_count.gte"] = media === "tv" ? 100 : 200;
     baseParams["vote_average.gte"] = 7.0;
-    // TMDb keyword 3494 = "black and white"
-    baseParams.with_keywords = "3494";
+    baseParams["sort_by"] = "vote_average.desc";
+    // TMDb keyword 3494 ("black and white") returns 0 results as of 2026-05.
+    // Rely on pre-1966 date filter + curated lists instead.
   }
   if (profile === "horror") {
     baseParams.with_genres = media === "tv" ? "9648" : "27|53|9648";
@@ -939,18 +940,20 @@ async function surprise(req, env, ctx) {
   );
   const all = await Promise.all(fetches);
   let pool = all.flatMap(r => (r.results || []).map(x => media === "tv"
-    ? { ...x, title: x.name || x.title, release_date: x.first_air_date || x.release_date, _media: "tv" }
-    : { ...x, _media: "movie" }
+    ? { ...x, title: x.name || x.title, release_date: x.first_air_date || x.release_date, _media: "tv", _source: "discover" }
+    : { ...x, _media: "movie", _source: "discover" }
   ));
   if (!allowsDocumentary(surpriseMood)) pool = pool.filter(f => !isDocumentaryLike(f));
   pool = pool.filter(f => passesQualityFloor(f, surpriseMood));
 
-  // bw profile: build a Set of hand-curated B&W film IDs from bw-cinema list.
+  // bw profile: build a Set of hand-curated B&W film IDs from bw-cinema + curated-bw lists.
   // Used to gate list injections and final dedup so no color films leak through.
   const bwCinemaIds = new Set();
   if (profile === "bw") {
     const bwList = LISTS.find(l => l.slug === "bw-cinema");
     if (bwList) for (const id of (bwList.ids || [])) bwCinemaIds.add(id);
+    const curatedBw = LISTS.find(l => l.slug === "curated-bw");
+    if (curatedBw) for (const id of (curatedBw.ids || [])) bwCinemaIds.add(id);
   }
 
   const matched = matchLists(surpriseMood, media);
@@ -1073,9 +1076,11 @@ async function surprise(req, env, ctx) {
     if (profile === "asian" && !["ja","ko","zh","cn","th","vi","hi","tl"].includes(lang_)) return false;
     if (profile === "classic" && f.release_date && f.release_date.slice(0,4) > "1979" && !bypassGenre) return false;
     if (profile === "bw" && f.release_date && f.release_date.slice(0,4) > "1965" && !bypassGenre) return false;
-    // For bw profile, discover films must have passed the TMDb with_keywords filter.
-    // Curated BW films skip this check — Cris already vetted them.
-    if (profile === "bw" && !bwCinemaIds.has(f.id) && !bypassGenre) return false;
+    // For bw profile, discover films pass through — TMDb date filter already limits to B&W era.
+    // Curated films skip this check — Cris already vetted them.
+    // List-injected films must be in the hand-curated B&W set.
+    const isFromDiscover = f._source === "discover";
+    if (profile === "bw" && !bwCinemaIds.has(f.id) && !bypassGenre && !isFromDiscover) return false;
     return true;
   };
   // De-dupe + drop excluded/profile leaks
