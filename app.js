@@ -2331,6 +2331,8 @@
     { profile: "noir",       key: "chip_noir" },
     { profile: "comedy",     key: "chip_comedy" },
     { profile: "comedy",     key: "chip_smart_funny" },
+    { profile: "animation",  key: "chip_animation" },
+    { profile: "animation",  key: "chip_drawn_world" },
     { profile: "lost-20s",   key: "chip_lost20s" },
   ];
 

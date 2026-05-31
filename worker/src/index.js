@@ -201,6 +201,7 @@ function surpriseMoodForProfile(profile) {
     asian:     { language_pref: "asian", quality: "high" },
     noir:      { tone: "dark", first_act: "thriller_horror", trust: "thriller", quality: "high" },
     comedy:    { tone: "light", energy: "engage", appetite: "comedy", quality: "high" },
+    animation: { trust: "animation", quality: "high" },
     old:       { decade: "old", quality: "high" },
     bw:        { appetite: "classic_bw", decade: "old", quality: "high", trust: "classic_bw" },
     "lost-20s":{ appetite: "lost-20s", depth: "thoughtful", state: "pensive", memory: "regret" },
@@ -928,6 +929,10 @@ async function surprise(req, env, ctx) {
     baseParams.with_genres = media === "tv" ? "35" : "35";
     baseParams["vote_count.gte"] = 150;
   }
+  if (profile === "animation") {
+    baseParams.with_genres = media === "tv" ? "16" : "16";
+    baseParams["vote_count.gte"] = 120;
+  }
 
   const fetches = pages.map(p =>
     M.discover(env, { ...baseParams, ...p }, lang).catch(() => ({ results: [] }))
@@ -1025,6 +1030,7 @@ async function surprise(req, env, ctx) {
     if (!bypassGenre && profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "comedy" && !["35"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "animation" && !["16"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;
@@ -1059,6 +1065,7 @@ async function surprise(req, env, ctx) {
     if (!bypassGenre && profile === "warm" && !["10751","10749","18"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "beautiful" && !["10751","10749","18"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "comedy" && !["35"].some(g => fid.has(g))) return false;
+    if (!bypassGenre && profile === "animation" && !["16"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "trip" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "cult" && !["27","878","14","9648"].some(g => fid.has(g))) return false;
     if (!bypassGenre && profile === "lost-20s" && !["18","10749"].some(g => fid.has(g))) return false;

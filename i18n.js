@@ -152,6 +152,8 @@ const STRINGS = {
     chip_noir: "Noir",
     chip_comedy: "Smart comedy",
     chip_smart_funny: "Actually funny",
+    chip_animation: "Animation",
+    chip_drawn_world: "Drawn worlds",
     chip_lost20s: "Lost in my 20s",
 
     loading_label: "Searching",
@@ -824,6 +826,8 @@ const STRINGS = {
     chip_noir: "Noir",
     chip_comedy: "Comedia inteligente",
     chip_smart_funny: "Realmente graciosa",
+    chip_animation: "Animación",
+    chip_drawn_world: "Mundos dibujados",
     chip_lost20s: "Perdido en los 20",
 
     loading_label: "Buscando",
