@@ -815,7 +815,7 @@ async function recommend(req, env, ctx) {
     matchedLists.unshift(wlLabel);
   }
 
-  return { films: enriched, lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matchedLists, media };
+  return { films: enriched, mode: "recommend", lb_used: lbUsed, why: moodSummary(mood, lang), matched_lists: matchedLists, media };
 }
 
 async function surprise(req, env, ctx) {
@@ -1250,10 +1250,19 @@ async function alt(req, env) {
       const runtime = media === "tv"
         ? (details.episode_run_time && details.episode_run_time[0]) || null
         : (details.runtime || null);
+      // Country of origin: TV uses origin_country, movies use production_countries.
+      let originCountry = null;
+      if (media === "tv" && Array.isArray(details.origin_country) && details.origin_country.length) {
+        originCountry = details.origin_country[0];
+      } else if (Array.isArray(details.production_countries) && details.production_countries.length) {
+        originCountry = details.production_countries[0].iso_3166_1 || null;
+      }
       const film = {
         id: details.id,
         title,
         original_title: originalTitleField && originalTitleField !== title ? originalTitleField : null,
+        original_language: (details.original_language || "").toLowerCase() || null,
+        country: originCountry,
         year: (date || "").slice(0, 4),
         director: credits.director || null,
         runtime,
@@ -1267,6 +1276,7 @@ async function alt(req, env) {
         curated_note: M.curatedFor(details.id)?.note || null,
         from_list: null,
         from_feedback: kind === "similar",
+        from_watchlist: false,
         reason: pickReason({ runtime, genres: localizeGenres(details.genres || [], lang.slice(0,2)), genre_ids: (details.genres || []).map(g => g.id), original_language: details.original_language }, {}, lang),
         media,
       };
