@@ -2329,6 +2329,8 @@
     { profile: "latam",      key: "chip_latam" },
     { profile: "asian",      key: "chip_asian" },
     { profile: "noir",       key: "chip_noir" },
+    { profile: "comedy",     key: "chip_comedy" },
+    { profile: "comedy",     key: "chip_smart_funny" },
     { profile: "lost-20s",   key: "chip_lost20s" },
   ];
 

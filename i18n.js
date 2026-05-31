@@ -150,6 +150,8 @@ const STRINGS = {
     chip_latam: "Latin American",
     chip_asian: "Asian cinema",
     chip_noir: "Noir",
+    chip_comedy: "Smart comedy",
+    chip_smart_funny: "Actually funny",
     chip_lost20s: "Lost in my 20s",
 
     loading_label: "Searching",
@@ -820,6 +822,8 @@ const STRINGS = {
     chip_latam: "Cine latino",
     chip_asian: "Cine asiático",
     chip_noir: "Noir",
+    chip_comedy: "Comedia inteligente",
+    chip_smart_funny: "Realmente graciosa",
     chip_lost20s: "Perdido en los 20",
 
     loading_label: "Buscando",
